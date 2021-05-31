@@ -17,6 +17,10 @@ gen.wvs.crosstabs <- function(write.res = T) {
       mutate(across(c(Q223, Q272, Q289, Q290), fct_explicit_na)) %>%
       mutate(across(c(Q223, Q272, Q289, Q290), ~fct_lump_prop(.x, 0.05)))
     
+    for (var in c("Q223", "Q272", "Q289", "Q290")) {
+      levels(d[[var]]) <- str_remove(levels(d[[var]]), "^\\w+:\\s*")
+    }
+    
     tables <- map(list("Q272", "Q289", "Q290"), function(var) {
       d %>% 
         tabyl(Q223, .data[[var]], show_missing_levels = F) %>% 
