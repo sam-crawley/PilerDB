@@ -34,10 +34,14 @@ gen.wvs.crosstabs <- function(write.res = T) {
     
     tables
     
-  })
-
-  names(res) <- countrycode(unique(data$B_COUNTRY_ALPHA), origin = 'iso3c', destination = 'country.name')
-
+  }) %>%
+    set_names(
+      data %>% select(B_COUNTRY_ALPHA, A_YEAR) %>% distinct() %>% 
+        mutate(Country = countrycode(B_COUNTRY_ALPHA, origin = 'iso3c', destination = 'country.name')) %>%
+        unite("Tab.Name", Country, A_YEAR, sep = " ") %>%
+        pull(Tab.Name)
+    )
+  
   if (write.res)
     write.wvs.xlsx(res)
   
