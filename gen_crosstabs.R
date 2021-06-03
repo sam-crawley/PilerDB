@@ -22,6 +22,10 @@ gen.wvs.crosstabs <- function(write.res = T) {
     }
     
     tables <- map(list("Q272", "Q289", "Q290"), function(var) {
+      if (all( d[var] == "(Missing)" )) {
+        return (NULL)
+      }
+      
       setClass <- function(i) { class(i) <- 'percentage'; i} 
       
       t <- d %>% 
@@ -65,9 +69,11 @@ write.wvs.xlsx <- function(res) {
     addWorksheet(wb, country)
     
     startRow <- 1
-    
     for (table.name in c("Language", "Relgion", "Ethnicity")) {
       table <- res[[country]][[table.name]]
+      
+      if (is.null(table))
+        next()
       
       writeData(wb, country, table.name, startCol = 1, startRow = startRow, rowNames = F)
       addStyle(wb, sheet = country, hs1, rows = startRow, cols = 1)
