@@ -2,11 +2,12 @@ library(tidyverse)
 library(janitor)
 library(openxlsx)
 library(countrycode)
+library(haven)
 
 skip.countries <- c("CHN", "EGY", "VNM")
 
 gen.wvs.crosstabs <- function(write.res = T) {
-  data <- readRDS("Divided/data/orig/WVS_Cross-National_Wave_7_R_v1_6.rds") %>%
+  data <- read_dta("Divided/data/orig/WVS_Cross-National_Wave_7_stata_v1_6_2.dta", encoding = "UTF-8") %>%
     filter(! B_COUNTRY_ALPHA %in% skip.countries)
   
   res <- map(unique(data$B_COUNTRY_ALPHA), function(country) {
