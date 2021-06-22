@@ -8,17 +8,20 @@ gen.correlations <- function() {
     filter(! B_COUNTRY_ALPHA %in% skip.countries)
   
   questions <- c("Q272", "Q289", "Q290")
+  q.names <- c("Language", "Religion", "Ethnicity")
+  names(q.names) <- questions
   
   res <- map_dfr(unique(data$B_COUNTRY_ALPHA), function(country) {
     d <- data %>%
       filter(B_COUNTRY_ALPHA == country)
     
-    tau <- map_dbl(questions, function(var) {
-      t <- GKtau(d$Q223, d[[var]])
-      t$tauxy
-    })
+    tau <- map_dfr(questions, function(var) {
+      t <- GKtau(d[[var]], d$Q223)
+      tibble(question = q.names[[var]], forward = t$tauxy, back = t$tauyx)
+    }) %>%
+      pivot_longer(c(forward, back)) %>% 
+      pivot_wider(names_from = c(question, name))
     
-    names(tau) <- c("Language", "Religion", "Ethnicity")
     tau$country <- country
     
     tau
