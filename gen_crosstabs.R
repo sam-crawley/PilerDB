@@ -111,7 +111,11 @@ write.wvs.xlsx <- function(res) {
   addWorksheet(wb, "Summary")
   summary.headers <- c("Country", "Survey Year", "Sample Size", "Group Basis", "Group Assoc.", "Incl. Group (N)", "Incl. Group (%)",
                        "Party Missing (N)", "Party Missing (%)", "Group Missing (N)", "Group Missing (%)")
+  
   writeData(wb, "Summary", data.frame(t(summary.headers)), startRow = 1, startCol = 1, colNames = F, rowNames = F)
+  setColWidths(wb, sheet = "Summary", cols = 1:length(summary.headers), widths = "auto")
+  addStyle(wb, sheet = "Summary", hs2, rows = 1, cols = 1:length(summary.headers))
+  
   country.count <- 1
   
   for (country in names(res)) {
