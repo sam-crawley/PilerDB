@@ -6,7 +6,7 @@ library(haven)
 
 skip.countries <- c("CHN", "EGY", "VNM")
 
-gen.wvs.crosstabs <- function(write.res = T) {
+gen.wvs.crosstabs <- function(write.res = T, lump = T) {
   data <- read_dta("Divided/data/orig/WVS_Cross-National_Wave_7_stata_v1_6_2.dta", encoding = "UTF-8") %>%
     filter(! B_COUNTRY_ALPHA %in% skip.countries)
   
@@ -15,8 +15,12 @@ gen.wvs.crosstabs <- function(write.res = T) {
     d <- data %>%
       filter(B_COUNTRY_ALPHA == country) %>%
       mutate(across(c(Q223, Q272, Q289, Q290), haven::as_factor)) %>%
-      mutate(across(c(Q223, Q272, Q289, Q290), fct_explicit_na)) %>%
-      mutate(across(c(Q223, Q272, Q289, Q290), ~fct_lump_prop(.x, 0.05)))
+      mutate(across(c(Q223, Q272, Q289, Q290), fct_explicit_na)) 
+    
+    if (lump) {
+      d <- d %>% 
+        mutate(across(c(Q223, Q272, Q289, Q290), ~fct_lump_prop(.x, 0.05)))
+    }
     
     for (var in c("Q223", "Q272", "Q289", "Q290")) {
       levels(d[[var]]) <- str_remove(levels(d[[var]]), "^\\w+:\\s*")
@@ -42,6 +46,13 @@ gen.wvs.crosstabs <- function(write.res = T) {
     
     tables[['Sample Size']] <- nrow(d)
     
+    tables$Summary <- list(
+      'Country' = countrycode(country, origin = 'iso3c', destination = 'country.name'),
+      'Year' = unique(as.numeric(d$A_YEAR)),
+      'Sample Size' = nrow(d),
+      'Correlations' = calc.correlations(d)
+    )
+    
     tables
     
   }) %>%
@@ -56,6 +67,23 @@ gen.wvs.crosstabs <- function(write.res = T) {
     write.wvs.xlsx(res)
   
   return(res)
+}
+
+calc.correlations <- function(d) {
+  questions <- c("Q272", "Q289", "Q290")
+  q.names <- c("Language", "Religion", "Ethnicity")
+  names(q.names) <- questions  
+  
+  tau <- map_dfr(questions, function(var) {
+    t <- GKtau(d[[var]], d$Q223)
+    tibble(question = q.names[[var]], forward = t$tauxy, back = t$tauyx)
+  }) %>%
+    pivot_longer(c(forward, back)) %>% 
+    pivot_wider(names_from = c(question, name)) %>%
+    mutate(across(everything(), ~ifelse(is.nan(.x) | .x == -Inf, NA, .x))) %>%
+    mutate(max.col = names(.)[which.max(c_across(everything()))])
+  
+  tau
   
 }
 
@@ -66,8 +94,19 @@ write.wvs.xlsx <- function(res) {
   hs1 <- createStyle(textDecoration = "bold", fontSize = 14)
   hs2 <- createStyle(textDecoration = "bold")
   
+  addWorksheet(wb, "Summary")
+  summary.headers <- c("Country", "Survey Year", "Sample Size", "Group Basis", "Group Assoc.")
+  writeData(wb, "Summary", data.frame(t(summary.headers)), startRow = 1, startCol = 1, colNames = F, rowNames = F)
+  country.count <- 1
+  
   for (country in names(res)) {
     addWorksheet(wb, country)
+    
+    country.count <- country.count + 1
+    
+    summary.line <- get.country.summary.line(res[[country]])
+    
+    writeData(wb, "Summary", t(summary.line), startRow = country.count, startCol = 1, colNames = F, rowNames = F)
     
     startRow <- 1
     for (table.name in c("Language", "Relgion", "Ethnicity")) {
@@ -115,4 +154,22 @@ write.wvs.xlsx <- function(res) {
   
   saveWorkbook(wb, "Divided/data/output/wvs_crosstabs.xlsx", overwrite = T)
   
+}
+
+# Get line for each country that appears on the summary sheet
+get.country.summary.line <- function(country.data) {
+  summary.data <- country.data[['Summary']]
+  
+  sum.line <- summary.data[c('Country', 'Year', 'Sample Size')]
+  sum.line$`Group Basis` <- summary.data$Correlations$max.col
+  
+  max.col <- summary.data$Correlations$max.col
+  
+  if (is.na(max.col)) {
+    stop("Couldn't find max col for country ", sum.line$Country)
+  }
+  
+  sum.line$`Group Assoc` <- summary.data$Correlations %>% pull({{max.col}})
+  
+  unlist(sum.line)
 }
