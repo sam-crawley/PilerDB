@@ -70,13 +70,13 @@ gen.wvs.crosstabs <- function(write.res = T, lump = T) {
     missing.counts <- d %>% summarise(
       party.missing.n = sum(Q223 == 'None/Missing/DK'),
       party.missing.pct = sum(Q223 == 'None/Missing/DK') / length(Q223),
-      group.missing.n = sum(.data[[group.var]] == 'None/Missing/DK'),
-      group.missing.pct = sum(.data[[group.var]] == 'None/Missing/DK') / length(.data[[group.var]]),
-      group.party.n = sum(Q223 != 'None/Missing/DK' & .data[[group.var]] != 'None/Missing/DK'),
-      group.party.pct = sum(Q223 != 'None/Missing/DK' & .data[[group.var]] != 'None/Missing/DK') / length(Q223),
+      group.missing.n = sum(.data[[group.var]] == '(Missing)'),
+      group.missing.pct = sum(.data[[group.var]] == '(Missing)') / length(.data[[group.var]]),
+      group.party.n = sum(Q223 != 'None/Missing/DK' & .data[[group.var]] != '(Missing)'),
+      group.party.pct = sum(Q223 != 'None/Missing/DK' & .data[[group.var]] != '(Missing)') / length(Q223),
     )
     
-    d.nomiss <- d %>% filter(Q223 != 'None/Missing/DK' & .data[[group.var]] != 'None/Missing/DK')
+    d.nomiss <- d %>% filter(Q223 != 'None/Missing/DK' & .data[[group.var]] != '(Missing)')
     
     tables$Summary <- list(
       'Country' = countrycode(country, origin = 'iso3c', destination = 'country.name'),
