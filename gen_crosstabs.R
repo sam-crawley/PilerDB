@@ -29,7 +29,7 @@ read.data <- function() {
   return(data)
 }
 
-gen.wvs.crosstabs <- function(write.res = T, lump = T) {
+gen.wvs.crosstabs <- function(write.res = T, lump = F) {
   data <- read.data()
   
   res <- map(unique(data$B_COUNTRY_ALPHA), function(country) {
@@ -133,16 +133,26 @@ write.wvs.xlsx <- function(res) {
   hs1 <- createStyle(textDecoration = "bold", fontSize = 14)
   hs2 <- createStyle(textDecoration = "bold")
   
+  # Add summary sheet with 2 header rows
   addWorksheet(wb, "Summary")
-  summary.headers <- c("Country", "Survey Year", "Sample Size", "Group Basis", "Group Assoc.", "Group Assoc. (missing removed)", 
-                       "Incl. Group (N)", "Incl. Group (%)", "Party Missing (N)", "Party Missing (%)", "Group Missing (N)", "Group Missing (%)",
+  outer.headers <- c("", "", "", "", "Highest Group Correlation", "",
+                     "Included in Group", "", "Party Missing", "", "Group Missing", "",
+                     "Group Sizes")
+  writeData(wb, "Summary", data.frame(t(outer.headers)), startRow = 1, startCol = 1, colNames = F, rowNames = F)
+  addStyle(wb, sheet = "Summary", hs2, rows = 1, cols = 1:length(outer.headers))
+  mergeCells(wb, "Summary", cols = 5:6, rows = 1)
+  mergeCells(wb, "Summary", cols = 7:8, rows = 1)
+  mergeCells(wb, "Summary", cols = 9:10, rows = 1)
+  
+  summary.headers <- c("Country", "Survey Year", "Sample Size", "Group Basis", "(All categories)", "(Missing removed)", 
+                       "(N)", "(%)", "(N)", "(%)", "(N)", "(%)",
                        "Group 1", "", "Group 2", "", "Group 3", "")
   
-  writeData(wb, "Summary", data.frame(t(summary.headers)), startRow = 1, startCol = 1, colNames = F, rowNames = F)
+  writeData(wb, "Summary", data.frame(t(summary.headers)), startRow = 2, startCol = 1, colNames = F, rowNames = F)
   setColWidths(wb, sheet = "Summary", cols = 1:length(summary.headers), widths = "auto")
-  addStyle(wb, sheet = "Summary", hs2, rows = 1, cols = 1:length(summary.headers))
+  addStyle(wb, sheet = "Summary", hs2, rows = 2, cols = 1:length(summary.headers))
   
-  country.count <- 1
+  country.count <- 2
   
   max.parties <- 0
   
@@ -204,13 +214,22 @@ write.wvs.xlsx <- function(res) {
     writeData(wb, country, res[[country]]$Summary$`Sample Size`, startCol = 1, startRow = startRow+1)
   }
   
-  party.headers <- rep(c("Party", "Total N", "Group 1", "Group 2", "Group 3"), max.parties)
+  party.headers.single <- c("Party", "Total N", "Group 1", "Group 2", "Group 3")
+  party.headers <- rep(party.headers.single, max.parties)
   party.headers.start.col <- length(summary.headers)+1
   party.headers.end.col <- party.headers.start.col + length(party.headers)
   
-  writeData(wb, "Summary", data.frame(t(party.headers)), startRow = 1, startCol = party.headers.start.col, colNames = F, rowNames = F)
+  outer.party.headers <- paste("Supporters of Party", 1:max.parties)
+  for (party.num in 1:max.parties) {
+    col <- party.headers.start.col + ( (party.num-1) * length(party.headers.single) )
+    writeData(wb, "Summary", paste("Supporters of Party", party.num), startRow = 1, startCol = col)
+  }
+  
+  writeData(wb, "Summary", data.frame(t(party.headers)), startRow = 2, startCol = party.headers.start.col, colNames = F, rowNames = F)
   setColWidths(wb, sheet = "Summary", cols = party.headers.start.col:party.headers.end.col, widths = "auto")
+  
   addStyle(wb, sheet = "Summary", hs2, rows = 1, cols = party.headers.start.col:party.headers.end.col)
+  addStyle(wb, sheet = "Summary", hs2, rows = 2, cols = party.headers.start.col:party.headers.end.col)
   
   saveWorkbook(wb, "Divided/data/output/wvs_crosstabs.xlsx", overwrite = T)
   
