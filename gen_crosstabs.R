@@ -182,22 +182,46 @@ get.excel.summary.sheet <- function(res) {
   summary.sheet <- calc.summary.data(res) %>%
     mutate(across(ends_with('.pct'), ~set.class('percentage', .)))
   
-  # Add in group sizes for 3 largest groups for each country
+  # Add in group sizes for 3 largest groups for each country,
+  #  as well as breakdowns for each Party/Main Group combo
   group.sizes <- map_dfr(res, function(country.data) {
     main.crosstab <- country.data[[country.data$Summary$cor$max.col]]
     
     gs <- main.crosstab %>% 
       select(-contains("(Missing)")) %>%
+      filter(Party != "None/Missing/DK") %>%
       adorn_totals(where = "row") %>% 
       filter(Party == "Total") %>% 
       pivot_longer(-Party) %>% 
-      slice_max(value, n = 3) %>%
+      slice_max(value, n = 3, with_ties = F) %>%
       select(-Party)
     
+    main.groups <- gs$name
     gs.row <- gs[1, ]
     
     for (row in 2:summary.group.size) {
       gs.row <- suppressMessages(bind_cols(gs.row, gs[row, ]))
+    }
+    
+    party.group.sizes <- main.crosstab %>% 
+      select(Party, all_of(main.groups)) %>% 
+      filter(Party != "None/Missing/DK") %>% 
+      adorn_totals("col") %>% 
+      filter(Total >= 20) %>%
+      arrange(desc(Total)) %>%
+      select(Party, Total, everything())
+    
+    names(party.group.sizes) <- c("Party.Grp", "Total", paste("Group", 1:length(main.groups)))
+    
+    # Ensure we always have 3 groups
+    if (length(main.groups) < summary.group.size) {
+      for (extra.group in (length(main.groups)+1):summary.group.size) {
+        party.group.sizes[[paste('Group ', extra.group)]] <- NA
+      }
+    }
+    
+    for (row in 1:nrow(party.group.sizes)) {
+      gs.row <- suppressMessages(bind_cols(gs.row, party.group.sizes[row, ]))
     }
     
     gs.row
@@ -238,15 +262,8 @@ write.wvs.xlsx <- function(res) {
   
   writeData(wb, "Summary", summary.data, startRow = 3, colNames = F, rowNames = F)
   
-  #max.parties <- 0
-  
   for (country in names(res)) {
     addWorksheet(wb, country)
-    
-    # Find number of parties included
-    #party.count <- length(names(summary.line)[str_detect(names(summary.line), "^Party \\d")])
-    #if (party.count > max.parties)
-    #  max.parties <- party.count
     
     startRow <- 1
     for (table.name in group.names) {
@@ -294,91 +311,24 @@ write.wvs.xlsx <- function(res) {
     writeData(wb, country, res[[country]]$Summary$general$`Sample Size`, startCol = 1, startRow = startRow+1)
   }
   
-  # party.headers.single <- c("Party", "Total N", "Group 1", "Group 2", "Group 3")
-  # party.headers <- rep(party.headers.single, max.parties)
-  # party.headers.start.col <- length(summary.headers)+1
-  # party.headers.end.col <- party.headers.start.col + length(party.headers)
-  # 
-  # outer.party.headers <- paste("Supporters of Party", 1:max.parties)
-  # for (party.num in 1:max.parties) {
-  #   col <- party.headers.start.col + ( (party.num-1) * length(party.headers.single) )
-  #   writeData(wb, "Summary", paste("Supporters of Party", party.num), startRow = 1, startCol = col)
-  # }
-  # 
-  # writeData(wb, "Summary", data.frame(t(party.headers)), startRow = 2, startCol = party.headers.start.col, colNames = F, rowNames = F)
-  # setColWidths(wb, sheet = "Summary", cols = party.headers.start.col:party.headers.end.col, widths = "auto")
-  # 
-  # addStyle(wb, sheet = "Summary", hs2, rows = 1, cols = party.headers.start.col:party.headers.end.col)
-  # addStyle(wb, sheet = "Summary", hs2, rows = 2, cols = party.headers.start.col:party.headers.end.col)
+  max.parties <- length(names(summary.sheet)[str_detect(names(summary.sheet), "^Party.Grp")])
+  
+  party.headers.single <- c("Party", "Total N", "Group 1", "Group 2", "Group 3")
+  party.headers <- rep(party.headers.single, max.parties)
+  party.headers.start.col <- length(summary.headers)+1
+  party.headers.end.col <- party.headers.start.col + length(party.headers)
+   
+  outer.party.headers <- paste("Supporters of Party", 1:max.parties)
+  for (party.num in 1:max.parties) {
+    col <- party.headers.start.col + ( (party.num-1) * length(party.headers.single) )
+    writeData(wb, "Summary", paste("Supporters of Party", party.num), startRow = 1, startCol = col)
+  }
+   
+  writeData(wb, "Summary", data.frame(t(party.headers)), startRow = 2, startCol = party.headers.start.col, colNames = F, rowNames = F)
+  setColWidths(wb, sheet = "Summary", cols = party.headers.start.col:party.headers.end.col, widths = "auto")
+   
+  addStyle(wb, sheet = "Summary", hs2, rows = 1, cols = party.headers.start.col:party.headers.end.col)
+  addStyle(wb, sheet = "Summary", hs2, rows = 2, cols = party.headers.start.col:party.headers.end.col)
   
   saveWorkbook(wb, "Divided/data/output/wvs_crosstabs.xlsx", overwrite = T)
-  
-}
-
-# Get line for each country that appears on the summary sheet
-get.country.summary.line <- function(country.data) {
-  summary.data <- country.data[['Summary']]
-  
-  sum.line <- summary.data[c('Country', 'Year', 'Sample Size')]
-  sum.line$`Group Basis` <- summary.data$Correlations$max.col
-  
-  max.col <- summary.data$Correlations$max.col
-  
-  if (is.na(max.col)) {
-    stop("Couldn't find max col for country ", sum.line$Country)
-  }
-  
-  sum.line$`Group Assoc` <- summary.data$Correlations %>% pull({{max.col}})
-  sum.line$`Group Assoc.nomiss` <- summary.data$Correlations.nomiss %>% pull({{max.col}})
-  
-  sum.line$`PartGrp` <- summary.data$`Missing Counts`$group.party.n
-  sum.line$`PartGrp %` <- round(summary.data$`Missing Counts`$group.party.pct, 2) * 100
-  sum.line$`Missing Party` <- summary.data$`Missing Counts`$party.missing.n
-  sum.line$`Missing Party %` <- round(summary.data$`Missing Counts`$party.missing.pct, 2) * 100
-  sum.line$`Missing Group` <- summary.data$`Missing Counts`$group.missing.n
-  sum.line$`Missing Group %` <- round(summary.data$`Missing Counts`$group.missing.pct, 2) * 100
-  
-  for (row in 1:summary.group.size) {
-    if (nrow(summary.data$`Group Sizes`) < row) {
-      sum.line[[paste0("Group name",row)]] <- ""
-      sum.line[[paste0("Group size",row)]] <- ""
-      next()
-    }
-    
-    gn <- summary.data$`Group Sizes`[row, "f"][[1]]
-    sum.line[[paste0("Group name",row)]] <- levels(gn)[gn]
-    sum.line[[paste0("Group size",row)]] <- summary.data$`Group Sizes`[row, "n"]
-  }
-  
-  groups <- summary.data$`Group Sizes`$f %>% as.character()
-  party.sizes <- summary.data$`Group Sizes by Party` %>% 
-    group_by(Q223) %>% 
-    summarise(party.size = sum(n)) %>% 
-    filter(party.size >= 20) %>%
-    arrange(desc(party.size))
-  
-  parties <- party.sizes %>% 
-    pull(Q223) %>% 
-    as.character()
-  
-  party.count <- 0
-  for (party.name in parties) {
-    party.count <- party.count + 1
-    
-    sum.line[[paste("Party", party.count)]] <- party.name
-    sum.line[[paste("Party N", party.count)]] <- party.sizes %>% filter(Q223 == party.name) %>% pull(party.size)
-    
-    for (group.count in 1:summary.group.size) {
-      if (length(groups) < group.count) {
-        sum.line[[paste("PartyGroup", party.count, group.count)]] <- ""
-        next()
-      }
-      
-      row <- summary.data$`Group Sizes by Party` %>% filter(Q223 == party.name & group == groups[[group.count]])
-
-      sum.line[[paste("PartyGroup", party.count, group.count)]] <- ifelse(nrow(row) == 0, 0, row$n)
-    }
-  }
-  
-  unlist(sum.line)
 }
