@@ -5,18 +5,16 @@ library(countrycode)
 library(haven)
 library(GoodmanKruskal)
 
-skip.countries <- c("CHN", "EGY", "VNM", "JOR")
+wvs7.skip.countries <- c("CHN", "EGY", "VNM", "JOR")
 
-questions <- c("Q272", "Q289", "Q290")
-q.names <- c("Language", "Religion", "Ethnicity")
-names(q.names) <- questions 
-names(questions) <- q.names
+group.names <- c("Language", "Religion", "Ethnicity")
+main.vars <- c("Party", group.names)
 
 summary.group.size <- 3
 
 read.data <- function() {
   data <- read_dta("Divided/data/orig/WVS_Cross-National_Wave_7_stata_v1_6_2.dta", encoding = "UTF-8") %>%
-    filter(! B_COUNTRY_ALPHA %in% skip.countries)
+    filter(! B_COUNTRY_ALPHA %in% wvs7.skip.countries)
   
   data <- data %>%
     mutate(across(c(Q223, Q272, Q289, Q290), haven::as_factor)) %>%
@@ -24,7 +22,20 @@ read.data <- function() {
     mutate(Q223 = fct_collapse(Q223,
                                "None/Missing/DK" = c("Not applicable", "No answer", "Don´t know", "No right to vote", "I would not vote", "(Missing)",
                                                      "I would cast a blank ballot; White vote", "None", "Null vote")
-    ))
+    )) %>%
+    rename(
+      "Party" = Q223,
+      "Language" = Q272,
+      "Religion" = Q289,
+      "Ethnicity" = Q290,
+      "Country.Code" = B_COUNTRY_ALPHA
+    ) %>%
+    mutate("Country" = countrycode(Country.Code, origin = 'iso3c', destination = 'country.name')) 
+  
+  # Strip out country prefixes from levels
+  for (var in main.vars) {
+    levels(data[[var]]) <- str_remove(levels(data[[var]]), "^\\w+:\\s*")
+  }
   
   return(data)
 }
@@ -32,21 +43,16 @@ read.data <- function() {
 gen.wvs.crosstabs <- function(write.res = T, lump = F) {
   data <- read.data()
   
-  res <- map(unique(data$B_COUNTRY_ALPHA), function(country) {
+  res <- map(unique(data$Country), function(cntry) {
     
-    d <- data %>%
-      filter(B_COUNTRY_ALPHA == country)
+    d <- data %>% filter(Country == cntry)
     
     if (lump) {
       d <- d %>% 
-        mutate(across(c(Q223, Q272, Q289, Q290), ~fct_lump_prop(.x, 0.05)))
+        mutate(across(all_of(main.vars), ~fct_lump_prop(.x, 0.05)))
     }
-    
-    for (var in c("Q223", "Q272", "Q289", "Q290")) {
-      levels(d[[var]]) <- str_remove(levels(d[[var]]), "^\\w+:\\s*")
-    }
-    
-    tables <- map(list("Q272", "Q289", "Q290"), function(var) {
+
+    tables <- map(group.names, function(var) {
       if (all( d[var] == "(Missing)" )) {
         return (NULL)
       }
@@ -54,39 +60,38 @@ gen.wvs.crosstabs <- function(write.res = T, lump = F) {
       setClass <- function(i) { class(i) <- 'percentage'; i} 
       
       t <- d %>% 
-        tabyl(Q223, .data[[var]], show_missing_levels = F) %>% 
+        tabyl(Party, .data[[var]], show_missing_levels = F) %>% 
         adorn_percentages("row") %>% 
-        rename("Party" = Q223) %>% 
         mutate(across(-Party, ~setClass(.)))
       
-      t <- inner_join(t, attr(t, "core") %>% rename("Party" = Q223), by = "Party", suffix = c(".%", ".n"))
+      t <- inner_join(t, attr(t, "core"), by = "Party", suffix = c(".%", ".n"))
     })
     
-    names(tables) <- c("Language", "Relgion", "Ethnicity")
+    names(tables) <- group.names
     
     cors <- calc.correlations(d)
     cors.nomiss <- calc.correlations(d, drop.missing = T)
-    group.var <- questions[[cors$max.col]]
+    group.var <- cors$max.col
     missing.counts <- d %>% summarise(
-      party.missing.n = sum(Q223 == 'None/Missing/DK'),
-      party.missing.pct = sum(Q223 == 'None/Missing/DK') / length(Q223),
+      party.missing.n = sum(Party == 'None/Missing/DK'),
+      party.missing.pct = sum(Party == 'None/Missing/DK') / length(Party),
       group.missing.n = sum(.data[[group.var]] == '(Missing)'),
       group.missing.pct = sum(.data[[group.var]] == '(Missing)') / length(.data[[group.var]]),
-      group.party.n = sum(Q223 != 'None/Missing/DK' & .data[[group.var]] != '(Missing)'),
-      group.party.pct = sum(Q223 != 'None/Missing/DK' & .data[[group.var]] != '(Missing)') / length(Q223),
+      group.party.n = sum(Party != 'None/Missing/DK' & .data[[group.var]] != '(Missing)'),
+      group.party.pct = sum(Party != 'None/Missing/DK' & .data[[group.var]] != '(Missing)') / length(Party),
     )
     
-    d.nomiss <- d %>% filter(Q223 != 'None/Missing/DK' & .data[[group.var]] != '(Missing)')
+    d.nomiss <- d %>% filter(Party != 'None/Missing/DK' & .data[[group.var]] != '(Missing)')
     
     tables$Summary <- list(
-      'Country' = countrycode(country, origin = 'iso3c', destination = 'country.name'),
-      'Year' = unique(as.numeric(d$A_YEAR)),
+      'Country' = cntry,
+      'Year' = unique(as.numeric(d$A_YEAR)), # Fix me
       'Sample Size' = nrow(d),
       'Correlations' = cors,
       'Correlations.nomiss' = cors.nomiss,
       'Missing Counts' = missing.counts,
       'Group Sizes' = fct_count(d.nomiss[[group.var]]) %>% slice_max(n, n = summary.group.size, with_ties = F) %>% filter(n != 0 & f != '(Missing)'),
-      'Group Sizes by Party' = d.nomiss %>% group_by(Q223, .data[[group.var]]) %>% count() %>% rename("group" = {{group.var}})
+      'Group Sizes by Party' = d.nomiss %>% group_by(Party, .data[[group.var]]) %>% count() %>% rename("group" = {{group.var}})
       
     )
     
@@ -94,8 +99,7 @@ gen.wvs.crosstabs <- function(write.res = T, lump = F) {
     
   }) %>%
     set_names(
-      data %>% select(B_COUNTRY_ALPHA, A_YEAR) %>% distinct() %>% 
-        mutate(Country = countrycode(B_COUNTRY_ALPHA, origin = 'iso3c', destination = 'country.name')) %>%
+      data %>% select(Country, A_YEAR) %>% distinct() %>% 
         unite("Tab.Name", Country, A_YEAR, sep = " ") %>%
         pull(Tab.Name)
     )
@@ -108,11 +112,11 @@ gen.wvs.crosstabs <- function(write.res = T, lump = F) {
 
 calc.correlations <- function(d, forward = T, drop.missing = F) {
   if (drop.missing)
-    d <- d %>% filter(Q223 != "None/Missing/DK")
+    d <- d %>% filter(Party != "None/Missing/DK")
   
-  tau <- map_dfr(unname(questions), function(var) {
-    t <- GKtau(d$Q223, d[[var]])
-    tibble(question = q.names[[var]], assoc = ifelse(forward, t$tauxy, t$tauyx))
+  tau <- map_dfr(group.names, function(var) {
+    t <- GKtau(d$Party, d[[var]])
+    tibble(question = var, assoc = ifelse(forward, t$tauxy, t$tauyx))
   })
 
   tau <- tau %>%
@@ -162,7 +166,7 @@ write.wvs.xlsx <- function(res) {
     country.count <- country.count + 1
     
     summary.line <- get.country.summary.line(res[[country]])
-    
+
     # Find number of parties included
     party.count <- length(names(summary.line)[str_detect(names(summary.line), "^Party \\d")])
     if (party.count > max.parties)
