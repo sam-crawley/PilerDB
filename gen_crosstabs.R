@@ -124,7 +124,7 @@ calc.correlations <- function(d, forward = T, drop.missing = F) {
 calc.summary.data <- function(res) {
   map_dfr(res, function(country.data) {
     orig.sum.data <- country.data$Summary
-    cat(orig.sum.data$general$Country, "\n")
+    #cat(orig.sum.data$general$Country, "\n")
     
     sum <- orig.sum.data$general
     sum$group.basis <- orig.sum.data$cor$max.col
@@ -167,7 +167,19 @@ calc.summary.data <- function(res) {
   })
 }
 
+reformat.table.for.excel <- function(table) {
+  setClass <- function(i) { class(i) <- 'percentage'; i} 
+  
+  table <- table %>% 
+    adorn_percentages("row") %>% 
+    mutate(across(-Party, ~setClass(.)))
+
+  inner_join(table, attr(table, "core"), by = "Party", suffix = c(".%", ".n"))
+}
+
 write.wvs.xlsx <- function(res) {
+  summary.data <- calc.summary.data(res)
+  
   options("openxlsx.numFmt" = NULL)
   wb <- createWorkbook()
   
@@ -193,26 +205,20 @@ write.wvs.xlsx <- function(res) {
   setColWidths(wb, sheet = "Summary", cols = 1:length(summary.headers), widths = "auto")
   addStyle(wb, sheet = "Summary", hs2, rows = 2, cols = 1:length(summary.headers))
   
-  country.count <- 2
+  writeData(wb, "Summary", summary.data, startRow = 3, colNames = F, rowNames = F)
   
-  max.parties <- 0
+  #max.parties <- 0
   
   for (country in names(res)) {
     addWorksheet(wb, country)
     
-    country.count <- country.count + 1
-    
-    summary.line <- get.country.summary.line(res[[country]])
-
     # Find number of parties included
-    party.count <- length(names(summary.line)[str_detect(names(summary.line), "^Party \\d")])
-    if (party.count > max.parties)
-      max.parties <- party.count
-    
-    writeData(wb, "Summary", t(summary.line), startRow = country.count, startCol = 1, colNames = F, rowNames = F)
+    #party.count <- length(names(summary.line)[str_detect(names(summary.line), "^Party \\d")])
+    #if (party.count > max.parties)
+    #  max.parties <- party.count
     
     startRow <- 1
-    for (table.name in c("Language", "Relgion", "Ethnicity")) {
+    for (table.name in group.names) {
       table <- res[[country]][[table.name]]
       
       if (is.null(table))
@@ -220,6 +226,8 @@ write.wvs.xlsx <- function(res) {
       
       writeData(wb, country, table.name, startCol = 1, startRow = startRow, rowNames = F)
       addStyle(wb, sheet = country, hs1, rows = startRow, cols = 1)
+      
+      table <- reformat.table.for.excel(table)
       
       headers <- unique(str_remove(names(table), '\\..$'))
       headerCol <- 1
@@ -252,25 +260,25 @@ write.wvs.xlsx <- function(res) {
     writeData(wb, country, "Sample Size", startCol = 1, startRow = startRow)
     addStyle(wb, sheet = country, hs1, rows = startRow, cols = 1)
     
-    writeData(wb, country, res[[country]]$Summary$`Sample Size`, startCol = 1, startRow = startRow+1)
+    writeData(wb, country, res[[country]]$Summary$general$`Sample Size`, startCol = 1, startRow = startRow+1)
   }
   
-  party.headers.single <- c("Party", "Total N", "Group 1", "Group 2", "Group 3")
-  party.headers <- rep(party.headers.single, max.parties)
-  party.headers.start.col <- length(summary.headers)+1
-  party.headers.end.col <- party.headers.start.col + length(party.headers)
-  
-  outer.party.headers <- paste("Supporters of Party", 1:max.parties)
-  for (party.num in 1:max.parties) {
-    col <- party.headers.start.col + ( (party.num-1) * length(party.headers.single) )
-    writeData(wb, "Summary", paste("Supporters of Party", party.num), startRow = 1, startCol = col)
-  }
-  
-  writeData(wb, "Summary", data.frame(t(party.headers)), startRow = 2, startCol = party.headers.start.col, colNames = F, rowNames = F)
-  setColWidths(wb, sheet = "Summary", cols = party.headers.start.col:party.headers.end.col, widths = "auto")
-  
-  addStyle(wb, sheet = "Summary", hs2, rows = 1, cols = party.headers.start.col:party.headers.end.col)
-  addStyle(wb, sheet = "Summary", hs2, rows = 2, cols = party.headers.start.col:party.headers.end.col)
+  # party.headers.single <- c("Party", "Total N", "Group 1", "Group 2", "Group 3")
+  # party.headers <- rep(party.headers.single, max.parties)
+  # party.headers.start.col <- length(summary.headers)+1
+  # party.headers.end.col <- party.headers.start.col + length(party.headers)
+  # 
+  # outer.party.headers <- paste("Supporters of Party", 1:max.parties)
+  # for (party.num in 1:max.parties) {
+  #   col <- party.headers.start.col + ( (party.num-1) * length(party.headers.single) )
+  #   writeData(wb, "Summary", paste("Supporters of Party", party.num), startRow = 1, startCol = col)
+  # }
+  # 
+  # writeData(wb, "Summary", data.frame(t(party.headers)), startRow = 2, startCol = party.headers.start.col, colNames = F, rowNames = F)
+  # setColWidths(wb, sheet = "Summary", cols = party.headers.start.col:party.headers.end.col, widths = "auto")
+  # 
+  # addStyle(wb, sheet = "Summary", hs2, rows = 1, cols = party.headers.start.col:party.headers.end.col)
+  # addStyle(wb, sheet = "Summary", hs2, rows = 2, cols = party.headers.start.col:party.headers.end.col)
   
   saveWorkbook(wb, "Divided/data/output/wvs_crosstabs.xlsx", overwrite = T)
   
