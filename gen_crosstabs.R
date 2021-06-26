@@ -43,7 +43,7 @@ read.data <- function() {
 # Produce a summary data structure
 #  At this level, we should only be doing summarising that requires access to the original dataset
 #  (Because the idea is that the original data will not be available after this point)
-gen.wvs.crosstabs <- function(lump = F, data = NULL) {
+gen.wvs.crosstabs <- function(data = NULL, lump = F) {
   if (is.null(data))
     data <- read.data()
   
@@ -63,14 +63,9 @@ gen.wvs.crosstabs <- function(lump = F, data = NULL) {
         return (NULL)
       }
       
-      setClass <- function(i) { class(i) <- 'percentage'; i} 
-      
       t <- d %>% 
-        tabyl(Party, .data[[var]], show_missing_levels = F) %>% 
-        adorn_percentages("row") %>% 
-        mutate(across(-Party, ~setClass(.)))
-      
-      t <- inner_join(t, attr(t, "core"), by = "Party", suffix = c(".%", ".n"))
+        tabyl(Party, .data[[var]], show_missing_levels = F) #%>% 
+      t
     })
     
     names(tables) <- group.names
@@ -82,7 +77,7 @@ gen.wvs.crosstabs <- function(lump = F, data = NULL) {
         'Sample Size' = nrow(d)
       ),
       cor = calc.correlations(d),
-      cor.nomiss = calc.correlations(d, drop.missing = T),
+      cor.nomiss = calc.correlations(d, drop.missing = T)
     )
     
     tables
@@ -96,15 +91,6 @@ gen.wvs.crosstabs <- function(lump = F, data = NULL) {
   
   
   # TODO: change cross tabs to be 'raw' so that these can easily be generated
-    #missing.counts <- d %>% summarise(
-    #  party.missing.n = sum(Party == 'None/Missing/DK'),
-    #  party.missing.pct = sum(Party == 'None/Missing/DK') / length(Party),
-    #  group.missing.n = sum(.data[[group.var]] == '(Missing)'),
-    #  group.missing.pct = sum(.data[[group.var]] == '(Missing)') / length(.data[[group.var]]),
-    #  group.party.n = sum(Party != 'None/Missing/DK' & .data[[group.var]] != '(Missing)'),
-    #  group.party.pct = sum(Party != 'None/Missing/DK' & .data[[group.var]] != '(Missing)') / length(Party),
-    #)
-    
     #d.nomiss <- d %>% filter(Party != 'None/Missing/DK' & .data[[group.var]] != '(Missing)')
     #d <- data %>% filter(Country == cntry)
     
@@ -132,7 +118,53 @@ calc.correlations <- function(d, forward = T, drop.missing = F) {
     mutate(max.col = names(.)[which.max(c_across(everything()))])
   
   tau
-  
+}
+
+# Calculate a DF summarising all countries
+calc.summary.data <- function(res) {
+  map_dfr(res, function(country.data) {
+    orig.sum.data <- country.data$Summary
+    cat(orig.sum.data$general$Country, "\n")
+    
+    sum <- orig.sum.data$general
+    sum$group.basis <- orig.sum.data$cor$max.col
+    sum$cor <- orig.sum.data$cor[[orig.sum.data$cor$max.col]]
+    
+    main.crosstab <- country.data[[sum$group.basis]]
+    
+    sum$total.included <- main.crosstab %>% 
+      filter(Party != "None/Missing/DK") %>% 
+      adorn_totals(where = c("row", "col")) %>%
+      filter(Party == "Total") %>%
+      pull(Total)
+    sum$total.included.pct <- sum$total.included / sum$`Sample Size` * 100
+    
+    if (main.crosstab %>% filter(Party == "None/Missing/DK") %>% count() == 1) {
+      sum$party.missing <- main.crosstab %>% 
+        adorn_totals(where = c("row", "col")) %>%
+        filter(Party == "None/Missing/DK") %>%
+        pull(Total)
+      sum$party.missing.pct <- sum$party.missing / sum$`Sample Size` * 100
+    }
+    else {
+      sum$party.missing <- 0
+      sum$party.missing.pct <- 0
+    }
+    
+    if (has_name(main.crosstab, "(Missing)")) {
+      sum$group.missing <- main.crosstab %>% 
+        adorn_totals(where = "row") %>%
+        filter(Party == "Total") %>%
+        pull(.data[["(Missing)"]])
+      sum$group.missing.pct <- sum$group.missing / sum$`Sample Size` * 100    
+    }
+    else {
+      sum$group.missing <- 0
+      sum$group.missing.pct <- 0
+    }
+    
+    sum
+  })
 }
 
 write.wvs.xlsx <- function(res) {
