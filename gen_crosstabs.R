@@ -30,7 +30,8 @@ read.data <- function() {
       "Ethnicity" = Q290,
       "Country.Code" = B_COUNTRY_ALPHA
     ) %>%
-    mutate("Country" = countrycode(Country.Code, origin = 'iso3c', destination = 'country.name')) 
+    mutate("Country" = countrycode(Country.Code, origin = 'iso3c', destination = 'country.name'))  %>%
+    arrange(Country)
   
   # Strip out country prefixes from levels
   for (var in main.vars) {
@@ -89,16 +90,7 @@ gen.wvs.crosstabs <- function(data = NULL, lump = F) {
         pull(Tab.Name)
     )
   
-  
-  # TODO: change cross tabs to be 'raw' so that these can easily be generated
-    #d.nomiss <- d %>% filter(Party != 'None/Missing/DK' & .data[[group.var]] != '(Missing)')
-    #d <- data %>% filter(Country == cntry)
-    
-      #'Missing Counts' = missing.counts,
-      #'Group Sizes' = fct_count(d.nomiss[[group.var]]) %>% slice_max(n, n = summary.group.size, with_ties = F) %>% filter(n != 0 & f != '(Missing)'),
-      #'Group Sizes by Party' = d.nomiss %>% group_by(Party, .data[[group.var]]) %>% count() %>% rename("group" = {{group.var}})
-
-    return(res)
+  return(res)
 }
 
 calc.correlations <- function(d, forward = T, drop.missing = F) {
