@@ -40,9 +40,15 @@ read.data <- function() {
   return(data)
 }
 
-gen.wvs.crosstabs <- function(write.res = T, lump = F) {
-  data <- read.data()
+# Produce a summary data structure
+#  At this level, we should only be doing summarising that requires access to the original dataset
+#  (Because the idea is that the original data will not be available after this point)
+gen.wvs.crosstabs <- function(lump = F, data = NULL) {
+  if (is.null(data))
+    data <- read.data()
   
+  # Create crosstabs for each country
+  # (Produces a list of lists, keyed by country+year)
   res <- map(unique(data$Country), function(cntry) {
     
     d <- data %>% filter(Country == cntry)
@@ -69,30 +75,14 @@ gen.wvs.crosstabs <- function(write.res = T, lump = F) {
     
     names(tables) <- group.names
     
-    cors <- calc.correlations(d)
-    cors.nomiss <- calc.correlations(d, drop.missing = T)
-    group.var <- cors$max.col
-    missing.counts <- d %>% summarise(
-      party.missing.n = sum(Party == 'None/Missing/DK'),
-      party.missing.pct = sum(Party == 'None/Missing/DK') / length(Party),
-      group.missing.n = sum(.data[[group.var]] == '(Missing)'),
-      group.missing.pct = sum(.data[[group.var]] == '(Missing)') / length(.data[[group.var]]),
-      group.party.n = sum(Party != 'None/Missing/DK' & .data[[group.var]] != '(Missing)'),
-      group.party.pct = sum(Party != 'None/Missing/DK' & .data[[group.var]] != '(Missing)') / length(Party),
-    )
-    
-    d.nomiss <- d %>% filter(Party != 'None/Missing/DK' & .data[[group.var]] != '(Missing)')
-    
     tables$Summary <- list(
-      'Country' = cntry,
-      'Year' = unique(as.numeric(d$A_YEAR)), # Fix me
-      'Sample Size' = nrow(d),
-      'Correlations' = cors,
-      'Correlations.nomiss' = cors.nomiss,
-      'Missing Counts' = missing.counts,
-      'Group Sizes' = fct_count(d.nomiss[[group.var]]) %>% slice_max(n, n = summary.group.size, with_ties = F) %>% filter(n != 0 & f != '(Missing)'),
-      'Group Sizes by Party' = d.nomiss %>% group_by(Party, .data[[group.var]]) %>% count() %>% rename("group" = {{group.var}})
-      
+      general = tibble(
+        'Country' = cntry,
+        'Year' = unique(as.numeric(d$A_YEAR)), # Fix me
+        'Sample Size' = nrow(d)
+      ),
+      cor = calc.correlations(d),
+      cor.nomiss = calc.correlations(d, drop.missing = T),
     )
     
     tables
@@ -104,10 +94,25 @@ gen.wvs.crosstabs <- function(write.res = T, lump = F) {
         pull(Tab.Name)
     )
   
-  if (write.res)
-    write.wvs.xlsx(res)
   
-  return(res)
+  # TODO: change cross tabs to be 'raw' so that these can easily be generated
+    #missing.counts <- d %>% summarise(
+    #  party.missing.n = sum(Party == 'None/Missing/DK'),
+    #  party.missing.pct = sum(Party == 'None/Missing/DK') / length(Party),
+    #  group.missing.n = sum(.data[[group.var]] == '(Missing)'),
+    #  group.missing.pct = sum(.data[[group.var]] == '(Missing)') / length(.data[[group.var]]),
+    #  group.party.n = sum(Party != 'None/Missing/DK' & .data[[group.var]] != '(Missing)'),
+    #  group.party.pct = sum(Party != 'None/Missing/DK' & .data[[group.var]] != '(Missing)') / length(Party),
+    #)
+    
+    #d.nomiss <- d %>% filter(Party != 'None/Missing/DK' & .data[[group.var]] != '(Missing)')
+    #d <- data %>% filter(Country == cntry)
+    
+      #'Missing Counts' = missing.counts,
+      #'Group Sizes' = fct_count(d.nomiss[[group.var]]) %>% slice_max(n, n = summary.group.size, with_ties = F) %>% filter(n != 0 & f != '(Missing)'),
+      #'Group Sizes by Party' = d.nomiss %>% group_by(Party, .data[[group.var]]) %>% count() %>% rename("group" = {{group.var}})
+
+    return(res)
 }
 
 calc.correlations <- function(d, forward = T, drop.missing = F) {
