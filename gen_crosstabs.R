@@ -44,7 +44,7 @@ read.data <- function() {
 # Produce a summary data structure
 #  At this level, we should only be doing summarising that requires access to the original dataset
 #  (Because the idea is that the original data will not be available after this point)
-gen.wvs.crosstabs <- function(data = NULL, lump = F) {
+gen.wvs.crosstabs <- function(data = NULL, lump = F, save.output = F) {
   if (is.null(data))
     data <- read.data()
   
@@ -89,6 +89,9 @@ gen.wvs.crosstabs <- function(data = NULL, lump = F) {
         unite("Tab.Name", Country, A_YEAR, sep = " ") %>%
         pull(Tab.Name)
     )
+  
+  if (save.output)
+    write_rds(res, "Divided/output/divided.rds")
   
   return(res)
 }
@@ -160,6 +163,10 @@ calc.summary.data <- function(res) {
   })
 }
 
+get.country.data <- function(res, row) {
+  res[[as.numeric(row)]]
+}
+
 set.class <- function(class.name, i) { class(i) <- class.name; i} 
 
 reformat.table.for.excel <- function(table) {
@@ -225,7 +232,7 @@ get.excel.summary.sheet <- function(res) {
 }
 
 write.wvs.xlsx <- function(res) {
-  summary.data <- get.excel.summary.sheet(res)
+  summary.sheet <- get.excel.summary.sheet(res)
   
   options("openxlsx.numFmt" = NULL)
   wb <- createWorkbook()
@@ -252,7 +259,7 @@ write.wvs.xlsx <- function(res) {
   setColWidths(wb, sheet = "Summary", cols = 1:length(summary.headers), widths = "auto")
   addStyle(wb, sheet = "Summary", hs2, rows = 2, cols = 1:length(summary.headers))
   
-  writeData(wb, "Summary", summary.data, startRow = 3, colNames = F, rowNames = F)
+  writeData(wb, "Summary", summary.sheet, startRow = 3, colNames = F, rowNames = F)
   
   for (country in names(res)) {
     addWorksheet(wb, country)
