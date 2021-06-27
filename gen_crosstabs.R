@@ -297,10 +297,20 @@ write.wvs.xlsx <- function(res) {
       startRow <- nrow(table) + 3 + startRow
     }
     
-    writeData(wb, country, "Sample Size", startCol = 1, startRow = startRow)
+    writeData(wb, country, "Statistics", startCol = 1, startRow = startRow)
     addStyle(wb, sheet = country, hs1, rows = startRow, cols = 1)
     
-    writeData(wb, country, res[[country]]$Summary$general$`Sample Size`, startCol = 1, startRow = startRow+1)
+    writeData(wb, country, "Sample Size", startCol = 1, startRow = startRow+2)
+    writeData(wb, country, res[[country]]$Summary$general$`Sample Size`, startCol = 2, startRow = startRow+2)
+    
+    writeData(wb, country, "Correlations", startCol = 1, startRow = startRow+4)
+    addStyle(wb, sheet = country, hs2, rows = startRow+4, cols = 1)
+    writeData(wb, country, res[[country]]$Summary$cor %>% select(-max.col), startCol = 2, startRow = startRow+5)
+    
+    writeData(wb, country, "Correlations (Party = None/Missing/DK removed)", startCol = 1, startRow = startRow+9)
+    addStyle(wb, sheet = country, hs2, rows = startRow+9, cols = 1)
+    
+    writeData(wb, country, res[[country]]$Summary$cor.nomiss %>% select(-max.col), startCol = 2, startRow = startRow+11)
   }
   
   max.parties <- length(names(summary.sheet)[str_detect(names(summary.sheet), "^Party.Grp")])
