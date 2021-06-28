@@ -1,63 +1,40 @@
 library(tidyverse)
 library(janitor)
 library(openxlsx)
-library(countrycode)
-library(haven)
 library(GoodmanKruskal)
-
-wvs7.skip.countries <- c("CHN", "EGY", "VNM", "JOR")
 
 group.names <- c("Language", "Religion", "Ethnicity")
 main.vars <- c("Party", group.names)
 
 summary.group.size <- 3
 
-read.data <- function() {
-  data <- read_dta("Divided/data/orig/WVS_Cross-National_Wave_7_stata_v1_6_2.dta", encoding = "UTF-8") %>%
-    filter(! B_COUNTRY_ALPHA %in% wvs7.skip.countries)
+# Generate crosstabs for all datasets
+gen.all.crosstabs <- function(save.output = F) {
+  # WVS7
+  data.wvs7 <- read.data.wvs()
+  overall <- gen.country.crosstabs(data.wvs7, "WVS7")
+
+  # Asian Barom 4
+  data.asb4 <- read.data.asian()
+  res <- gen.country.crosstabs(data.asb4, "ASB4")
+  overall <- append(overall, res)
   
-  data <- data %>%
-    mutate(across(c(Q223, Q272, Q289, Q290), haven::as_factor)) %>%
-    mutate(across(c(Q223, Q272, Q289, Q290), fct_explicit_na)) %>%
-    mutate(Q223 = fct_collapse(Q223,
-                               "None/Missing/DK" = c("Not applicable", "No answer", "Don´t know", "No right to vote", "I would not vote", "(Missing)",
-                                                     "I would cast a blank ballot; White vote", "None", "Null vote")
-    )) %>%
-    rename(
-      "Party" = Q223,
-      "Language" = Q272,
-      "Religion" = Q289,
-      "Ethnicity" = Q290,
-      "Country.Code" = B_COUNTRY_ALPHA
-    ) %>%
-    mutate("Country" = countrycode(Country.Code, origin = 'iso3c', destination = 'country.name'))  %>%
-    arrange(Country)
   
-  # Strip out country prefixes from levels
-  for (var in main.vars) {
-    levels(data[[var]]) <- str_remove(levels(data[[var]]), "^\\w+:\\s*")
-  }
+  if (save.output)
+    write_rds(overall, "Divided/output/divided.rds")
   
-  return(data)
+  overall
 }
 
-# Produce a summary data structure
+# Produce a data structure for a single dataset that includes crosstabs for each country
 #  At this level, we should only be doing summarising that requires access to the original dataset
 #  (Because the idea is that the original data will not be available after this point)
-gen.wvs.crosstabs <- function(data = NULL, lump = F, save.output = F) {
-  if (is.null(data))
-    data <- read.data()
-  
+gen.country.crosstabs <- function(data, data.source) {
   # Create crosstabs for each country
   # (Produces a list of lists, keyed by country+year)
   res <- map(unique(data$Country), function(cntry) {
     
     d <- data %>% filter(Country == cntry)
-    
-    if (lump) {
-      d <- d %>% 
-        mutate(across(all_of(main.vars), ~fct_lump_prop(.x, 0.05)))
-    }
 
     tables <- map(group.names, function(var) {
       if (all( d[var] == "(Missing)" )) {
@@ -65,7 +42,7 @@ gen.wvs.crosstabs <- function(data = NULL, lump = F, save.output = F) {
       }
       
       t <- d %>% 
-        tabyl(Party, .data[[var]], show_missing_levels = F) #%>% 
+        tabyl(Party, .data[[var]], show_missing_levels = F)
       t
     })
     
@@ -74,7 +51,8 @@ gen.wvs.crosstabs <- function(data = NULL, lump = F, save.output = F) {
     tables$Summary <- list(
       general = tibble(
         'Country' = cntry,
-        'Year' = unique(as.numeric(d$A_YEAR)), # Fix me
+        'Data Source' = data.source,
+        'Year' = unique(as.numeric(d$Year)),
         'Sample Size' = nrow(d)
       ),
       cor = calc.correlations(d),
@@ -85,14 +63,11 @@ gen.wvs.crosstabs <- function(data = NULL, lump = F, save.output = F) {
     
   }) %>%
     set_names(
-      data %>% select(Country, A_YEAR) %>% distinct() %>% 
-        unite("Tab.Name", Country, A_YEAR, sep = " ") %>%
+      data %>% select(Country, Year) %>% distinct() %>% 
+        mutate(Tab.Name = paste(Country, Year, data.source)) %>%
         pull(Tab.Name)
     )
-  
-  if (save.output)
-    write_rds(res, "Divided/output/divided.rds")
-  
+
   return(res)
 }
 
@@ -339,5 +314,5 @@ write.wvs.xlsx <- function(res) {
   addStyle(wb, sheet = "Summary", hs2, rows = 1, cols = party.headers.start.col:party.headers.end.col)
   addStyle(wb, sheet = "Summary", hs2, rows = 2, cols = party.headers.start.col:party.headers.end.col)
   
-  saveWorkbook(wb, "Divided/data/output/wvs_crosstabs.xlsx", overwrite = T)
+  saveWorkbook(wb, "Divided/data/output/asian_crosstabs.xlsx", overwrite = T)
 }
