@@ -207,7 +207,8 @@ get.excel.summary.sheet <- function(res) {
 }
 
 write.wvs.xlsx <- function(res) {
-  summary.sheet <- get.excel.summary.sheet(res)
+  summary.sheet <- get.excel.summary.sheet(res) %>%
+    arrange(desc(cor))
   
   options("openxlsx.numFmt" = NULL)
   wb <- createWorkbook()
@@ -226,7 +227,7 @@ write.wvs.xlsx <- function(res) {
   mergeCells(wb, "Summary", cols = 7:8, rows = 1)
   mergeCells(wb, "Summary", cols = 9:10, rows = 1)
   
-  summary.headers <- c("Country", "Survey Year", "Sample Size", "Group Basis", "(All categories)", "(Missing removed)", 
+  summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "(All categories)", "(Missing removed)", 
                        "(N)", "(%)", "(N)", "(%)", "(N)", "(%)",
                        "Group 1", "", "Group 2", "", "Group 3", "")
   
@@ -314,5 +315,5 @@ write.wvs.xlsx <- function(res) {
   addStyle(wb, sheet = "Summary", hs2, rows = 1, cols = party.headers.start.col:party.headers.end.col)
   addStyle(wb, sheet = "Summary", hs2, rows = 2, cols = party.headers.start.col:party.headers.end.col)
   
-  saveWorkbook(wb, "Divided/data/output/asian_crosstabs.xlsx", overwrite = T)
+  saveWorkbook(wb, "Divided/data/output/divided_crosstabs.xlsx", overwrite = T)
 }
