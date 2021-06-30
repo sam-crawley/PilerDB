@@ -30,5 +30,14 @@ read.data.wvs <- function() {
     levels(data[[var]]) <- str_remove(levels(data[[var]]), "^\\w+:\\s*")
   }
   
+  # Collapse some more categories
+  data <- data %>%
+    mutate(
+      Party = fct_collapse(Party, "Other" = c("Other", "Independent candidate")),
+      Language = fct_collapse(Language, "Other" = c("Other", "Other European", "Other Chinese dialects", "Other local; aboriginal; tribal, community")),
+      Religion = fct_collapse(Religion, "Other" = c("Other", "Other Christian (Pentecostal/Free church/Jehova...)")),
+      Ethnicity = fct_collapse(Ethnicity, "Other" = c("Other, non-Hispanic", "Two plus, non-Hispanic"))
+    )
+  
   return(data)
 }
