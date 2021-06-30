@@ -77,9 +77,11 @@ gen.country.crosstabs <- function(data, data.source) {
 
 calc.correlations <- function(d, forward = T, drop.missing = F) {
   if (drop.missing)
-    d <- d %>% filter(Party != "None/Missing/DK")
+    d <- d %>% filter(Party != "None/Missing/DK" & Party != "Other")
   
   tau <- map_dfr(group.names, function(var) {
+    d.g <- d %>% filter(.data[[var]] != "(Missing)" & .data[[var]] != "Other")
+    
     t <- GKtau(d$Party, d[[var]])
     tibble(question = var, assoc = ifelse(forward, t$tauxy, t$tauyx))
   })
@@ -102,7 +104,7 @@ calc.summary.data <- function(res) {
     #cat(orig.sum.data$general$Country, "\n")
     
     sum <- orig.sum.data$general
-    sum$group.basis <- orig.sum.data$cor$max.col
+    sum$group.basis <- orig.sum.data$cor.nomiss$max.col
     sum$cor <- orig.sum.data$cor[[orig.sum.data$cor$max.col]]
     sum$cor.nomiss <- orig.sum.data$cor.nomiss[[orig.sum.data$cor.nomiss$max.col]]
     
