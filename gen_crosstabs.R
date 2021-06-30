@@ -98,7 +98,7 @@ calc.correlations <- function(d, forward = T, drop.missing = F) {
 calc.summary.data <- function(res) {
   map_dfr(res, function(country.data) {
     orig.sum.data <- country.data$Summary
-    orig.sum.data$ID <- NULL
+    orig.sum.data$general$ID <- NULL
     #cat(orig.sum.data$general$Country, "\n")
     
     sum <- orig.sum.data$general
