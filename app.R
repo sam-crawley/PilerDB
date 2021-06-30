@@ -8,19 +8,7 @@ source("gen_crosstabs.R")
 
 ui <- fluidPage(
   tabsetPanel(id = "mainPanel", 
-    tabPanel("Summary",DTOutput("tableOutput", height = "auto"),),
-    tabPanel("Country Details",
-      h3(textOutput("CountryName")),
-      
-      h4(textOutput("LanguageHeading")),
-      tableOutput("LanguageTable"),
-      
-      h4(textOutput("ReligionHeading")),
-      tableOutput("ReligionTable"),
-      
-      h4(textOutput("EthnicityHeading")),
-      tableOutput("EthnicityTable")
-    )
+    tabPanel("Summary",DTOutput("tableOutput", height = "auto"),)
   )
 )
 
@@ -49,33 +37,48 @@ server <- function(input, output, session) {
     
     country.data <- get.country.data(res, row)
     
-    output$CountryName <- renderText(country.data$Summary$general$Country)
+    if (is.null(session$userData$tabCount))
+      session$userData$tabCount <- 0
     
-    for (group.o in group.names) {
-      local({
-        group <- group.o
-        
-        grp.output.header <- paste0(group, "Heading")
-        grp.output.table <- paste0(group, "Table")
-        
-        if (! is.null(country.data[[group]])) {
-          output[[grp.output.header]] <- renderText(group)
-          
-          crosstab <- country.data[[group]] %>% 
-            adorn_percentages("row") %>% 
-            adorn_pct_formatting() %>% 
-            adorn_ns()
-          
-          output[[grp.output.table]] <- renderTable(crosstab, digits = 0)
-        }
-        else {
-          output[[grp.output.header]] <- renderText("")
-          output[[grp.output.table]]<- renderTable(tibble())
-        }
-      })
-    }
+    session$userData$tabCount <- session$userData$tabCount + 1
+    tabNum <- session$userData$tabCount
     
-    updateTabsetPanel(session, "mainPanel", selected = "Country Details")
+    tab <- tabPanel(country.data$Summary$general$ID,
+      h3(textOutput(paste0("CountryName", tabNum))),
+    
+      h4(textOutput(paste0("LanguageHeading", tabNum))),
+      tableOutput(paste0("LanguageTable", tabNum)),
+      
+      h4(textOutput(paste0("ReligionHeading", tabNum))),
+      tableOutput(paste0("ReligionTable", tabNum)),
+      
+      h4(textOutput(paste0("EthnicityHeading", tabNum))),
+      tableOutput(paste0("EthnicityTable", tabNum))
+    )
+    
+    output[[paste0("CountryName", tabNum)]] <- renderText(country.data$Summary$general$Country)
+    
+    walk (group.names, function(group) {
+      grp.output.header <- paste0(group, "Heading", tabNum)
+      grp.output.table <- paste0(group, "Table", tabNum)
+      
+      if (! is.null(country.data[[group]])) {
+        output[[grp.output.header]] <- renderText(group)
+        
+        crosstab <- country.data[[group]] %>% 
+          adorn_percentages("row") %>% 
+          adorn_pct_formatting() %>% 
+          adorn_ns()
+        
+        output[[grp.output.table]] <- renderTable(crosstab, digits = 0)
+      }
+      else {
+        output[[grp.output.header]] <- renderText("")
+        output[[grp.output.table]]<- renderTable(tibble())
+      }
+    })
+    
+    appendTab("mainPanel", tab, select = T)
   })
 }
 

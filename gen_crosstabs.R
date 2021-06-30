@@ -19,6 +19,10 @@ gen.all.crosstabs <- function(save.output = F) {
   res <- gen.country.crosstabs(data.asb4, "ASB4")
   overall <- append(overall, res)
   
+  # Afrobarometer 7
+  data.afb7 <- read.data.afro()
+  res <- gen.country.crosstabs(data.afb7, "AFB7")
+  overall <- append(overall, res)
   
   if (save.output)
     write_rds(overall, "Divided/output/divided.rds")
@@ -48,11 +52,14 @@ gen.country.crosstabs <- function(data, data.source) {
     
     names(tables) <- group.names
     
+    year <- unique(as.numeric(d$Year))
+    
     tables$Summary <- list(
       general = tibble(
+        'ID' = paste(cntry, data.source, year),
         'Country' = cntry,
         'Data Source' = data.source,
-        'Year' = unique(as.numeric(d$Year)),
+        'Year' = year,
         'Sample Size' = nrow(d)
       ),
       cor = calc.correlations(d),
@@ -61,12 +68,9 @@ gen.country.crosstabs <- function(data, data.source) {
     
     tables
     
-  }) %>%
-    set_names(
-      data %>% select(Country, Year) %>% distinct() %>% 
-        mutate(Tab.Name = paste(Country, Year, data.source)) %>%
-        pull(Tab.Name)
-    )
+  })
+  
+  res <- set_names(res, map_chr(res, ~ .x$Summary$general$ID))
 
   return(res)
 }
@@ -94,12 +98,13 @@ calc.correlations <- function(d, forward = T, drop.missing = F) {
 calc.summary.data <- function(res) {
   map_dfr(res, function(country.data) {
     orig.sum.data <- country.data$Summary
+    orig.sum.data$ID <- NULL
     #cat(orig.sum.data$general$Country, "\n")
     
     sum <- orig.sum.data$general
     sum$group.basis <- orig.sum.data$cor$max.col
     sum$cor <- orig.sum.data$cor[[orig.sum.data$cor$max.col]]
-    sum$cor.nomiss <- orig.sum.data$cor[[orig.sum.data$cor.nomiss$max.col]]
+    sum$cor.nomiss <- orig.sum.data$cor.nomiss[[orig.sum.data$cor.nomiss$max.col]]
     
     main.crosstab <- country.data[[sum$group.basis]]
     
