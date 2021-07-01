@@ -33,6 +33,14 @@ read.data.asian <- function() {
   # Munge Singapore year (spans 2 years)
   data <- data %>% mutate(Year = ifelse(Country == "Singapore" & Year == 2015, 2014, Year))
   
+  # Collapse some more categories
+  data <- data %>%
+    mutate(
+      Language = fct_collapse(Language, "Other" = c("Other", "Others", "Other languages")),
+      Religion = fct_collapse(Religion, "(Missing)" = c("(Missing)", "Can't choose", "Decline to answer")),
+      Ethnicity = fct_collapse(Ethnicity, "(Missing)" = c("(Missing)", "Can't choose", "Decline to answer"))
+    )  
+  
   data
   
 }

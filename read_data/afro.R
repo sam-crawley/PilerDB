@@ -27,5 +27,14 @@ read.data.afro <- function() {
     )) %>%
     mutate(across(c(Religion, Ethnicity, Language), ~fct_relabel(.x, ~str_replace(.x, "Missing", "\\(Missing\\)"))))
   
+  # Collapse some more categories
+  data <- data %>%
+    mutate(
+      Language = fct_collapse(Language, "(Missing)" = c("(Missing)", "Refused To Answer", "Don't know")),
+      Religion = fct_collapse(Religion, "(Missing)" = c("(Missing)", "Don't know", "Refused")),
+      Ethnicity = fct_collapse(Ethnicity, "Other" = c("Other", "Doesn’t think of self in those terms")),
+      Ethnicity = fct_collapse(Ethnicity, "(Missing)" = c("(Missing)", "Not asked in the country", "Refused", "Don't know"))
+    )
+  
   return(data)
 }
