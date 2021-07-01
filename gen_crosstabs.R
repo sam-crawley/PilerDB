@@ -6,7 +6,7 @@ library(GoodmanKruskal)
 group.names <- c("Language", "Religion", "Ethnicity")
 main.vars <- c("Party", group.names)
 
-summary.group.size <- 3
+summary.group.size <- 5
 
 # Generate crosstabs for all datasets
 gen.all.crosstabs <- function(save.output = F) {
@@ -159,7 +159,10 @@ get.group.size.summary <- function(res) {
   map_dfr(res, function(country.data) {
     main.crosstab <- country.data[[country.data$Summary$general$`Group Basis`]]
     
-    gs.row <- tibble(Country = country.data$Summary$general$Country)
+    gs.row <- tibble(
+      Country = country.data$Summary$general$Country,
+      ID = country.data$Summary$general$ID
+    )
     
     gs <- main.crosstab %>% 
       select(-contains("(Missing)")) %>%
@@ -167,7 +170,7 @@ get.group.size.summary <- function(res) {
       adorn_totals(where = "row") %>% 
       filter(Party == "Total") %>% 
       pivot_longer(-Party) %>% 
-      slice_max(value, n = 3, with_ties = F) %>%
+      slice_max(value, n = summary.group.size, with_ties = F) %>%
       select(-Party)
     
     main.groups <- gs$name
@@ -200,8 +203,6 @@ get.group.size.summary <- function(res) {
     
     gs.row
   })
-  
-  #summary.sheet <- suppressMessages(bind_cols(summary.sheet, group.sizes))    
 }
 
 set.class <- function(class.name, i) { class(i) <- class.name; i} 

@@ -6,6 +6,7 @@ library(DT)
 res <- read_rds("output/divided.rds")
 summary.table <- calc.summary.data(res)
 group.sizes <- get.group.size.summary(res)
+max.parties <- length(names(group.sizes)[str_detect(names(group.sizes), "^Party.Grp")])
 
 source("gen_crosstabs.R")
 
@@ -49,14 +50,14 @@ get.summary.table <- function(datasrc, country, with.id = F) {
     mutate(across(ends_with('.pct'), ~round(.x, digits = 2) * 100)) %>%
     rename(
       "Correlation (all)" = cor,
+      "Correlation (others/missing removed)" = cor.nomiss,
       "Total Included (N)" = total.included,
       "Total Included (%)" = total.included.pct,
       "Party Missing (N)" = party.missing,
       "Party Missing (%)" = party.missing.pct,
       "Group Missing (N)" = group.missing,
       "Group Missing (%)" = group.missing.pct
-    ) %>%
-    select(-cor.nomiss)
+    )
   
   if (! with.id)
     tab <- tab %>% select(-ID)
@@ -72,12 +73,18 @@ get.summary.table <- function(datasrc, country, with.id = F) {
   tab
 }
 
+get.group.sizes <- function() {
+  summary.table %>%
+    select(ID, `Data Source`, Year, cor.nomiss) %>%
+    inner_join(group.sizes, by = "ID") %>%
+    select(Country, everything()) %>%
+    select(-ID)
+}
+
 gen.group.size.names <- function(max.parties) {
-  names <- c(
-    "Country",
-    #"Correlation",
+  c(
     rep(c("Name", "N"), summary.group.size),
-    rep(c("Party", "Total N", paste(1:summary.group.size, "Group")), max.parties)
+    rep(c("Party", "Total N", paste("Group", 1:summary.group.size)), max.parties)
   )
 }
 
@@ -85,33 +92,48 @@ server <- function(input, output, session) {
   
   output$tableOutput = renderDT(
     get.summary.table(input$datasrc, input$country), 
-    options = list(lengthChange = FALSE, paging = F, searching = F),
+    options = list(
+      lengthChange = F, 
+      paging = F, 
+      searching = F,
+      buttons = c('copy', 'csv', 'excel'),
+      dom = 'Bfrtip',
+      order = list(list(7, 'desc'))
+    ),
     server = T, 
     selection = 'single',
-    class = "display compact"
+    class = "display compact",
+    extensions = 'Buttons'
   )
-  
-  max.parties <- length(names(group.sizes)[str_detect(names(group.sizes), "^Party.Grp")])
   
   sketch = htmltools::withTags(table(
     class = 'display compact',
     thead(
       tr(
-        th(colspan = 1, ' '),
+        lapply(c("Country", "Data Source", "Year"), function (x) { th(rowspan = 2, x) }),
+        th("Correlation"),
         lapply(1:summary.group.size, function (x) { th(colspan = 2, paste("Group", x)) }),
-        lapply(paste("Supporters of party", 1:max.parties), function (x) { th(colspan = 5, x) })
+        lapply(paste("Supporters of party", 1:max.parties), function (x) { th(colspan = summary.group.size+2, x) })
       ),
       tr(
+        th("(missing/other removed)"),
         lapply(gen.group.size.names(max.parties), th)
       )
     )
   ))
   
   output$tableGroupSizes <- renderDT(
-    group.sizes,
-    options = list(lengthChange = FALSE, paging = F, searching = F),
+    get.group.sizes(),
+    options = list(
+      lengthChange = F, 
+      paging = F, 
+      searching = F,
+      buttons = c('copy', 'csv', 'excel'),
+      dom = 'Bfrtip'
+    ),
     container = sketch,
-    rownames = F
+    rownames = F,
+    extensions = 'Buttons'
   )
   
   observeEvent(input$tableOutput_rows_selected, {
