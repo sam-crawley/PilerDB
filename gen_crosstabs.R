@@ -110,7 +110,6 @@ calc.correlations <- function(d, forward = T, drop.missing = F) {
 calc.summary.data <- function(res) {
   map_dfr(res, function(country.data) {
     orig.sum.data <- country.data$Summary
-    orig.sum.data$general$ID <- NULL
     #cat(orig.sum.data$general$Country, "\n")
     
     sum <- orig.sum.data$general
@@ -203,10 +202,6 @@ get.group.size.summary <- function(res) {
   })
   
   #summary.sheet <- suppressMessages(bind_cols(summary.sheet, group.sizes))    
-}
-
-get.country.data <- function(res, row) {
-  res[[as.numeric(row)]]
 }
 
 set.class <- function(class.name, i) { class(i) <- class.name; i} 

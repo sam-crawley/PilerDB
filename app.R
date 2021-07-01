@@ -44,7 +44,7 @@ ui <- fluidPage(
   )
 )
 
-get.summary.table <- function(datasrc, country) {
+get.summary.table <- function(datasrc, country, with.id = F) {
   tab <- summary.table  %>%
     mutate(across(ends_with('.pct'), ~round(.x, digits = 2) * 100)) %>%
     rename(
@@ -57,6 +57,9 @@ get.summary.table <- function(datasrc, country) {
       "Group Missing (%)" = group.missing.pct
     ) %>%
     select(-cor.nomiss)
+  
+  if (! with.id)
+    tab <- tab %>% select(-ID)
   
   if (! is.null(datasrc))
     tab <- tab %>%
@@ -114,7 +117,10 @@ server <- function(input, output, session) {
   observeEvent(input$tableOutput_rows_selected, {
     row <- input$tableOutput_rows_selected
     
-    country.data <- get.country.data(res, row)
+    displayed.sum.table <- get.summary.table(input$datasrc, input$country, with.id = T)
+    selected.row <- displayed.sum.table[row,]
+    
+    country.data <- res[[selected.row$ID]]
     
     if (is.null(session$userData$tabCount))
       session$userData$tabCount <- 0
