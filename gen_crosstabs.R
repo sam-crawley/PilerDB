@@ -80,9 +80,15 @@ calc.correlations <- function(d, forward = T, drop.missing = F) {
     d <- d %>% filter(Party != "None/Missing/DK" & Party != "Other")
   
   tau <- map_dfr(group.names, function(var) {
-    d.g <- d %>% filter(.data[[var]] != "(Missing)" & .data[[var]] != "Other")
+    d.g <- d 
     
-    t <- GKtau(d$Party, d[[var]])
+    if (drop.missing)
+      d.g <- d.g %>% filter(.data[[var]] != "(Missing)" & .data[[var]] != "Other")
+    
+    if (nrow(d.g) == 0)
+      return(tibble(question = var, assoc = NA))
+    
+    t <- GKtau(d.g$Party, d.g[[var]])
     tibble(question = var, assoc = ifelse(forward, t$tauxy, t$tauyx))
   })
 
