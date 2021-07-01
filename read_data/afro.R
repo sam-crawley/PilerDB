@@ -10,8 +10,9 @@ read.data.afro <- function() {
   data <- read_sav("Divided/data/afrobarom/r7_merged_data_34ctry.release.sav")
   
   data <- data %>%
-    mutate(across(c(Q99, Q98, Q2A, Q84, COUNTRY), haven::as_factor)) %>%
+    mutate(across(c(Q99, Q98, Q2A, Q84), haven::as_factor)) %>%
     mutate(across(c(Q99, Q98, Q2A, Q84), fct_explicit_na)) %>%
+    mutate(COUNTRY = as.character(haven::as_factor(COUNTRY))) %>%
     filter(COUNTRY != "eSwatini") %>%
     rename(
       "Party" = Q99,
