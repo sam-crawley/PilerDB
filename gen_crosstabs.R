@@ -53,6 +53,8 @@ gen.country.crosstabs <- function(data, data.source) {
     names(tables) <- group.names
     
     year <- unique(as.numeric(d$Year))
+    cor = calc.correlations(d)
+    cor.nomiss = calc.correlations(d, drop.missing = T)    
     
     tables$Summary <- list(
       general = tibble(
@@ -60,11 +62,13 @@ gen.country.crosstabs <- function(data, data.source) {
         'Country' = cntry,
         'Data Source' = data.source,
         'Year' = year,
-        'Sample Size' = nrow(d)
+        'Sample Size' = nrow(d),
+        'Group Basis' = cor.nomiss$max.col
       ),
-      cor = calc.correlations(d),
-      cor.nomiss = calc.correlations(d, drop.missing = T)
+      cor = cor,
+      cor.nomiss = cor.nomiss
     )
+    
     
     tables
     
@@ -110,11 +114,10 @@ calc.summary.data <- function(res) {
     #cat(orig.sum.data$general$Country, "\n")
     
     sum <- orig.sum.data$general
-    sum$group.basis <- orig.sum.data$cor.nomiss$max.col
     sum$cor <- orig.sum.data$cor[[orig.sum.data$cor$max.col]]
     sum$cor.nomiss <- orig.sum.data$cor.nomiss[[orig.sum.data$cor.nomiss$max.col]]
     
-    main.crosstab <- country.data[[sum$group.basis]]
+    main.crosstab <- country.data[[sum$`Group Basis`]]
     
     sum$total.included <- main.crosstab %>% 
       filter(Party != "None/Missing/DK") %>% 
@@ -151,28 +154,13 @@ calc.summary.data <- function(res) {
   })
 }
 
-get.country.data <- function(res, row) {
-  res[[as.numeric(row)]]
-}
-
-set.class <- function(class.name, i) { class(i) <- class.name; i} 
-
-reformat.table.for.excel <- function(table) {
-  table <- table %>% 
-    adorn_percentages("row") %>% 
-    mutate(across(-Party, ~set.class('percentage', .)))
-
-  inner_join(table, attr(table, "core"), by = "Party", suffix = c(".%", ".n"))
-}
-
-get.excel.summary.sheet <- function(res) {
-  summary.sheet <- calc.summary.data(res) %>%
-    mutate(across(ends_with('.pct'), ~set.class('percentage', .)))
-  
+get.group.size.summary <- function(res) {
   # Add in group sizes for 3 largest groups for each country,
   #  as well as breakdowns for each Party/Main Group combo
-  group.sizes <- map_dfr(res, function(country.data) {
-    main.crosstab <- country.data[[country.data$Summary$cor$max.col]]
+  map_dfr(res, function(country.data) {
+    main.crosstab <- country.data[[country.data$Summary$general$`Group Basis`]]
+    
+    gs.row <- tibble(Country = country.data$Summary$general$Country)
     
     gs <- main.crosstab %>% 
       select(-contains("(Missing)")) %>%
@@ -184,10 +172,10 @@ get.excel.summary.sheet <- function(res) {
       select(-Party)
     
     main.groups <- gs$name
-    gs.row <- gs[1, ]
-    
-    for (row in 2:summary.group.size) {
-      gs.row <- suppressMessages(bind_cols(gs.row, gs[row, ]))
+
+    for (row in 1:summary.group.size) {
+      sum.row <- gs[row, ]
+      gs.row <- suppressMessages(bind_cols(gs.row, sum.row))
     }
     
     party.group.sizes <- main.crosstab %>% 
@@ -214,8 +202,28 @@ get.excel.summary.sheet <- function(res) {
     gs.row
   })
   
-  summary.sheet <- suppressMessages(bind_cols(summary.sheet, group.sizes))
+  #summary.sheet <- suppressMessages(bind_cols(summary.sheet, group.sizes))    
+}
+
+get.country.data <- function(res, row) {
+  res[[as.numeric(row)]]
+}
+
+set.class <- function(class.name, i) { class(i) <- class.name; i} 
+
+reformat.table.for.excel <- function(table) {
+  table <- table %>% 
+    adorn_percentages("row") %>% 
+    mutate(across(-Party, ~set.class('percentage', .)))
+
+  inner_join(table, attr(table, "core"), by = "Party", suffix = c(".%", ".n"))
+}
+
+get.excel.summary.sheet <- function(res) {
+  summary.sheet <- calc.summary.data(res) %>%
+    mutate(across(ends_with('.pct'), ~set.class('percentage', .)))
   
+
   return(summary.sheet)
 }
 
