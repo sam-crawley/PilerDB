@@ -165,10 +165,22 @@ server <- function(input, output, session) {
       tableOutput(paste0("ReligionTable", countryTabID)),
       
       h4(textOutput(paste0("EthnicityHeading", countryTabID))),
-      tableOutput(paste0("EthnicityTable", countryTabID))
+      tableOutput(paste0("EthnicityTable", countryTabID)),
+      
+      h4("Statistics"),
+      textOutput(paste0("SampleSize", countryTabID)),
+      h5("Correlations - all categories"),
+      tableOutput(paste0("CorTable", countryTabID)),
+      h5("Correlations - Missing/Other removed"),
+      tableOutput(paste0("CorNoMissTable", countryTabID))
     )
     
     output[[paste0("CountryName", countryTabID)]] <- renderText(country.data$Summary$general$Country)
+    output[[paste0("SampleSize", countryTabID)]] <- renderText({
+      paste("Sample Size:", country.data$Summary$general$`Sample Size`)
+    })
+    output[[paste0("CorTable", countryTabID)]] <- renderTable(country.data$Summary$cor %>% select(-max.col))
+    output[[paste0("CorNoMissTable", countryTabID)]] <- renderTable(country.data$Summary$cor.nomiss %>% select(-max.col))
     
     walk (group.names, function(group) {
       grp.output.header <- paste0(group, "Heading", countryTabID)
