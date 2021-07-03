@@ -13,19 +13,24 @@ main.vars <- c("Party", group.names)
 
 summary.group.size <- 5
 
+category.defs <- list()
+
 # Generate crosstabs for all datasets
 gen.all.crosstabs <- function(save.output = F) {
   # WVS7
   data.wvs7 <- read.data.wvs()
+  category.defs[['WVS7']] <- wvs7.cats
   overall <- gen.country.crosstabs(data.wvs7, "WVS7")
 
   # Asian Barom 4
   data.asb4 <- read.data.asian()
+  category.defs[['ASB4']] <- asb4.cats
   res <- gen.country.crosstabs(data.asb4, "ASB4")
   overall <- append(overall, res)
   
   # Afrobarometer 7
   data.afb7 <- read.data.afro()
+  category.defs[['AFB7']] <- afro7.cats
   res <- gen.country.crosstabs(data.afb7, "AFB7")
   overall <- append(overall, res)
   
@@ -39,8 +44,11 @@ gen.all.crosstabs <- function(save.output = F) {
 #  At this level, we should only be doing summarising that requires access to the original dataset
 #  (Because the idea is that the original data will not be available after this point)
 gen.country.crosstabs <- function(data, data.source) {
+  # Do common processing of dataset
+  data <- process.data(data)
+  
   # Create crosstabs for each country
-  # (Produces a list of lists, keyed by country+year)
+  # (Produces a list of lists, keyed by country+data.source.year)
   res <- map(unique(data$Country), function(cntry) {
     
     d <- data %>% filter(Country == cntry)
@@ -74,7 +82,6 @@ gen.country.crosstabs <- function(data, data.source) {
       cor.nomiss = cor.nomiss
     )
     
-    
     tables
     
   })
@@ -82,6 +89,20 @@ gen.country.crosstabs <- function(data, data.source) {
   res <- set_names(res, map_chr(res, ~ .x$Summary$general$ID))
 
   return(res)
+}
+
+# Do initial common data processing
+process.data <- function(data, data.source) {
+  cat.defs <- category.defs[[data.source]]
+  
+  for (cat.def.var in names(cat.defs)) {
+    for (cat.type in names(cat.defs[[cat.def.var]])){
+      data[[cat.def.var]] <- fct_collapse(data[[cat.def.var]], "(Missing)" = cat.defs[[cat.def.var]][[cat.type]])
+    }
+  }
+  
+  data
+  
 }
 
 calc.correlations <- function(d, forward = T, drop.missing = F) {

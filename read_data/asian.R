@@ -3,7 +3,22 @@ library(haven)
 # Party - q34
 # Religion - se6
 # Ethnicity - se11a
-# Language - ir2c
+
+asb4.cats <- list(
+  Party = list(
+    "Missing" = c("Not applicable", "Cannot recall", "Invalid vote", "Do not understand the question",
+                  "Missing", "Can't choose", "Decline to answer"),
+  ),
+  Language = list(
+    "Other" = c("Other", "Others", "Other languages")
+  ),
+  Religion = list(
+    "Missing" = c("(Missing)", "Can't choose", "Decline to answer")
+  ),
+  Ethnicity = list(
+    "Missing" = c("(Missing)", "Can't choose", "Decline to answer")
+  )
+)
 
 asian.w4.skip.countries <- c("China", "Vietnam")
 
@@ -21,10 +36,6 @@ read.data.asian <- function() {
       "Country" = country,
       "Year" = year
     ) %>%
-    mutate(Party = fct_collapse(Party,
-                               "None/Missing/DK" = c("Not applicable", "Cannot recall", "Invalid vote", "Do not understand the question",
-                                                     "Missing", "Can't choose", "Decline to answer")
-    )) %>%
     mutate(across(c(Religion, Ethnicity, Language), ~fct_relabel(.x, ~str_replace(.x, "Missing", "\\(Missing\\)")))) %>%
     mutate(Country = as.character(haven::as_factor(Country))) %>%
     filter(! Country %in% asian.w4.skip.countries) %>%
@@ -32,14 +43,6 @@ read.data.asian <- function() {
   
   # Munge Singapore year (spans 2 years)
   data <- data %>% mutate(Year = ifelse(Country == "Singapore" & Year == 2015, 2014, Year))
-  
-  # Collapse some more categories
-  data <- data %>%
-    mutate(
-      Language = fct_collapse(Language, "Other" = c("Other", "Others", "Other languages")),
-      Religion = fct_collapse(Religion, "(Missing)" = c("(Missing)", "Can't choose", "Decline to answer")),
-      Ethnicity = fct_collapse(Ethnicity, "(Missing)" = c("(Missing)", "Can't choose", "Decline to answer"))
-    )  
   
   data
   

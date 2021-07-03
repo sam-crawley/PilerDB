@@ -5,6 +5,22 @@ library(haven)
 # Q2A - Language
 # Q84 - Ethnicity
 
+afro7.cats <- list(
+  Party = list(
+    "Missing" = c("Missing", "Would not vote", "Refused", "Don't know", "Not asked in the country")
+  ),
+  Language = list(
+    "Missing" = c("(Missing)", "Refused To Answer", "Don't know")
+  ),
+  Religion = list(
+    "Missing" = c("(Missing)", "Don't know", "Refused")
+  ),
+  Ethnicity = list(
+    "Other" = c("Other", "Doesn’t think of self in those terms"),
+    "Missing" = c("(Missing)", "Not asked in the country", "Refused", "Don't know")
+  )
+)
+
 read.data.afro <- function() {
   
   data <- read_sav("Divided/data/afrobarom/r7_merged_data_34ctry.release.sav")
@@ -22,20 +38,7 @@ read.data.afro <- function() {
       "Country" = COUNTRY
     ) %>%
     mutate(Year = 2018) %>%
-    mutate(Party = fct_collapse(Party,
-       "None/Missing/DK" = c("Missing", "Would not vote", "Refused", "Don't know", 
-       "Not asked in the country")
-    )) %>%
     mutate(across(c(Religion, Ethnicity, Language), ~fct_relabel(.x, ~str_replace(.x, "Missing", "\\(Missing\\)"))))
-  
-  # Collapse some more categories
-  data <- data %>%
-    mutate(
-      Language = fct_collapse(Language, "(Missing)" = c("(Missing)", "Refused To Answer", "Don't know")),
-      Religion = fct_collapse(Religion, "(Missing)" = c("(Missing)", "Don't know", "Refused")),
-      Ethnicity = fct_collapse(Ethnicity, "Other" = c("Other", "Doesn’t think of self in those terms")),
-      Ethnicity = fct_collapse(Ethnicity, "(Missing)" = c("(Missing)", "Not asked in the country", "Refused", "Don't know"))
-    )
-  
+
   return(data)
 }
