@@ -110,7 +110,7 @@ server <- function(input, output, session) {
     class = 'display compact',
     thead(
       tr(
-        lapply(c("Country", "Data Source", "Year", "Correlation<(missing/other removed)"), function (x) { th(rowspan = 2, x) }),
+        lapply(c("Country", "Data Source", "Year", "Correlation (missing/other removed)"), function (x) { th(rowspan = 2, x) }),
         lapply(1:summary.group.size, function (x) { th(colspan = 2, paste("Group", x)) }),
         lapply(paste("Supporters of party", 1:max.parties), function (x) { th(colspan = summary.group.size+2, x) })
       ),
@@ -142,30 +142,37 @@ server <- function(input, output, session) {
     
     country.data <- res[[selected.row$ID]]
     
-    if (is.null(session$userData$tabCount))
-      session$userData$tabCount <- 0
+    if (is.null(session$userData$countryTabsOpen))
+      session$userData$countryTabsOpen <- list()
     
-    session$userData$tabCount <- session$userData$tabCount + 1
-    tabNum <- session$userData$tabCount
+    countryTabsOpen <- session$userData$countryTabsOpen
+    countryTabID <- str_remove_all(selected.row$ID, " ")
+    
+    if (has_name(countryTabsOpen, countryTabID)) {
+      updateTabsetPanel(session, "mainPanel", selected = selected.row$ID)
+      return()
+    }
+    
+    session$userData$countryTabsOpen[[countryTabID]] <- 1
     
     tab <- tabPanel(country.data$Summary$general$ID,
-      h3(textOutput(paste0("CountryName", tabNum))),
+      h3(textOutput(paste0("CountryName", countryTabID))),
     
-      h4(textOutput(paste0("LanguageHeading", tabNum))),
-      tableOutput(paste0("LanguageTable", tabNum)),
+      h4(textOutput(paste0("LanguageHeading", countryTabID))),
+      tableOutput(paste0("LanguageTable", countryTabID)),
       
-      h4(textOutput(paste0("ReligionHeading", tabNum))),
-      tableOutput(paste0("ReligionTable", tabNum)),
+      h4(textOutput(paste0("ReligionHeading", countryTabID))),
+      tableOutput(paste0("ReligionTable", countryTabID)),
       
-      h4(textOutput(paste0("EthnicityHeading", tabNum))),
-      tableOutput(paste0("EthnicityTable", tabNum))
+      h4(textOutput(paste0("EthnicityHeading", countryTabID))),
+      tableOutput(paste0("EthnicityTable", countryTabID))
     )
     
-    output[[paste0("CountryName", tabNum)]] <- renderText(country.data$Summary$general$Country)
+    output[[paste0("CountryName", countryTabID)]] <- renderText(country.data$Summary$general$Country)
     
     walk (group.names, function(group) {
-      grp.output.header <- paste0(group, "Heading", tabNum)
-      grp.output.table <- paste0(group, "Table", tabNum)
+      grp.output.header <- paste0(group, "Heading", countryTabID)
+      grp.output.table <- paste0(group, "Table", countryTabID)
       
       if (! is.null(country.data[[group]])) {
         output[[grp.output.header]] <- renderText(group)

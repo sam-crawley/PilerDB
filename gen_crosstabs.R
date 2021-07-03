@@ -2,6 +2,11 @@ library(tidyverse)
 library(janitor)
 library(openxlsx)
 library(GoodmanKruskal)
+library(here)
+
+source(here("Divided/read_data/wvs.R"))
+source(here("Divided/read_data/asian.R"))
+source(here("Divided/read_data/afro.R"))
 
 group.names <- c("Language", "Religion", "Ethnicity")
 main.vars <- c("Party", group.names)
