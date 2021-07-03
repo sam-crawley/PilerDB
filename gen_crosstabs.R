@@ -13,29 +13,31 @@ main.vars <- c("Party", group.names)
 
 summary.group.size <- 5
 
-category.defs <- list()
-
 # Generate crosstabs for all datasets
 gen.all.crosstabs <- function(save.output = F) {
+  cat.sum <- list()
+  
   # WVS7
   data.wvs7 <- read.data.wvs()
-  category.defs[['WVS7']] <- wvs7.cats
-  overall <- gen.country.crosstabs(data.wvs7, "WVS7")
+  cat.sum[['WVS7']] <- gen.category.summary(data.wvs7, wvs7.cats)
+  overall <- gen.country.crosstabs(data.wvs7, wvs7.cats, "WVS7")
 
   # Asian Barom 4
   data.asb4 <- read.data.asian()
-  category.defs[['ASB4']] <- asb4.cats
-  res <- gen.country.crosstabs(data.asb4, "ASB4")
+  cat.sum[['ASB4']] <- gen.category.summary(data.asb4, asb4.cats)
+  res <- gen.country.crosstabs(data.asb4, asb4.cats, "ASB4")
   overall <- append(overall, res)
   
   # Afrobarometer 7
   data.afb7 <- read.data.afro()
-  category.defs[['AFB7']] <- afro7.cats
-  res <- gen.country.crosstabs(data.afb7, "AFB7")
+  cat.sum[['AFB7']] <- gen.category.summary(data.afb7, afro7.cats)
+  res <- gen.country.crosstabs(data.afb7, afro7.cats, "AFB7")
   overall <- append(overall, res)
   
-  if (save.output)
+  if (save.output) {
     write_rds(overall, "Divided/output/divided.rds")
+    write_rds(cat.sum, "Divided/output/divided.category.summary.rds")
+  }
   
   overall
 }
@@ -43,9 +45,9 @@ gen.all.crosstabs <- function(save.output = F) {
 # Produce a data structure for a single dataset that includes crosstabs for each country
 #  At this level, we should only be doing summarising that requires access to the original dataset
 #  (Because the idea is that the original data will not be available after this point)
-gen.country.crosstabs <- function(data, data.source) {
+gen.country.crosstabs <- function(data, cat.defs, data.source) {
   # Do common processing of dataset
-  data <- process.data(data)
+  data <- process.data(data, cat.defs)
   
   # Create crosstabs for each country
   # (Produces a list of lists, keyed by country+data.source.year)
@@ -92,9 +94,7 @@ gen.country.crosstabs <- function(data, data.source) {
 }
 
 # Do initial common data processing
-process.data <- function(data, data.source) {
-  cat.defs <- category.defs[[data.source]]
-  
+process.data <- function(data, cat.defs) {
   for (cat.def.var in names(cat.defs)) {
     for (cat.type in names(cat.defs[[cat.def.var]])){
       data[[cat.def.var]] <- fct_collapse(data[[cat.def.var]], "(Missing)" = cat.defs[[cat.def.var]][[cat.type]])
@@ -103,6 +103,26 @@ process.data <- function(data, data.source) {
   
   data
   
+}
+
+gen.category.summary <- function(data, cat.defs) {
+  map(main.vars, function(var.name) {
+    categories <- fct_count(data[[var.name]]) %>%
+      mutate("Collapsed To" = case_when(
+        f %in% cat.defs[[var.name]]$Missing ~ 'Missing',
+        f %in% cat.defs[[var.name]]$Other ~ 'Other',
+        TRUE ~ ''
+      )) %>%
+      rename(
+        "Category" = f,
+        "N" = n
+      )
+    
+    list(
+      question = attr(data[[var.name]], "label"),
+      categories = categories
+    )
+  }) %>% set_names(main.vars)
 }
 
 calc.correlations <- function(d, forward = T, drop.missing = F) {

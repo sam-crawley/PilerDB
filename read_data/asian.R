@@ -7,7 +7,7 @@ library(haven)
 asb4.cats <- list(
   Party = list(
     "Missing" = c("Not applicable", "Cannot recall", "Invalid vote", "Do not understand the question",
-                  "Missing", "Can't choose", "Decline to answer"),
+                  "Missing", "Can't choose", "Decline to answer")
   ),
   Language = list(
     "Other" = c("Other", "Others", "Other languages")

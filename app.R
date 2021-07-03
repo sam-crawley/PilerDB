@@ -4,44 +4,68 @@ library(shinyWidgets)
 library(DT)
 
 res <- read_rds("output/divided.rds")
+category.sum <- read_rds("output/divided.category.summary.rds")
 summary.table <- calc.summary.data(res)
 group.sizes <- get.group.size.summary(res)
 max.parties <- length(names(group.sizes)[str_detect(names(group.sizes), "^Party.Grp")])
 
 source("gen_crosstabs.R")
 
-ui <- fluidPage(
-  tabsetPanel(id = "mainPanel", 
-    tabPanel("Summary",
-      pageWithSidebar(
-        headerPanel('Summary'),
-        sidebarPanel(
-          h3("Filters"),
-          pickerInput("datasrc", 
-                      label = "Data source", 
-                      unique(summary.table$`Data Source`), 
-                      multiple = T,
-                      options = list(
-                        `none-selected-text` = "All"
-                      )),
-          pickerInput("country", 
-                      label = "Country", 
-                      unique(summary.table$`Country`), 
-                      multiple = T,
-                      options = list(
-                        `none-selected-text` = "All"
-                      )),          
-          width = 2
-        ),
-        mainPanel(
-          DTOutput("tableOutput", height = "auto"),
-          width = 10
+ui <- navbarPage(title = "Divided Society Data",
+  tabPanel("Crosstabs",
+    tabsetPanel(id = "mainPanel", 
+      tabPanel("Summary",
+        pageWithSidebar(
+          headerPanel('Summary'),
+          sidebarPanel(
+            h3("Filters"),
+            pickerInput("datasrc", 
+                        label = "Data source", 
+                        unique(summary.table$`Data Source`), 
+                        multiple = T,
+                        options = list(
+                          `none-selected-text` = "All"
+                        )),
+            pickerInput("country", 
+                        label = "Country", 
+                        unique(summary.table$`Country`), 
+                        multiple = T,
+                        options = list(
+                          `none-selected-text` = "All"
+                        )),          
+            width = 2
+          ),
+          mainPanel(
+            DTOutput("tableOutput", height = "auto"),
+            width = 10
+          )
         )
+      ),
+      tabPanel("Group Sizes",
+        DTOutput("tableGroupSizes")
       )
-    ),
-    tabPanel("Group Sizes",
-      DTOutput("tableGroupSizes")
     )
+  ),
+  tabPanel("Category Data", 
+     pageWithSidebar(
+       headerPanel('Category Data'),
+       sidebarPanel(
+         pickerInput("cat.datasrc", 
+                     label = "Data source", 
+                     names(category.sum)
+         ),
+         pickerInput("cat.var", 
+                     label = "Variable", 
+                     main.vars
+         ),
+         width = 2
+       ),
+       mainPanel(
+         p("Question: ", textOutput("catSumQuestion")),
+         DTOutput("catSumTable", height = "auto"),
+         width = 10
+       )
+     )
   )
 )
 
@@ -88,6 +112,14 @@ gen.group.size.names <- function(max.parties) {
   )
 }
 
+get.cat.sum.table <- function(data.src, var.name) {
+  category.sum[[data.src]][[var.name]]$categories
+}
+
+get.cat.sum.question <- function(data.src, var.name) {
+  category.sum[[data.src]][[var.name]]$question
+}
+
 server <- function(input, output, session) {
   
   output$tableOutput = renderDT(
@@ -105,6 +137,15 @@ server <- function(input, output, session) {
     class = "display compact",
     extensions = 'Buttons'
   )
+  
+  output$catSumTable = renderDT(
+    get.cat.sum.table(input$cat.datasrc, input$cat.var),
+    options = list(
+      paging = F
+    ),
+  )
+  
+  output$catSumQuestion <- renderText(get.cat.sum.question(input$cat.datasrc, input$cat.var))
   
   sketch = htmltools::withTags(table(
     class = 'display compact',
