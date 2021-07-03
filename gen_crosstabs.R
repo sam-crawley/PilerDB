@@ -190,17 +190,17 @@ get.group.size.summary <- function(res) {
     
     names(party.group.sizes) <- c("Party.Grp", "Total", paste("Group", 1:length(main.groups)))
     
-    # Ensure we always have 3 groups
+    # Ensure we always have the right number of groups groups
     if (length(main.groups) < summary.group.size) {
       for (extra.group in (length(main.groups)+1):summary.group.size) {
-        party.group.sizes[[paste('Group ', extra.group)]] <- NA
+        party.group.sizes[[paste('Group', extra.group)]] <- NA
       }
     }
     
     for (row in 1:nrow(party.group.sizes)) {
       gs.row <- suppressMessages(bind_cols(gs.row, party.group.sizes[row, ]))
     }
-    
+
     gs.row
   })
 }
