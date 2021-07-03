@@ -97,7 +97,10 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
 process.data <- function(data, cat.defs) {
   for (cat.def.var in names(cat.defs)) {
     for (cat.type in names(cat.defs[[cat.def.var]])){
-      data[[cat.def.var]] <- fct_collapse(data[[cat.def.var]], "(Missing)" = cat.defs[[cat.def.var]][[cat.type]])
+      new.levels <- list(cat.defs[[cat.def.var]][[cat.type]])
+      names(new.levels) <- cat.type
+      
+      data[[cat.def.var]] <- fct_collapse(data[[cat.def.var]], !!!new.levels)
     }
   }
   
