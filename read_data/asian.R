@@ -13,10 +13,10 @@ asb4.cats <- list(
     "Other" = c("Other", "Others", "Other languages")
   ),
   Religion = list(
-    "Missing" = c("(Missing)", "Can't choose", "Decline to answer")
+    "Missing" = c("Missing", "Can't choose", "Decline to answer")
   ),
   Ethnicity = list(
-    "Missing" = c("(Missing)", "Can't choose", "Decline to answer")
+    "Missing" = c("Missing", "Can't choose", "Decline to answer")
   )
 )
 
@@ -27,7 +27,7 @@ read.data.asian <- function() {
   
   data <- data %>%
     mutate(across(c(q34, se6, se11a, ir2c), haven::as_factor)) %>%
-    mutate(across(c(q34, se6, se11a, ir2c), fct_explicit_na)) %>%
+    mutate(across(c(q34, se6, se11a, ir2c), ~fct_explicit_na(.x, na_level = "Missing"))) %>%
     rename(
       "Party" = q34,
       "Language" = ir2c,
@@ -36,7 +36,6 @@ read.data.asian <- function() {
       "Country" = country,
       "Year" = year
     ) %>%
-    mutate(across(c(Religion, Ethnicity, Language), ~fct_relabel(.x, ~str_replace(.x, "Missing", "\\(Missing\\)")))) %>%
     mutate(Country = as.character(haven::as_factor(Country))) %>%
     filter(! Country %in% asian.w4.skip.countries) %>%
     arrange(Country)

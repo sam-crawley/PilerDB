@@ -56,7 +56,7 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
     d <- data %>% filter(Country == cntry)
 
     tables <- map(group.names, function(var) {
-      if (all( d[var] == "(Missing)" )) {
+      if (all( d[var] == "Missing" )) {
         return (NULL)
       }
       
@@ -69,7 +69,7 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
     
     year <- unique(as.numeric(d$Year))
     cor = calc.correlations(d)
-    cor.nomiss = calc.correlations(d, drop.missing = T)    
+    cor.nomiss = calc.correlations(d, cats.to.drop = c("Missing", "Other"))
     
     tables$Summary <- list(
       general = tibble(
@@ -128,15 +128,17 @@ gen.category.summary <- function(data, cat.defs) {
   }) %>% set_names(main.vars)
 }
 
-calc.correlations <- function(d, forward = T, drop.missing = F) {
-  if (drop.missing)
-    d <- d %>% filter(Party != "None/Missing/DK" & Party != "Other")
+calc.correlations <- function(d, forward = T, cats.to.drop = NULL) {
+  drop.cats <- ! is.null(cats.to.drop)
+  
+  if (drop.cats)
+    d <- d %>% filter(! Party %in% cats.to.drop)
   
   tau <- map_dfr(group.names, function(var) {
     d.g <- d 
     
-    if (drop.missing)
-      d.g <- d.g %>% filter(.data[[var]] != "(Missing)" & .data[[var]] != "Other")
+    if (drop.cats)
+      d.g <- d.g %>% filter(! .data[[var]] %in% cats.to.drop)
     
     if (nrow(d.g) == 0)
       return(tibble(question = var, assoc = NA))
@@ -168,17 +170,19 @@ calc.summary.data <- function(res) {
     main.crosstab <- country.data[[sum$`Group Basis`]]
     
     sum$total.included <- main.crosstab %>% 
-      filter(Party != "None/Missing/DK") %>% 
-      adorn_totals(where = c("row", "col")) %>%
-      filter(Party == "Total") %>%
-      pull(Total)
+      pivot_longer(-Party, names_to = "Group") %>%
+      filter(! Party %in% c("Missing", "Other")) %>% 
+      filter(! Group %in% c("Missing", "Other")) %>% 
+      summarise(v = sum(value)) %>%
+      pull(v)
     sum$total.included.pct <- sum$total.included / sum$`Sample Size`
     
-    if (main.crosstab %>% filter(Party == "None/Missing/DK") %>% count() == 1) {
+    if (main.crosstab %>% filter(Party %in% c("Missing", "Other")) %>% count() > 0) {
       sum$party.missing <- main.crosstab %>% 
-        adorn_totals(where = c("row", "col")) %>%
-        filter(Party == "None/Missing/DK") %>%
-        pull(Total)
+        pivot_longer(-Party, names_to = "Group") %>%
+        filter(Party %in% c("Missing", "Other")) %>% 
+        summarise(v = sum(value)) %>%
+        pull(v)
       sum$party.missing.pct <- sum$party.missing / sum$`Sample Size`
     }
     else {
@@ -186,11 +190,12 @@ calc.summary.data <- function(res) {
       sum$party.missing.pct <- 0
     }
     
-    if (has_name(main.crosstab, "(Missing)")) {
+    if (any(has_name(main.crosstab, c("Missing", "Other")))) {
       sum$group.missing <- main.crosstab %>% 
-        adorn_totals(where = "row") %>%
-        filter(Party == "Total") %>%
-        pull(.data[["(Missing)"]])
+        pivot_longer(-Party, names_to = "Group") %>%
+        filter(Group %in% c("Missing", "Other")) %>% 
+        summarise(v = sum(value)) %>%
+        pull(v)
       sum$group.missing.pct <- sum$group.missing / sum$`Sample Size`
     }
     else {

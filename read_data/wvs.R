@@ -5,7 +5,7 @@ wvs7.skip.countries <- c("CHN", "EGY", "VNM", "JOR")
 
 wvs7.cats <- list(
   Party = list(
-    "Missing" = c("Not applicable", "No answer", "Don´t know", "No right to vote", "I would not vote", "(Missing)",
+    "Missing" = c("Not applicable", "No answer", "Don´t know", "No right to vote", "I would not vote", "Missing",
                                 "I would cast a blank ballot; White vote", "None", "Null vote"),
     "Other" = c("Other", "Independent candidate")
   ),
@@ -26,7 +26,7 @@ read.data.wvs <- function() {
   
   data <- data %>%
     mutate(across(c(Q223, Q272, Q289, Q290), haven::as_factor)) %>%
-    mutate(across(c(Q223, Q272, Q289, Q290), fct_explicit_na)) %>%
+    mutate(across(c(Q223, Q272, Q289, Q290), ~fct_explicit_na(.x, na_level = "Missing"))) %>%
     rename(
       "Party" = Q223,
       "Language" = Q272,

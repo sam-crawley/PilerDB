@@ -10,14 +10,14 @@ afro7.cats <- list(
     "Missing" = c("Missing", "Would not vote", "Refused", "Don't know", "Not asked in the country")
   ),
   Language = list(
-    "Missing" = c("(Missing)", "Refused To Answer", "Don't know")
+    "Missing" = c("Missing", "Refused To Answer", "Don't know")
   ),
   Religion = list(
-    "Missing" = c("(Missing)", "Don't know", "Refused")
+    "Missing" = c("Missing", "Don't know", "Refused")
   ),
   Ethnicity = list(
     "Other" = c("Other", "Doesn’t think of self in those terms"),
-    "Missing" = c("(Missing)", "Not asked in the country", "Refused", "Don't know")
+    "Missing" = c("Missing", "Not asked in the country", "Refused", "Don't know")
   )
 )
 
@@ -27,7 +27,7 @@ read.data.afro <- function() {
   
   data <- data %>%
     mutate(across(c(Q99, Q98, Q2A, Q84), haven::as_factor)) %>%
-    mutate(across(c(Q99, Q98, Q2A, Q84), fct_explicit_na)) %>%
+    mutate(across(c(Q99, Q98, Q2A, Q84), ~fct_explicit_na(.x, na_level = "Missing"))) %>%
     mutate(COUNTRY = as.character(haven::as_factor(COUNTRY))) %>%
     filter(COUNTRY != "eSwatini") %>%
     rename(
@@ -38,7 +38,6 @@ read.data.afro <- function() {
       "Country" = COUNTRY
     ) %>%
     mutate(Year = 2018) %>%
-    mutate(across(c(Religion, Ethnicity, Language), ~fct_relabel(.x, ~str_replace(.x, "Missing", "\\(Missing\\)"))))
 
   return(data)
 }
