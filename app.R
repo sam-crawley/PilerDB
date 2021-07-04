@@ -200,13 +200,13 @@ server <- function(input, output, session) {
       h3(textOutput(paste0("CountryName", countryTabID))),
     
       h4(textOutput(paste0("LanguageHeading", countryTabID))),
-      tableOutput(paste0("LanguageTable", countryTabID)),
+      DTOutput(paste0("LanguageTable", countryTabID)),
       
       h4(textOutput(paste0("ReligionHeading", countryTabID))),
-      tableOutput(paste0("ReligionTable", countryTabID)),
+      DTOutput(paste0("ReligionTable", countryTabID)),
       
       h4(textOutput(paste0("EthnicityHeading", countryTabID))),
-      tableOutput(paste0("EthnicityTable", countryTabID)),
+      DTOutput(paste0("EthnicityTable", countryTabID)),
       
       h4("Statistics"),
       textOutput(paste0("SampleSize", countryTabID)),
@@ -230,16 +230,54 @@ server <- function(input, output, session) {
       if (! is.null(country.data[[group]])) {
         output[[grp.output.header]] <- renderText(group)
         
+        group.cols <- colnames(country.data[[group]])[2:ncol(country.data[[group]])]
+        
         crosstab <- country.data[[group]] %>% 
           adorn_percentages("row") %>% 
-          adorn_pct_formatting() %>% 
-          adorn_ns()
+          adorn_pct_formatting()
         
-        output[[grp.output.table]] <- renderTable(crosstab, digits = 0)
+        group.cols.order <- unlist( map(group.cols, ~paste0(.x, c(".n", '.%'))))
+        
+        crosstab <- inner_join(crosstab, attr(crosstab, "core"), by = "Party", suffix = c(".%", ".n")) %>%
+          select( Party, all_of(group.cols.order) ) %>% 
+          adorn_totals("col")
+        
+        col.totals <- crosstab %>% adorn_totals("row", fill = '') %>% filter(Party == "Total")
+        
+        sketch = htmltools::withTags(table(
+          class = 'display compact',
+          thead(
+            tr(
+              th("Party", rowspan = 2),
+              lapply(group.cols, function (x) { th(colspan = 2, x) }),
+              th("Total", rowspan = 2)
+            ),
+            tr(
+              lapply(rep(c('N', '%'), length(group.cols)), th)
+            )
+          ),
+          tfoot(
+            tr(
+              lapply(col.totals, th)
+            )
+          )
+        ))        
+        
+        output[[grp.output.table]] <- renderDT(
+          crosstab,
+          options = list(
+            lengthChange = F, 
+            paging = F, 
+            searching = F,
+            bInfo = F
+          ),
+          rownames = F,
+          container = sketch
+        )
       }
       else {
         output[[grp.output.header]] <- renderText("")
-        output[[grp.output.table]]<- renderTable(tibble())
+        output[[grp.output.table]]<- renderDT(NULL)
       }
     })
     
