@@ -77,10 +77,10 @@ get.summary.table <- function(datasrc, country, with.id = F) {
       "Correlation (others / missing removed)" = cor.nomiss,
       "Total Included (N)" = total.included,
       "Total Included (%)" = total.included.pct,
-      "Party Missing (N)" = party.missing,
-      "Party Missing (%)" = party.missing.pct,
-      "Group Missing (N)" = group.missing,
-      "Group Missing (%)" = group.missing.pct
+      "Party Missing / Other (N)" = party.missing,
+      "Party Missing / Other (%)" = party.missing.pct,
+      "Group Missing / Other (N)" = group.missing,
+      "Group Missing / Other (%)" = group.missing.pct
     )
   
   if (! with.id)
