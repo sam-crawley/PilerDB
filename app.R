@@ -246,6 +246,7 @@ server <- function(input, output, session) {
         
         sketch = htmltools::withTags(table(
           class = 'display compact',
+          style = 'white-space: nowrap',
           thead(
             tr(
               th("Party", rowspan = 2),
@@ -269,7 +270,8 @@ server <- function(input, output, session) {
             lengthChange = F, 
             paging = F, 
             searching = F,
-            bInfo = F
+            bInfo = F,
+            scrollX = T
           ),
           rownames = F,
           container = sketch
