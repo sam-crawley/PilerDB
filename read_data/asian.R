@@ -3,14 +3,12 @@ library(haven)
 # Party - q34
 # Religion - se6
 # Ethnicity - se11a
+# Language - *Missing*
 
 asb4.cats <- list(
   Party = list(
     "Missing" = c("Not applicable", "Cannot recall", "Invalid vote", "Do not understand the question",
                   "Missing", "Can't choose", "Decline to answer")
-  ),
-  Language = list(
-    "Other" = c("Other", "Others", "Other languages")
   ),
   Religion = list(
     "Missing" = c("Missing", "Can't choose", "Decline to answer")
@@ -30,12 +28,12 @@ read.data.asian <- function() {
     mutate(across(c(q34, se6, se11a, ir2c), ~fct_explicit_na(.x, na_level = "Missing"))) %>%
     rename(
       "Party" = q34,
-      "Language" = ir2c,
       "Religion" = se6,
       "Ethnicity" = se11a,
       "Country" = country,
       "Year" = year
     ) %>%
+    mutate(Language = factor("Missing")) %>%
     mutate(Country = as.character(haven::as_factor(Country))) %>%
     filter(! Country %in% asian.w4.skip.countries) %>%
     arrange(Country)
