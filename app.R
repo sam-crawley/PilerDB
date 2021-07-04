@@ -3,6 +3,8 @@ library(shiny)
 library(shinyWidgets)
 library(DT)
 
+source("gen_crosstabs.R")
+
 res <- read_rds("output/divided.rds")
 category.sum <- read_rds("output/divided.category.summary.rds")
 summary.table <- calc.summary.data(res)
@@ -128,21 +130,27 @@ server <- function(input, output, session) {
       lengthChange = F, 
       paging = F, 
       searching = F,
-      buttons = c('copy', 'csv', 'excel'),
+      buttons = c('excel'),
       dom = 'Bfrtip',
       order = list(list(7, 'desc'))
     ),
     server = T, 
     selection = 'single',
     class = "display compact",
-    extensions = 'Buttons'
+    extensions = 'Buttons',
+    rownames = F
   )
   
   output$catSumTable = renderDT(
     get.cat.sum.table(input$cat.datasrc, input$cat.var),
     options = list(
-      paging = F
+      paging = F,
+      buttons = c('excel'),
+      dom = 'Bfrtip',
+      order = list(list(2, 'desc'))
     ),
+    rownames = F,
+    extensions = 'Buttons'
   )
   
   output$catSumQuestion <- renderText(get.cat.sum.question(input$cat.datasrc, input$cat.var))
@@ -167,7 +175,7 @@ server <- function(input, output, session) {
       lengthChange = F, 
       paging = F, 
       searching = F,
-      buttons = c('copy', 'csv', 'excel'),
+      buttons = c('excel'),
       dom = 'Bfrtip',
       order = list(list(3, 'desc'))
     ),
