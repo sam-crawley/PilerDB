@@ -73,8 +73,8 @@ get.summary.table <- function(datasrc, country, with.id = F) {
   tab <- summary.table  %>%
     mutate(across(ends_with('.pct'), ~round(.x, digits = 2) * 100)) %>%
     rename(
-      "Correlation (all)" = cor,
-      "Correlation (others/missing removed)" = cor.nomiss,
+      "Correlation (full sample)" = cor,
+      "Correlation (others / missing removed)" = cor.nomiss,
       "Total Included (N)" = total.included,
       "Total Included (%)" = total.included.pct,
       "Party Missing (N)" = party.missing,

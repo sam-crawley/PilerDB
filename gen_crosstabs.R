@@ -219,15 +219,14 @@ get.group.size.summary <- function(res) {
     )
     
     gs <- main.crosstab %>% 
-      select(-contains("(Missing)")) %>%
-      filter(Party != "None/Missing/DK") %>%
-      adorn_totals(where = "row") %>% 
-      filter(Party == "Total") %>% 
-      pivot_longer(-Party) %>% 
-      slice_max(value, n = summary.group.size, with_ties = F) %>%
-      select(-Party)
-    
-    main.groups <- gs$name
+      pivot_longer(-Party, names_to = "Group") %>% 
+      filter(! Party %in% c("Missing", "Other")) %>% 
+      filter(! Group %in% c("Missing", "Other")) %>% 
+      group_by(Group) %>% 
+      summarise(value = sum(value)) %>% 
+      slice_max(value, n=5, with_ties = F)      
+
+    main.groups <- gs$Group
 
     for (row in 1:summary.group.size) {
       sum.row <- gs[row, ]
@@ -236,7 +235,7 @@ get.group.size.summary <- function(res) {
     
     party.group.sizes <- main.crosstab %>% 
       select(Party, all_of(main.groups)) %>% 
-      filter(Party != "None/Missing/DK") %>% 
+      filter(! Party %in% c("Missing", "Other")) %>% 
       adorn_totals("col") %>% 
       filter(Total >= 20) %>%
       arrange(desc(Total)) %>%
