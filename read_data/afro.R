@@ -28,14 +28,13 @@ read.data.afro <- function() {
   data <- data %>%
     mutate(across(c(Q99, Q98, Q2A, Q84), haven::as_factor)) %>%
     mutate(across(c(Q99, Q98, Q2A, Q84), ~fct_explicit_na(.x, na_level = "Missing"))) %>%
-    mutate(COUNTRY = as.character(haven::as_factor(COUNTRY))) %>%
-    filter(COUNTRY != "eSwatini") %>%
+    mutate(Country = countrycode(as.character(haven::as_factor(COUNTRY)), origin = "country.name", destination = "country.name")) %>%
+    filter(Country != "Eswatini") %>%
     rename(
       "Party" = Q99,
       "Language" = Q2A,
       "Religion" = Q98,
-      "Ethnicity" = Q84,
-      "Country" = COUNTRY
+      "Ethnicity" = Q84
     ) %>%
     mutate(Year = 2018) %>%
 

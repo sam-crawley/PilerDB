@@ -34,7 +34,7 @@ read.data.asian <- function() {
       "Year" = year
     ) %>%
     mutate(Language = factor("Missing")) %>%
-    mutate(Country = as.character(haven::as_factor(Country))) %>%
+    mutate(Country = countrycode(as.character(haven::as_factor(Country)), origin = "country.name", destination = "country.name")) %>%
     filter(! Country %in% asian.w4.skip.countries) %>%
     arrange(Country)
   
