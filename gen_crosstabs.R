@@ -224,6 +224,7 @@ get.group.size.summary <- function(res) {
       filter(! Group %in% c("Missing", "Other")) %>% 
       group_by(Group) %>% 
       summarise(value = sum(value)) %>% 
+      filter(value > 0) %>%
       slice_max(value, n=5, with_ties = F)      
 
     main.groups <- gs$Group
@@ -243,7 +244,7 @@ get.group.size.summary <- function(res) {
     
     names(party.group.sizes) <- c("Party.Grp", "Total", paste("Group", 1:length(main.groups)))
     
-    # Ensure we always have the right number of groups groups
+    # Ensure we always have the right number of groups
     if (length(main.groups) < summary.group.size) {
       for (extra.group in (length(main.groups)+1):summary.group.size) {
         party.group.sizes[[paste('Group', extra.group)]] <- NA

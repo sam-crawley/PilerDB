@@ -168,7 +168,8 @@ server <- function(input, output, session) {
       paging = F, 
       searching = F,
       buttons = c('copy', 'csv', 'excel'),
-      dom = 'Bfrtip'
+      dom = 'Bfrtip',
+      order = list(list(3, 'desc'))
     ),
     container = sketch,
     rownames = F,
