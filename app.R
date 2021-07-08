@@ -132,7 +132,7 @@ server <- function(input, output, session) {
       searching = F,
       buttons = c('excel'),
       dom = 'Bfrtip',
-      order = list(list(7, 'desc'))
+      order = list(list(6, 'desc'))
     ),
     server = T, 
     selection = 'single',
