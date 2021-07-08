@@ -13,10 +13,24 @@ afro7.cats <- list(
     "Missing" = c("Missing", "Refused To Answer", "Don't know")
   ),
   Religion = list(
-    "Missing" = c("Missing", "Don't know", "Refused")
+    "Missing" = c("Missing", "Don't know", "Refused"),
+    "Other" = c("Other", "None")
   ),
   Ethnicity = list(
-    "Other" = c("Other", "Doesn’t think of self in those terms"),
+    "Other" = c("Other", "Doesn\u2019t think of self in those terms",
+                "Related to regional origin (badio/sampadjudo)",
+                "Related to Gender",
+                "Related to Religion",
+                "Related to Race",
+                "Related to political-partisan affiliation",
+                "Related to social groups (Foros, Angulares, Cabo-verdianos, Principenses)",
+                "Related to age",
+                "Related to gender",
+                "Related to the job",
+                "Related to religian",
+                "Related to social classes",
+                "Related to race",
+                "Related to political party affiliation"),
     "Missing" = c("Missing", "Not asked in the country", "Refused", "Don't know")
   )
 )

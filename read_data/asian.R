@@ -11,7 +11,8 @@ asb4.cats <- list(
                   "Missing", "Can't choose", "Decline to answer")
   ),
   Religion = list(
-    "Missing" = c("Missing", "Can't choose", "Decline to answer")
+    "Missing" = c("Missing", "Can't choose", "Decline to answer"),
+    "Other" = c("Other", "Other Asian religions")
   ),
   Ethnicity = list(
     "Missing" = c("Missing", "Can't choose", "Decline to answer")

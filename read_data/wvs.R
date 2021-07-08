@@ -5,7 +5,7 @@ wvs7.skip.countries <- c("CHN", "EGY", "VNM", "JOR")
 
 wvs7.cats <- list(
   Party = list(
-    "Missing" = c("Not applicable", "No answer", "Don´t know", "No right to vote", "I would not vote", "Missing",
+    "Missing" = c("Not applicable", "No answer", "Don\ub4t know", "No right to vote", "I would not vote", "Missing",
                                 "I would cast a blank ballot; White vote", "None", "Null vote"),
     "Other" = c("Other", "Independent candidate")
   ),
@@ -13,7 +13,7 @@ wvs7.cats <- list(
     "Other" = c("Other", "Other European", "Other Chinese dialects", "Other local; aboriginal; tribal, community")
   ),
   Religion = list(
-    "Other" = c("Other", "Other Christian (Pentecostal/Free church/Jehova...)")
+    "Other" = c("Other", "Other Christian (Pentecostal/Free church/Jehova...)", "Do not belong to a denomination")
   ),
   Ethnicity = list(
     "Other" = c("Other, non-Hispanic", "Two plus, non-Hispanic")
