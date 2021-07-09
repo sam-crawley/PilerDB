@@ -238,7 +238,6 @@ get.group.size.summary <- function(res) {
       select(Party, all_of(main.groups)) %>% 
       filter(! Party %in% c("Missing", "Other")) %>% 
       adorn_totals("col") %>% 
-      filter(Total >= 20) %>%
       arrange(desc(Total)) %>%
       select(Party, Total, everything())
     
