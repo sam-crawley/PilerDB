@@ -33,7 +33,8 @@ read.data.wvs <- function() {
       "Religion" = Q289,
       "Ethnicity" = Q290,
       "Country.Code" = B_COUNTRY_ALPHA,
-      "Year" = A_YEAR
+      "Year" = A_YEAR,
+      "Weight" = W_WEIGHT
     ) %>%
     mutate("Country" = countrycode(Country.Code, origin = 'iso3c', destination = 'country.name'))  %>%
     arrange(Country)

@@ -3,6 +3,7 @@ library(janitor)
 library(openxlsx)
 library(GoodmanKruskal)
 library(here)
+library(StatMatch)
 
 source(here("Divided/read_data/wvs.R"))
 source(here("Divided/read_data/asian.R"))
@@ -69,7 +70,9 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
     
     year <- unique(as.numeric(d$Year))
     cor = calc.correlations(d)
+    cor.wt = calc.correlations(d, use.weights = T)
     cor.nomiss = calc.correlations(d, cats.to.drop = c("Missing", "Other"))
+    cor.nomiss.wt = calc.correlations(d, cats.to.drop = c("Missing", "Other"), use.weights = T)
     
     tables$Summary <- list(
       general = tibble(
@@ -81,7 +84,9 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
         'Group Basis' = cor.nomiss$max.col
       ),
       cor = cor,
-      cor.nomiss = cor.nomiss
+      cor.wt = cor.wt,
+      cor.nomiss = cor.nomiss,
+      cor.nomiss.wt = cor.nomiss.wt
     )
     
     tables
@@ -128,7 +133,7 @@ gen.category.summary <- function(data, cat.defs) {
   }) %>% set_names(main.vars)
 }
 
-calc.correlations <- function(d, forward = T, cats.to.drop = NULL) {
+calc.correlations <- function(d, cats.to.drop = NULL, use.stat.match = T, use.weights = F) {
   drop.cats <- ! is.null(cats.to.drop)
   
   if (drop.cats)
@@ -143,8 +148,24 @@ calc.correlations <- function(d, forward = T, cats.to.drop = NULL) {
     if (nrow(d.g) == 0)
       return(tibble(question = var, assoc = NA))
     
-    t <- GKtau(d.g$Party, d.g[[var]])
-    tibble(question = var, assoc = ifelse(forward, t$tauxy, t$tauyx))
+    if (use.stat.match) {
+      d.g <- d.g %>% mutate(
+        Party = fct_drop(Party),
+        "{var}" = fct_drop(.data[[var]])
+      )
+      
+      wt.var = NULL
+      if (use.weights)
+        wt.var = "Weight"
+      
+      assoc <- suppressWarnings(pw.assoc(as.formula(paste(var, "~ Party")), d.g, out.df = T, weights = wt.var))
+      t <- round(assoc$tau, digits = 3)
+    }
+    else {
+      t <- GKtau(d.g$Party, d.g[[var]])$tauxy  
+    }
+    
+    tibble(question = var, assoc = t)
   })
 
   tau <- tau %>%

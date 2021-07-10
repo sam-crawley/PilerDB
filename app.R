@@ -221,8 +221,12 @@ server <- function(input, output, session) {
       textOutput(paste0("SampleSize", countryTabID)),
       h5("Correlations - all categories"),
       tableOutput(paste0("CorTable", countryTabID)),
+      h5("Correlations - all categories, weighted"),
+      tableOutput(paste0("CorWtTable", countryTabID)),
       h5("Correlations - Missing/Other removed"),
-      tableOutput(paste0("CorNoMissTable", countryTabID))
+      tableOutput(paste0("CorNoMissTable", countryTabID)),
+      h5("Correlations - Missing/Other removed, weighted"),
+      tableOutput(paste0("CorNoMissWtTable", countryTabID))
     )
     
     output[[paste0("CountryName", countryTabID)]] <- renderText(country.data$Summary$general$Country)
@@ -230,7 +234,9 @@ server <- function(input, output, session) {
       paste("Sample Size:", country.data$Summary$general$`Sample Size`)
     })
     output[[paste0("CorTable", countryTabID)]] <- renderTable(country.data$Summary$cor %>% select(-max.col))
+    output[[paste0("CorWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.wt %>% select(-max.col))
     output[[paste0("CorNoMissTable", countryTabID)]] <- renderTable(country.data$Summary$cor.nomiss %>% select(-max.col))
+    output[[paste0("CorNoMissWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.nomiss.wt %>% select(-max.col))
     
     walk (group.names, function(group) {
       grp.output.header <- paste0(group, "Heading", countryTabID)

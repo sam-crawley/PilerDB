@@ -32,7 +32,8 @@ read.data.asian <- function() {
       "Religion" = se6,
       "Ethnicity" = se11a,
       "Country" = country,
-      "Year" = year
+      "Year" = year,
+      "Weight" = w
     ) %>%
     mutate(Language = factor("Missing")) %>%
     mutate(Country = countrycode(as.character(haven::as_factor(Country)), origin = "country.name", destination = "country.name")) %>%

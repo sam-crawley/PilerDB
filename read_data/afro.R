@@ -48,7 +48,8 @@ read.data.afro <- function() {
       "Party" = Q99,
       "Language" = Q2A,
       "Religion" = Q98,
-      "Ethnicity" = Q84
+      "Ethnicity" = Q84,
+      "Weight" = withinwt
     ) %>%
     mutate(Year = 2018) %>%
 
