@@ -2,6 +2,7 @@ library(tidyverse)
 library(shiny)
 library(shinyWidgets)
 library(DT)
+library(shinybusy)
 
 source("gen_crosstabs.R")
 
@@ -9,7 +10,7 @@ res <- read_rds("output/divided.rds")
 category.sum <- read_rds("output/divided.category.summary.rds")
 summary.table <- calc.summary.data(res)
 group.sizes <- get.group.size.summary(res)
-max.parties <- length(names(group.sizes)[str_detect(names(group.sizes), "^Party.Grp")])
+max.parties <- get.max.parties(group.sizes)
 
 source("gen_crosstabs.R")
 
@@ -68,6 +69,18 @@ ui <- navbarPage(title = "Divided Society Data",
          width = 10
        )
      )
+  ),
+  tabPanel("Download Data",
+     fluidPage(
+       headerPanel('Download Data'),
+       mainPanel(
+         use_busy_spinner(spin = "fading-circle", position = 'full-page'),
+         p("Download data as an Excel file."),
+         p(strong("Note:"), " After clicking Download, it will take a few minutes for the file to generate."),
+         downloadBttn("downloadData", label = "Download"),
+         width = 10
+       )
+     )          
   )
 )
 
@@ -99,14 +112,6 @@ get.summary.table <- function(datasrc, country, with.id = F) {
   tab
 }
 
-get.group.sizes <- function() {
-  summary.table %>%
-    select(ID, `Data Source`, Year, cor.nomiss) %>%
-    inner_join(group.sizes, by = "ID") %>%
-    select(Country, everything()) %>%
-    select(-ID)
-}
-
 gen.group.size.names <- function(max.parties) {
   c(
     rep(c("Name", "N"), summary.group.size),
@@ -130,14 +135,11 @@ server <- function(input, output, session) {
       lengthChange = F, 
       paging = F, 
       searching = F,
-      buttons = c('excel'),
-      dom = 'Bfrtip',
       order = list(list(6, 'desc'))
     ),
     server = T, 
     selection = 'single',
     class = "display compact",
-    extensions = 'Buttons',
     rownames = F
   )
   
@@ -145,12 +147,9 @@ server <- function(input, output, session) {
     get.cat.sum.table(input$cat.datasrc, input$cat.var),
     options = list(
       paging = F,
-      buttons = c('excel'),
-      dom = 'Bfrtip',
       order = list(list(2, 'desc'))
     ),
-    rownames = F,
-    extensions = 'Buttons'
+    rownames = F
   )
   
   output$catSumQuestion <- renderText(get.cat.sum.question(input$cat.datasrc, input$cat.var))
@@ -170,7 +169,7 @@ server <- function(input, output, session) {
   ))
   
   output$tableGroupSizes <- renderDT(
-    get.group.sizes(),
+    group.sizes,
     options = list(
       lengthChange = F, 
       paging = F, 
@@ -182,6 +181,18 @@ server <- function(input, output, session) {
     container = sketch,
     rownames = F,
     extensions = 'Buttons'
+  )
+  
+  output$downloadData <- downloadHandler(
+    filename <- function() {
+      "divided_crosstabs.xlsx"
+    },
+    
+    content <- function(file) {
+      showModal(show_spinner())
+      on.exit(hide_spinner())
+      write.wvs.xlsx(res, file)
+    }
   )
   
   observeEvent(input$tableOutput_rows_selected, {
