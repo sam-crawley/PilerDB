@@ -5,7 +5,7 @@ wvs7.skip.countries <- c("CHN", "EGY", "VNM", "JOR")
 
 wvs7.cats <- list(
   Party = list(
-    "Missing" = c("Not applicable", "No answer", "Don\ub4t know", "No right to vote", "I would not vote", "Missing",
+    "Missing" = c("Not applicable", "No answer", "Don\ub4t know", "No right to vote", "I would not vote", "Missing, Not available",
                                 "I would cast a blank ballot; White vote", "None", "Null vote"),
     "Other" = c("Other", "Independent candidate")
   ),
@@ -16,12 +16,12 @@ wvs7.cats <- list(
     "Other" = c("Other", "Other Christian (Pentecostal/Free church/Jehova...)", "Do not belong to a denomination")
   ),
   Ethnicity = list(
-    "Other" = c("Other, non-Hispanic", "Two plus, non-Hispanic")
+    "Other" = c("Other, Non-Hispanic", "Two plus, non-Hispanic")
   )
 )
 
 read.data.wvs <- function() {
-  data <- read_dta("Divided/data/orig/WVS_Cross-National_Wave_7_stata_v1_6_2.dta", encoding = "UTF-8") %>%
+  data <- read_dta("Divided/data/WVS/W7/WVS_Cross-National_Wave_7_stata_v2_0.dta", encoding = "UTF-8") %>%
     filter(! B_COUNTRY_ALPHA %in% wvs7.skip.countries)
   
   data <- data %>%
