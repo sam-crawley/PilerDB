@@ -1,11 +1,28 @@
-library(haven)
-
 # Q99 - Party
 # Q98 - Religion
 # Q2A - Language
 # Q84 - Ethnicity
 
-afro7.cats <- list(
+data.spec <- list(
+  file.name = "Divided/data/afrobarom/r7_merged_data_34ctry.release.sav",
+  file.type = 'sav',
+  skip.countries = c("Eswatini"),
+  country.format = 'country.name',
+  field.def = c(
+    "Party" = "Q99",
+    "Language" = "Q2A",
+    "Religion" = "Q98",
+    "Ethnicity" = "Q84",
+    "Weight" = "withinwt",
+    "Country" = "COUNTRY",
+    "Year" = NA
+  ),
+  fixups = function(data) {
+    data %>% mutate(Year = 2018)
+  }  
+)
+
+cat.defs <- list(
   Party = list(
     "Missing" = c("Missing", "Would not vote", "Refused", "Don't know", "Not asked in the country")
   ),
@@ -34,24 +51,3 @@ afro7.cats <- list(
     "Missing" = c("Missing", "Not asked in the country", "Refused", "Don't know")
   )
 )
-
-read.data.afro <- function() {
-  
-  data <- read_sav("Divided/data/afrobarom/r7_merged_data_34ctry.release.sav")
-  
-  data <- data %>%
-    mutate(across(c(Q99, Q98, Q2A, Q84), haven::as_factor)) %>%
-    mutate(across(c(Q99, Q98, Q2A, Q84), ~fct_explicit_na(.x, na_level = "Missing"))) %>%
-    mutate(Country = countrycode(as.character(haven::as_factor(COUNTRY)), origin = "country.name", destination = "country.name")) %>%
-    filter(Country != "Eswatini") %>%
-    rename(
-      "Party" = Q99,
-      "Language" = Q2A,
-      "Religion" = Q98,
-      "Ethnicity" = Q84,
-      "Weight" = withinwt
-    ) %>%
-    mutate(Year = 2018) %>%
-
-  return(data)
-}

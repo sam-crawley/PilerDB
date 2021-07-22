@@ -5,35 +5,31 @@ library(GoodmanKruskal)
 library(here)
 library(StatMatch)
 
-source(here("Divided/read_data/wvs.R"))
-source(here("Divided/read_data/asian.R"))
-source(here("Divided/read_data/afro.R"))
-
-group.names <- c("Language", "Religion", "Ethnicity")
-main.vars <- c("Party", group.names)
+source(here("Divided/read_data.R"))
 
 summary.group.size <- 5
 
 # Generate crosstabs for all datasets
 gen.all.crosstabs <- function(save.output = F) {
+  data.defs <- list.files(here("Divided/read_data"), pattern="*.R", full.names=T)
+  
+  overall <- list()
   cat.sum <- list()
   
-  # WVS7
-  data.wvs7 <- read.data.wvs()
-  cat.sum[['WVS7']] <- gen.category.summary(data.wvs7, wvs7.cats)
-  overall <- gen.country.crosstabs(data.wvs7, wvs7.cats, "WVS7")
-
-  # Asian Barom 4
-  data.asb4 <- read.data.asian()
-  cat.sum[['ASB4']] <- gen.category.summary(data.asb4, asb4.cats)
-  res <- gen.country.crosstabs(data.asb4, asb4.cats, "ASB4")
-  overall <- append(overall, res)
-  
-  # Afrobarometer 7
-  data.afb7 <- read.data.afro()
-  cat.sum[['AFB7']] <- gen.category.summary(data.afb7, afro7.cats)
-  res <- gen.country.crosstabs(data.afb7, afro7.cats, "AFB7")
-  overall <- append(overall, res)
+  for (data.def in data.defs) {
+    id <- toupper( str_match(data.def, "/(\\w+?).R$")[,2] )
+    
+    e <- new.env()
+    
+    source(data.def, local = e)
+    
+    data <- read.div.data(e$data.spec)
+    
+    cat.sum[[id]] <- gen.category.summary(data, e$cat.defs)
+    tabs <- gen.country.crosstabs(data, e$cat.defs, id)
+    
+    overall <- append(overall, tabs)
+  }
   
   if (save.output) {
     write_rds(overall, "Divided/output/divided.rds")
