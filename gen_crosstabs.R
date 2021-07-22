@@ -17,6 +17,8 @@ gen.all.crosstabs <- function(save.output = F) {
   cat.sum <- list()
   
   for (data.def in data.defs) {
+    cat("Processing", data.def, "\n")
+    
     id <- toupper( str_match(data.def, "/(\\w+?).R$")[,2] )
     
     e <- new.env()
@@ -130,6 +132,9 @@ gen.category.summary <- function(data, cat.defs) {
 }
 
 calc.correlations <- function(d, cats.to.drop = NULL, use.stat.match = T, use.weights = F) {
+  country <- unique(d$Country)
+  #cat("Calc correlations for", country, "\n")
+  
   drop.cats <- ! is.null(cats.to.drop)
   
   if (drop.cats)
@@ -163,6 +168,10 @@ calc.correlations <- function(d, cats.to.drop = NULL, use.stat.match = T, use.we
     
     tibble(question = var, assoc = t)
   })
+  
+  if (all(is.nan(tau$assoc) | is.na(tau$assoc))) {
+    stop("Couldn't calculate any correlations, bad data for ", country, "?")
+  }
 
   tau <- tau %>%
     pivot_longer(assoc) %>% 

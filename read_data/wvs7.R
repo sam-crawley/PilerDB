@@ -1,7 +1,7 @@
 data.spec <- list(
   file.name = "Divided/data/WVS/W7/WVS_Cross-National_Wave_7_stata_v2_0.dta",
   file.type = 'dta',
-  skip.countries = c("China", "Egypt", "Vietnam", "Jordan"),
+  skip.countries = c("China", "Egypt", "Vietnam", "Jordan", "Singapore"),
   country.format = 'iso3c',
   field.def = c(
     "Party" = "Q223",

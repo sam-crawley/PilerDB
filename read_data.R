@@ -31,7 +31,7 @@ read.div.data <- function(data.spec) {
     stop("Unknown file type")
   
   data <- read_func(data.spec$file.name, encoding = "UTF-8") %>%
-    rename(rename.spec)
+    rename(all_of(rename.spec))
   
   if (is.labelled(data$Country))
     data$Country <- as.character(haven::as_factor(data$Country))
@@ -56,6 +56,15 @@ read.div.data <- function(data.spec) {
   
   fixup.func <- data.spec$fixups
   data <- fixup.func(data)
+  
+  # Check for countries without Party data
+  res <- data %>% 
+    group_by(Country) %>% 
+    summarise(party.resp.count = sum(Party != "Missing")) %>%
+    filter(party.resp.count == 0)
+  
+  if (nrow(res) > 1)
+    stop("The following countries have no Party data (they should be added to skip.countries): ", paste(res %>% pull(Country), collapse = ", "))
   
   return(data)
 }
