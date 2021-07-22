@@ -57,6 +57,13 @@ read.div.data <- function(data.spec) {
   fixup.func <- data.spec$fixups
   data <- fixup.func(data)
   
+  return(data)
+}
+
+# Do some checks on the data to find out if all countries included have enough data
+check.data <- function(data, cat.defs) {
+  data <- process.data(data, cat.defs)
+  
   # Check for countries without Party data
   res <- data %>% 
     group_by(Country) %>% 
@@ -65,6 +72,4 @@ read.div.data <- function(data.spec) {
   
   if (nrow(res) > 1)
     stop("The following countries have no Party data (they should be added to skip.countries): ", paste(res %>% pull(Country), collapse = ", "))
-  
-  return(data)
 }
