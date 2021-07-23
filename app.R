@@ -7,9 +7,10 @@ library(shinybusy)
 source("gen_crosstabs.R")
 
 res <- read_rds("output/divided.rds")
-category.sum <- read_rds("output/divided.category.summary.rds")
-summary.table <- calc.summary.data(res)
-group.sizes <- get.group.size.summary(res)
+crosstabs <- res$crosstabs
+category.sum <- res$cat.sum
+summary.table <- calc.summary.data(crosstabs)
+group.sizes <- get.group.size.summary(crosstabs)
 max.parties <- get.max.parties(group.sizes)
 
 source("gen_crosstabs.R")
@@ -191,7 +192,7 @@ server <- function(input, output, session) {
     content <- function(file) {
       showModal(show_spinner())
       on.exit(hide_spinner())
-      write.wvs.xlsx(res, file)
+      write.wvs.xlsx(crosstabs, file)
     }
   )
   
@@ -201,7 +202,7 @@ server <- function(input, output, session) {
     displayed.sum.table <- get.summary.table(input$datasrc, input$country, with.id = T)
     selected.row <- displayed.sum.table[row,]
     
-    country.data <- res[[selected.row$ID]]
+    country.data <- crosstabs[[selected.row$ID]]
     
     if (is.null(session$userData$countryTabsOpen))
       session$userData$countryTabsOpen <- list()

@@ -10,16 +10,39 @@ source(here("Divided/read_data.R"))
 summary.group.size <- 5
 
 # Generate crosstabs for all datasets
-gen.all.crosstabs <- function(save.output = F) {
-  data.defs <- list.files(here("Divided/read_data"), pattern="*.R", full.names=T)
+gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.output = F) {
+  if (! is.null(ids.to.load) && is.null(existing.data) && save.output)
+    stop("Can't save output if ids.to.load provided, but existing.data *not* provided")
   
-  overall <- list()
+  tabs <- list()
   cat.sum <- list()
   
-  for (data.def in data.defs) {
-    cat("Processing", data.def, "\n")
+  if (! is.null(existing.data)) {
+    tabs <- existing.data$crosstabs
+    cat.sum <- existing.data$cat.sum
     
+    if (! is.null(ids.to.load)) {
+      # Remove ids.to.load from existing data
+      for (tab in names(tabs)) {
+        if (tabs[[tab]]$Summary$general$`Data Source` %in% ids.to.load)
+          tabs[[tab]] <- NULL
+      }
+      
+      cat.sum[ids.to.load] <- NULL
+    }
+  }
+  
+  data.defs <- list.files(here("Divided/read_data"), pattern="*.R", full.names=T)
+  
+  for (data.def in data.defs) {
     id <- toupper( str_match(data.def, "/(\\w+?).R$")[,2] )
+    
+    if (! is.null(ids.to.load)) {
+      if (! id %in% ids.to.load)
+        next()
+    }
+    
+    cat("Processing", data.def, "\n")
     
     e <- new.env()
     
@@ -28,17 +51,21 @@ gen.all.crosstabs <- function(save.output = F) {
     data <- read.div.data(e$data.spec)
     
     cat.sum[[id]] <- gen.category.summary(data, e$cat.defs)
-    tabs <- gen.country.crosstabs(data, e$cat.defs, id)
+    src.tabs <- gen.country.crosstabs(data, e$cat.defs, id)
     
-    overall <- append(overall, tabs)
+    tabs <- append(tabs, src.tabs)
   }
+  
+  res <- list(
+    crosstabs = tabs,
+    cat.sum = cat.sum
+  )
   
   if (save.output) {
-    write_rds(overall, "Divided/output/divided.rds")
-    write_rds(cat.sum, "Divided/output/divided.category.summary.rds")
+    write_rds(res, "Divided/output/divided.rds")
   }
   
-  overall
+  res
 }
 
 # Produce a data structure for a single dataset that includes crosstabs for each country
