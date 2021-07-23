@@ -25,14 +25,14 @@ ui <- navbarPage(title = "Divided Society Data",
             h3("Filters"),
             pickerInput("datasrc", 
                         label = "Data source", 
-                        unique(summary.table$`Data Source`), 
+                        sort(unique(summary.table$`Data Source`)), 
                         multiple = T,
                         options = list(
                           `none-selected-text` = "All"
                         )),
             pickerInput("country", 
                         label = "Country", 
-                        unique(summary.table$`Country`), 
+                        sort(unique(summary.table$`Country`)), 
                         multiple = T,
                         options = list(
                           `none-selected-text` = "All"
@@ -77,7 +77,6 @@ ui <- navbarPage(title = "Divided Society Data",
        mainPanel(
          use_busy_spinner(spin = "fading-circle", position = 'full-page'),
          p("Download data as an Excel file."),
-         p(strong("Note:"), " After clicking Download, it will take a few minutes for the file to generate."),
          downloadBttn("downloadData", label = "Download"),
          width = 10
        )
@@ -148,9 +147,12 @@ server <- function(input, output, session) {
     get.cat.sum.table(input$cat.datasrc, input$cat.var),
     options = list(
       paging = F,
-      order = list(list(2, 'desc'))
+      order = list(list(2, 'desc')),
+      buttons = c('excel'),
+      dom = 'Bfrtip'
     ),
-    rownames = F
+    rownames = F,
+    extensions = 'Buttons'
   )
   
   output$catSumQuestion <- renderText(get.cat.sum.question(input$cat.datasrc, input$cat.var))
@@ -175,13 +177,10 @@ server <- function(input, output, session) {
       lengthChange = F, 
       paging = F, 
       searching = F,
-      buttons = c('excel'),
-      dom = 'Bfrtip',
       order = list(list(3, 'desc'))
     ),
     container = sketch,
-    rownames = F,
-    extensions = 'Buttons'
+    rownames = F
   )
   
   output$downloadData <- downloadHandler(
@@ -190,9 +189,7 @@ server <- function(input, output, session) {
     },
     
     content <- function(file) {
-      showModal(show_spinner())
-      on.exit(hide_spinner())
-      write.wvs.xlsx(crosstabs, file)
+      file.copy('output/divided_crosstabs.xlsx', file)
     }
   )
   

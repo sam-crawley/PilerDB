@@ -333,7 +333,7 @@ get.max.parties <- function(group.sizes) {
 
 
 
-write.wvs.xlsx <- function(res, file = "Divided/data/output/divided_crosstabs.xlsx") {
+write.wvs.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") {
   summary.sheet <- get.excel.summary.sheet(res) %>%
     select(-ID) %>%
     arrange(desc(cor))
