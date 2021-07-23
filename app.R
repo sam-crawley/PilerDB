@@ -56,7 +56,7 @@ ui <- navbarPage(title = "Divided Society Data",
        sidebarPanel(
          pickerInput("cat.datasrc", 
                      label = "Data source", 
-                     names(category.sum)
+                     sort(names(category.sum))
          ),
          pickerInput("cat.var", 
                      label = "Variable", 

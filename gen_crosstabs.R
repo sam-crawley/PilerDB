@@ -9,6 +9,9 @@ source(here("Divided/read_data.R"))
 
 summary.group.size <- 5
 
+# These "countries" should *always* be skipped
+global.country.skip <- c("Hong Kong SAR China", "Macao SAR China", "Puerto Rico")
+
 # Generate crosstabs for all datasets
 gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.output = F) {
   if (! is.null(ids.to.load) && is.null(existing.data) && save.output)
@@ -75,10 +78,14 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
   # Do common processing of dataset
   data <- process.data(data, cat.defs)
   
+  countries <- data %>%
+    filter(! Country %in% global.country.skip) %>%
+    pull(Country) %>%
+    unique()
+  
   # Create crosstabs for each country
   # (Produces a list of lists, keyed by country+data.source.year)
-  res <- map(unique(data$Country), function(cntry) {
-    
+  res <- map(countries, function(cntry) {
     d <- data %>% filter(Country == cntry)
 
     tables <- map(group.names, function(var) {
@@ -389,7 +396,7 @@ write.wvs.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") 
   addStyle(wb, sheet = "Group Sizes", hs2, rows = 1, cols = 1:header.cols)
   addStyle(wb, sheet = "Group Sizes", hs2, rows = 2, cols = 1:header.cols)
   
-  for (country in names(res)) {
+  for (country in sort(names(res))) {
     addWorksheet(wb, country)
     
     startRow <- 1
