@@ -135,7 +135,7 @@ server <- function(input, output, session) {
       lengthChange = F, 
       paging = F, 
       searching = F,
-      order = list(list(6, 'desc'))
+      order = list(list(8, 'desc'))
     ),
     server = T, 
     selection = 'single',

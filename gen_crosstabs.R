@@ -114,7 +114,8 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
         'Year' = year,
         'Sample Size' = nrow(d),
         'Group Basis' = cor.nomiss$max.col,
-        'Gallagher' = calc.gallagher(d, cor.nomiss$max.col)
+        'Gallagher' = calc.gallagher(d, cor.nomiss$max.col),
+        'Loosmore Hanby' = calc.gallagher(d, cor.nomiss$max.col, loosemore = T)
       ),
       cor = cor,
       cor.wt = cor.wt,
@@ -218,7 +219,7 @@ calc.correlations <- function(d, cats.to.drop = NULL, use.stat.match = T, use.we
   tau
 }
 
-calc.gallagher <- function(d, group.to.use, max.groups = 5) {
+calc.gallagher <- function(d, group.to.use, max.groups = NULL, loosemore = F) {
   # Remove Missing/Other categories from Party and Grouping vars
   d <- d %>%
     filter(! .data[[group.to.use]] %in% c("Missing", "Other")) %>% 
@@ -229,7 +230,7 @@ calc.gallagher <- function(d, group.to.use, max.groups = 5) {
   # If max.groups is set, find the top n groups, and remove all but these from the data
   if (! is.null(max.groups)) {
     grp.sizes <- grp.sizes %>%
-      slice_max(n, n=5, with_ties = F)
+      slice_max(n, n=max.groups, with_ties = F)
     
     d <- d %>% filter(.data[[group.to.use]] %in% grp.sizes[[group.to.use]])
     
@@ -249,10 +250,20 @@ calc.gallagher <- function(d, group.to.use, max.groups = 5) {
   # Calculate unweighted values for each party
   res <- party.sizes.by.grp %>% 
     pivot_longer(-Party) %>% 
-    mutate(value = unlist(grp.size.list[name]) - as.numeric(value)*100) %>% 
-    mutate(value = value*value) %>% 
-    group_by(Party) %>% 
-    summarise(total = sqrt(sum(value)/2))
+    mutate(value = unlist(grp.size.list[name]) - as.numeric(value)*100)
+  
+  if (loosemore) {
+    res <- res %>% 
+      mutate(value = abs(value)) %>% 
+      group_by(Party) %>% 
+      summarise(total = sum(value)/2)
+  }
+  else {
+    res <- res %>% 
+      mutate(value = value*value) %>% 
+      group_by(Party) %>% 
+      summarise(total = sqrt(sum(value)/2))
+  }
   
   # Apply weights
   res.wt <- d %>%
@@ -277,6 +288,7 @@ calc.summary.data <- function(res) {
     
     sum <- orig.sum.data$general
     sum$Gallagher <- round(sum$Gallagher, 2)
+    sum$`Loosmore Hanby` <- round(sum$`Loosmore Hanby`, 2)
     sum$cor <- orig.sum.data$cor[[orig.sum.data$cor$max.col]]
     sum$cor.nomiss <- orig.sum.data$cor.nomiss[[orig.sum.data$cor.nomiss$max.col]]
     
