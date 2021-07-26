@@ -404,7 +404,6 @@ get.max.parties <- function(group.sizes) {
 }
 
 
-
 write.wvs.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") {
   summary.sheet <- get.excel.summary.sheet(res) %>%
     select(-ID) %>%
@@ -418,15 +417,15 @@ write.wvs.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") 
   
   # Add summary sheet with 2 header rows
   addWorksheet(wb, "Summary")
-  outer.headers <- c("", "", "", "", "", "Highest Group Correlation", "",
+  outer.headers <- c("", "", "", "", "", "", "", "Highest Group Correlation", "",
                      "Included in Group", "", "Party Missing", "", "Group Missing")
   writeData(wb, "Summary", data.frame(t(outer.headers)), startRow = 1, startCol = 1, colNames = F, rowNames = F)
   addStyle(wb, sheet = "Summary", hs2, rows = 1, cols = 1:length(outer.headers))
-  mergeCells(wb, "Summary", cols = 6:7, rows = 1)
   mergeCells(wb, "Summary", cols = 8:9, rows = 1)
   mergeCells(wb, "Summary", cols = 10:11, rows = 1)
+  mergeCells(wb, "Summary", cols = 12:13, rows = 1)
   
-  summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "(full sample)", "(Missing/Other removed)", 
+  summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "Gallagher", "Loosemore Hanby", "(full sample)", "(Missing/Other removed)", 
                        "(N)", "(%)", "(N)", "(%)", "(N)", "(%)")
   
   writeData(wb, "Summary", data.frame(t(summary.headers)), startRow = 2, startCol = 1, colNames = F, rowNames = F)
