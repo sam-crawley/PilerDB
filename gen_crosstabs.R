@@ -113,7 +113,8 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
         'Data Source' = data.source,
         'Year' = year,
         'Sample Size' = nrow(d),
-        'Group Basis' = cor.nomiss$max.col
+        'Group Basis' = cor.nomiss$max.col,
+        'Gallagher' = calc.gallagher(d, cor.nomiss$max.col)
       ),
       cor = cor,
       cor.wt = cor.wt,
@@ -217,6 +218,57 @@ calc.correlations <- function(d, cats.to.drop = NULL, use.stat.match = T, use.we
   tau
 }
 
+calc.gallagher <- function(d, group.to.use, max.groups = 5) {
+  # Remove Missing/Other categories from Party and Grouping vars
+  d <- d %>%
+    filter(! .data[[group.to.use]] %in% c("Missing", "Other")) %>% 
+    filter(! Party %in% c("Missing", "Other"))
+  
+  grp.sizes <- tabyl(d, {{group.to.use}}, show_missing_levels = F)
+  
+  # If max.groups is set, find the top n groups, and remove all but these from the data
+  if (! is.null(max.groups)) {
+    grp.sizes <- grp.sizes %>%
+      slice_max(n, n=5, with_ties = F)
+    
+    d <- d %>% filter(.data[[group.to.use]] %in% grp.sizes[[group.to.use]])
+    
+    # Recalculate grp.sizes table so that percentages are right
+    grp.sizes <- tabyl(d, {{group.to.use}}, show_missing_levels = F)
+  }
+  
+  grp.sizes <- grp.sizes %>%
+    mutate(percent = percent*100)
+
+  # Create lookup of group sizes
+  grp.size.list <- map(grp.sizes[[group.to.use]], ~grp.sizes %>% filter(.data[[group.to.use]] == .x) %>% pull(percent)) %>%
+    set_names(grp.sizes[[group.to.use]])
+  
+  party.sizes.by.grp <- tabyl(d, Party, .data[[group.to.use]], show_missing_levels = F) %>% adorn_percentages()
+  
+  # Calculate unweighted values for each party
+  res <- party.sizes.by.grp %>% 
+    pivot_longer(-Party) %>% 
+    mutate(value = unlist(grp.size.list[name]) - as.numeric(value)*100) %>% 
+    mutate(value = value*value) %>% 
+    group_by(Party) %>% 
+    summarise(total = sqrt(sum(value)/2))
+  
+  # Apply weights
+  res.wt <- d %>%
+     group_by(Party) %>%
+     count(Party) %>%
+     mutate(weight = n / nrow(d)) %>%
+     inner_join(res, by = "Party") %>%
+     mutate(total = total * weight)
+  
+ res.wt %>% 
+   ungroup() %>% 
+   summarise(total = sum(total)) %>%
+   pull(total)
+  
+}
+
 # Calculate a DF summarising all countries
 calc.summary.data <- function(res) {
   map_dfr(res, function(country.data) {
@@ -224,6 +276,7 @@ calc.summary.data <- function(res) {
     #cat(orig.sum.data$general$Country, "\n")
     
     sum <- orig.sum.data$general
+    sum$Gallagher <- round(sum$Gallagher, 2)
     sum$cor <- orig.sum.data$cor[[orig.sum.data$cor$max.col]]
     sum$cor.nomiss <- orig.sum.data$cor.nomiss[[orig.sum.data$cor.nomiss$max.col]]
     
