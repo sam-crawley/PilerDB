@@ -182,7 +182,7 @@ calc.correlations <- function(d, cats.to.drop = NULL, use.stat.match = T, use.we
     if (drop.cats)
       d.g <- d.g %>% filter(! .data[[var]] %in% cats.to.drop)
     
-    if (nrow(d.g) == 0)
+    if (nrow(d.g) == 0 || length(unique(d.g[[var]])) <= 1)
       return(tibble(question = var, assoc = NA))
     
     if (use.stat.match) {
