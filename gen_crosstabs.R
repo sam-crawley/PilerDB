@@ -13,7 +13,7 @@ summary.group.size <- 5
 global.country.skip <- c("Hong Kong SAR China", "Macao SAR China", "Puerto Rico")
 
 # Generate crosstabs for all datasets
-gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.output = F) {
+gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.output = F, calc.summaries = T) {
   if (! is.null(ids.to.load) && is.null(existing.data) && save.output)
     stop("Can't save output if ids.to.load provided, but existing.data *not* provided")
   
@@ -63,6 +63,12 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
     crosstabs = tabs,
     cat.sum = cat.sum
   )
+  
+  if (calc.summaries) {
+    res$summary <- calc.summary.data(res$crosstabs)
+    res$group.sizes <- get.group.size.summary(res$crosstabs)
+    res$max.parties <- get.max.parties(res$group.sizes)
+  }
   
   if (save.output) {
     write_rds(res, "Divided/output/divided.rds")

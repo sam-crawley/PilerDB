@@ -9,11 +9,9 @@ source("gen_crosstabs.R")
 res <- read_rds("output/divided.rds")
 crosstabs <- res$crosstabs
 category.sum <- res$cat.sum
-summary.table <- calc.summary.data(crosstabs)
-group.sizes <- get.group.size.summary(crosstabs)
-max.parties <- get.max.parties(group.sizes)
-
-source("gen_crosstabs.R")
+summary.table <- res$summary
+group.sizes <- res$group.sizes
+max.parties <- res$max.parties
 
 ui <- navbarPage(title = "Divided Society Data",
   tabPanel("Crosstabs",
