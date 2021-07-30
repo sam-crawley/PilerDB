@@ -17,6 +17,7 @@ source("gen_crosstabs.R")
 
 ui <- navbarPage(title = "Divided Society Data",
   tabPanel("Crosstabs",
+    add_busy_spinner(spin = "cube-grid"),
     tabsetPanel(id = "mainPanel", 
       tabPanel("Summary",
         pageWithSidebar(
