@@ -79,6 +79,15 @@ check.data <- function(data, cat.defs) {
     summarise(party.resp.count = sum(Party != "Missing")) %>%
     filter(party.resp.count == 0)
   
-  if (nrow(res) > 1)
+  if (nrow(res) > 0)
     stop("The following countries have no Party data (they should be added to skip.countries): ", paste(res %>% pull(Country), collapse = ", "))
+  
+  missing.all <- keep(unique(data$Country), function(c) {
+    combos <- data %>% filter(Country == c) %>% count(Religion, Ethnicity, Language)
+    
+    nrow(combos) == 1
+  })
+  
+  if (length(missing.all) > 0)
+    stop("The following counrties do not appear to have any usable group data: ", paste(missing.all, collapse = ", "))
 }
