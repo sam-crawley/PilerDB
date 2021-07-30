@@ -1,0 +1,44 @@
+data.spec <- list(
+  file.name = "Divided/data/WVS/W3/WV3_Data_Stata_v20180912.dta",
+  file.type = 'dta',
+  skip.countries = c('China', 'Nigeria', 'Pakistan', 'South Korea'),
+  country.format = 'country.name',
+  country.custom = c("SrpSka Republic" = "SrpSka Republic"),
+  field.def = c(
+    "Party" = "V210",
+    "Language" = "V209",
+    "Religion" = "V179",
+    "Ethnicity" = "V233",
+    "Country" = "V2",
+    "Year" = "V238",
+    "Weight" = "V236"
+  ),
+  fixups = function(data) {
+    # Strip out country prefixes from levels
+    for (var in main.vars) {
+      levels(data[[var]]) <- str_remove(levels(data[[var]]), "^\\w+:\\s*")
+    }
+    
+    data
+  }
+)
+
+cat.defs <- list(
+  Party = list(
+    "Missing" = c("No answer", "No right to vote", "I would not vote", "Missing, Not available", "Dont know",
+                  "I would cast a blank ballot; White vote", "None", "Not asked"),
+    "Other" = c("Other", "Other party", "Other 1", "Other 2")
+  ),
+  Language = list(
+    "Missing" = c("Not asked", "No answer", "Dont know"),
+    "Other" = c("Other", "Other European", "Other Indian Language", "Other Philipinan language", "Other Yugoslavian", "More than one")
+  ),
+  Religion = list(
+    "Missing" = c("Not asked", "NA", "DK"),
+    "Other" = c("Other", "doesnt follow rules", "No, not a member")
+  ),
+  Ethnicity = list(
+    "Missing" = c("Missing; Not specified", "Not asked", "No answer", "Dont know"),
+    "Other" = c("Other, Non-Hispanic", "Undocumented 1", "Other ethnic group")
+  )
+)

@@ -216,6 +216,9 @@ server <- function(input, output, session) {
     
     tab <- tabPanel(country.data$Summary$general$ID,
       h3(textOutput(paste0("CountryName", countryTabID))),
+      h4("Group basis: ", textOutput(paste0("GroupBasis", countryTabID), inline = T)),
+      
+      br(),
     
       h4(textOutput(paste0("LanguageHeading", countryTabID))),
       DTOutput(paste0("LanguageTable", countryTabID)),
@@ -235,10 +238,14 @@ server <- function(input, output, session) {
       h5("Correlations - Missing/Other removed"),
       tableOutput(paste0("CorNoMissTable", countryTabID)),
       h5("Correlations - Missing/Other removed, weighted"),
-      tableOutput(paste0("CorNoMissWtTable", countryTabID))
+      tableOutput(paste0("CorNoMissWtTable", countryTabID)),
+      h5("Original country name (from data file)"),
+      textOutput(paste0("country.orig", countryTabID))
     )
     
     output[[paste0("CountryName", countryTabID)]] <- renderText(country.data$Summary$general$Country)
+    output[[paste0("GroupBasis", countryTabID)]] <- renderText(country.data$Summary$general$`Group Basis`)
+    
     output[[paste0("SampleSize", countryTabID)]] <- renderText({
       paste("Sample Size:", country.data$Summary$general$`Sample Size`)
     })
@@ -246,6 +253,7 @@ server <- function(input, output, session) {
     output[[paste0("CorWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.wt %>% select(-max.col))
     output[[paste0("CorNoMissTable", countryTabID)]] <- renderTable(country.data$Summary$cor.nomiss %>% select(-max.col))
     output[[paste0("CorNoMissWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.nomiss.wt %>% select(-max.col))
+    output[[paste0("country.orig", countryTabID)]] <- renderText(country.data$Summary$country.orig)
     
     walk (group.names, function(group) {
       grp.output.header <- paste0(group, "Heading", countryTabID)

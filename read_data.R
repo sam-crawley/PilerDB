@@ -10,6 +10,7 @@ library(countrycode)
 #               For the main vars, if the field is missing from the dataset, it should be set
 #               to NA
 # * country.format = the original format of the country (see countrycode::codelist)
+# * country.custom = names vector to be passed to custom_match parameter of countrycode()
 # * skip.countries = list of countries to skip completely (using full country.name text)
 # * fixups = a function to apply some custom fixups to the data before returning it
 
@@ -17,7 +18,7 @@ group.names <- c("Language", "Religion", "Ethnicity")
 main.vars <- c("Party", group.names)
 allowed.field.names <- c(main.vars, "Country", "Year", "Weight")
 
-read.div.data <- function(data.spec) {
+read.div.data <- function(data.spec, raw = F) {
   if (! all(names(data.spec$field.def) %in% allowed.field.names))
     stop("field.def contains invalid field names")
   
@@ -30,14 +31,22 @@ read.div.data <- function(data.spec) {
   else
     stop("Unknown file type")
   
-  data <- read_func(data.spec$file.name, encoding = "UTF-8") %>%
+  data <- read_func(data.spec$file.name, encoding = "UTF-8")
+  
+  if (raw)
+    return(data)
+  
+  data <- data %>%
     rename(all_of(rename.spec))
   
   if (is.labelled(data$Country))
     data$Country <- as.character(haven::as_factor(data$Country))
   
   data <- data %>%
-    mutate(Country = countrycode(Country, origin = data.spec$country.format, destination = 'country.name')) %>%
+    mutate(
+      Country.orig = Country,
+      Country = countrycode(Country, origin = data.spec$country.format, destination = 'country.name', custom_match = data.spec$country.custom),
+    ) %>%
     filter(! Country %in% data.spec$skip.countries)
   
   main.var.def <- data.spec$field.def[main.vars]

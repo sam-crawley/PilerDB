@@ -86,7 +86,10 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
   # Create crosstabs for each country
   # (Produces a list of lists, keyed by country+data.source.year)
   res <- map(countries, function(cntry) {
+    #cat(cntry, "\n")
     d <- data %>% filter(Country == cntry)
+    
+    country.orig <- d %>% distinct(Country.orig) %>% pull(Country.orig)
 
     tables <- map(group.names, function(var) {
       if (all( d[var] == "Missing" )) {
@@ -100,7 +103,7 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
     
     names(tables) <- group.names
     
-    year <- unique(as.numeric(d$Year))
+    year <- max(as.numeric(d$Year))
     cor = calc.correlations(d)
     cor.wt = calc.correlations(d, use.weights = T)
     cor.nomiss = calc.correlations(d, cats.to.drop = c("Missing", "Other"))
@@ -120,7 +123,9 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
       cor = cor,
       cor.wt = cor.wt,
       cor.nomiss = cor.nomiss,
-      cor.nomiss.wt = cor.nomiss.wt
+      cor.nomiss.wt = cor.nomiss.wt,
+      country.orig = country.orig
+      
     )
     
     tables
