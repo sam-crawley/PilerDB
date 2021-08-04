@@ -350,7 +350,7 @@ get.group.size.summary <- function(res) {
     main.crosstab <- country.data[[country.data$Summary$general$`Group Basis`]]
     
     gs.row <- country.data$Summary$general %>%
-      select(-ID, -`Sample Size`)
+      select(Country, `Data Source`, Year, `Group Basis`)
     
     gs <- main.crosstab %>% 
       pivot_longer(-Party, names_to = "Group") %>% 
