@@ -5,6 +5,7 @@ library(countrycode)
 # Data Spec fields
 # * file.name = file name to load
 # * file.type = either sav or dta
+# * file.encoding = encoding to use when reading the file, defaults to UTF-8
 # * field.def = vector of fields to use for the analysis, with names being the column names
 #               (names should be ones from field.names)
 #               For the main vars, if the field is missing from the dataset, it should be set
@@ -31,7 +32,9 @@ read.div.data <- function(data.spec, raw = F) {
   else
     stop("Unknown file type")
   
-  data <- read_func(data.spec$file.name, encoding = "UTF-8")
+  encoding <- if_else(is.null(data.spec$file.encoding), "UTF-8", data.spec$file.encoding)
+  
+  data <- read_func(data.spec$file.name, encoding = encoding)
   
   if (raw)
     return(data)

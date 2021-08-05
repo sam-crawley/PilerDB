@@ -18,7 +18,7 @@ data.spec <- list(
     "Year" = NA
   ),
   fixups = function(data) {
-    data %>% mutate(Year = 2018)
+    data %>% mutate(Year = 2019)
   }  
 )
 
