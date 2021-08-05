@@ -14,7 +14,7 @@ data.spec <- list(
     "Year" = NA
   ),
   fixups = function(data) {
-    data %>% mutate(Year = 2016)
+    data %>% mutate(Year = format(DATEINTR, format = "%Y"))
   }  
 )
 
