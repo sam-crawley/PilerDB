@@ -1,14 +1,15 @@
 data.spec <- list(
-  file.name = "Divided/data/afrobarom/merged-round-5-data-34-countries-2011-2013-last-update-july-2015.sav",
+  file.name = "Divided/data/afrobarom/merged_r4_data.sav",
   file.type = 'sav',
-  skip.countries = c('Eswatini'),
+  file.encoding = "latin1",
+  skip.countries = c(),
   country.format = 'country.name',
   field.def = c(
-    "Party" = "Q89B",
-    "Language" = "Q2",
-    "Religion" = "Q98A",
-    "Ethnicity" = "Q84",
-    "Weight" = "withinwt",
+    "Party" = "Q86",
+    "Language" = "Q3",
+    "Religion" = "Q90",
+    "Ethnicity" = "Q79",
+    "Weight" = "Withinwt",
     "Country" = "COUNTRY",
     "Year" = NA
   ),
@@ -23,7 +24,7 @@ cat.defs <- list(
     "Other" = c("Others")
   ),
   Language = list(
-    "Missing" = c("Missing", "Don't know"),
+    "Missing" = c("Missing"),
     "Other" = c("Others")
   ),
   Religion = list(
@@ -33,13 +34,14 @@ cat.defs <- list(
   Ethnicity = list(
     "Other" = c("Related to regional origin (badio/sampadjudo)",
                 "Related to political-partisan affiliation",
-                "Related to age",
-                "Related to gender",
-                "Related to race",
-                "Related to occupation",
-                "Related to religion",
-                "Related to class",
-                "National identity only, or \"doesn't think of self in those terms\"",
+                "National ID only or 'doesn't think of self in those terms'",
+                "Related to Age",
+                "Related to Gender",
+                "Related to Occupation",	
+                "Related to Religion",
+                "Related to Class",
+                "Related to Race",
+                "Relacionado com o estado de espirito",
                 "Others"
     ),
     "Missing" = c("Missing", "Don't know", "Refused")

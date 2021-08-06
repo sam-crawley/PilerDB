@@ -1,7 +1,6 @@
 data.spec <- list(
   file.name = "Divided/data/afrobarom/merged_r6_data_2016_36countries2.sav",
   file.type = 'sav',
-  #file.encoding = "latin1",
   skip.countries = c("Egypt", "Eswatini"),
   country.format = 'country.name',
   field.def = c(
@@ -35,7 +34,11 @@ cat.defs <- list(
                 "Related to political-partisan affiliation",
                 "Related to age",
                 "Related to gender",
-                "Related to race", 
+                "Related to race",
+                "Related to class",
+                "Related to occupation",
+                "Related to religion",
+                "Related to regional origin (Foros, Angulares, Cabo-verdianos)",
                 "National identity only, or 'doesnt think of self in those terms'"
             ),
     "Missing" = c("Missing", "Don't know", "Refused to answer")
