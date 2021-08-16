@@ -13,7 +13,7 @@ data.spec <- list(
     "Language" = "Q2A",
     "Religion" = "Q98",
     "Ethnicity" = "Q84",
-    "Weight" = "withinwt",
+    "Weight" = "Combinwt",
     "Country" = "COUNTRY",
     "Year" = NA
   ),
@@ -31,7 +31,7 @@ cat.defs <- list(
   ),
   Religion = list(
     "Missing" = c("Missing", "Don't know", "Refused"),
-    "Other" = c("Other", "None", "Atheist")
+    "Other" = c("Other", "None", "Atheist", "Agnostic")
   ),
   Ethnicity = list(
     "Other" = c("Other", "Doesn\u2019t think of self in those terms",

@@ -9,7 +9,7 @@ data.spec <- list(
     "Language" = "Q3",
     "Religion" = "Q90",
     "Ethnicity" = "Q79",
-    "Weight" = "Withinwt",
+    "Weight" = "Combinwt",
     "Country" = "COUNTRY",
     "Year" = NA
   ),
@@ -29,7 +29,7 @@ cat.defs <- list(
   ),
   Religion = list(
     "Missing" = c("Missing", "Don't know", "Refused"),
-    "Other" = c("Other", "None")
+    "Other" = c("Other", "None", "Agnostic(Do not know if there is a God)", "Atheist(Do not believe in a God)")
   ),
   Ethnicity = list(
     "Other" = c("Related to regional origin (badio/sampadjudo)",

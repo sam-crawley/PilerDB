@@ -8,7 +8,7 @@ data.spec <- list(
     "Language" = "Q2",
     "Religion" = "Q98A",
     "Ethnicity" = "Q87",
-    "Weight" = "withinwt",
+    "Weight" = "Combinwt",
     "Country" = "COUNTRY",
     "Year" = NA
   ),
@@ -26,7 +26,7 @@ cat.defs <- list(
   ),
   Religion = list(
     "Missing" = c("Missing", "Don't know", "Refused"),
-    "Other" = c("Other", "None", "Atheist")
+    "Other" = c("Other", "None", "Atheist", "Agnostic")
   ),
   Ethnicity = list(
     "Other" = c("Other", 
