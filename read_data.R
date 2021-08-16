@@ -67,7 +67,9 @@ read.div.data <- function(data.spec, raw = F) {
     arrange(Country)
   
   fixup.func <- data.spec$fixups
-  data <- fixup.func(data)
+  
+  if (! is.null(fixup.func))
+    data <- fixup.func(data)
   
   return(data)
 }
