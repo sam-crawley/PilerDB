@@ -39,6 +39,10 @@ read.div.data <- function(data.spec, raw = F) {
   if (raw)
     return(data)
   
+  prefixup.func <- data.spec$pre_fixups
+  if (! is.null(prefixup.func))
+    data <- prefixup.func(data)
+  
   data <- data %>%
     rename(all_of(rename.spec))
   
@@ -95,4 +99,21 @@ check.data <- function(data, cat.defs) {
   
   if (length(missing.all) > 0)
     stop("The following counrties do not appear to have any usable group data: ", paste(missing.all, collapse = ", "))
+}
+
+### Some util functions
+
+# Coalesce a list of variables into a single column
+#  (Needed because ESS has separate columns per country)
+coalese.vars <- function(data, cols, new_var)  {
+  data <- data %>% 
+    mutate(across(all_of(cols), ~haven::as_factor(.x, levels = "label")))
+  
+  data[[new_var]] <- NA_character_
+  
+  for (c in cols) {
+    data[[new_var]] <- coalesce(data[[new_var]], data[[c]])  
+  }
+  
+  data
 }
