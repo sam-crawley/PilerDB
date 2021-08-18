@@ -10,11 +10,9 @@ data.spec <- list(
     "Ethnicity" = NA,
     "Weight" = "E1010_2",
     "Country" = "E1006_NAM",
-    "Year" = NA
+    "Year" = "E1034"
   ),
   fixups = function(data) {
-    data <- data %>% mutate(Year = 2020)
-    
     # Strip out country prefixes from levels
     levels(data$Party) <- str_remove(levels(data$Party), "^\\d+\\. \\w+ - \\s*")
     
