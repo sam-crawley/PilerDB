@@ -1,0 +1,47 @@
+data.spec <- list(
+  file.name = "Divided/data/ess/Round 6/ESS6e02_4.dta",
+  file.type = 'dta',
+  file.encoding = "latin1",
+  skip.countries = c(),
+  country.format = 'iso2c',
+  country.custom = c("XK" = "Kosovo"),
+  field.def = c(
+    "Party" = "prtvt",
+    "Language" = "lnghom1",
+    "Religion" = "rel",
+    "Ethnicity" = NA,
+    "Weight" = "pspwght",
+    "Country" = "cntry",
+    "Year" = NA
+  ),
+  pre_fixups = function(data) {
+    # Coalesce necessary vars
+    data <- coalese.vars(data, str_subset(names(data), "^prtv"), "prtvt")
+    
+    rl.cols <- str_subset(names(data), "^rlgdn") %>%
+      discard(~.x == "rlgdnme")
+    
+    data <- coalese.vars(data, rl.cols, "rel")
+    
+    data
+  },
+  fixups = function(data) {
+    data %>% mutate(Year = 2012)
+  }  
+)
+
+cat.defs <- list(
+  Party = list(
+    "Missing" = c("Not applicable", "Refusal", "Don't know","No answer", "Nul", "Blanc", "Does not know if voted for a candidate list", "Ongeldig",
+                  "A white ballot (empty ballot note)"),
+    "Other" = c("Andet - other", "Otros", "Autre", "Other (nir)", "Outro", "Other party", "Other", "Autres mouvements écologistes", "Independent",
+                "Altro", "Other (Write in)")
+  ),
+  Language = list(
+    "Missing" = c("777", "888", "999", "ZXX")
+  ),
+  Religion = list(
+    "Missing" = c("Refusal", "No answer"),
+    "Other" = c("Not applicable", "Other non-Christian religions")
+  )
+)
