@@ -1,7 +1,6 @@
 library(tidyverse)
 library(janitor)
 library(openxlsx)
-library(GoodmanKruskal)
 library(here)
 library(StatMatch)
 
@@ -115,6 +114,8 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
     cor.nomiss = calc.correlations(d, cats.to.drop = c("Missing", "Other"))
     cor.nomiss.wt = calc.correlations(d, cats.to.drop = c("Missing", "Other"), use.weights = T)
     
+    group.basis <- calc.group.basis(cor.nomiss)
+    
     tables$Summary <- list(
       general = tibble(
         'ID' = paste(cntry, data.source, year),
@@ -122,9 +123,9 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
         'Data Source' = data.source,
         'Year' = year,
         'Sample Size' = nrow(d),
-        'Group Basis' = cor.nomiss$max.col,
-        'Gallagher' = calc.gallagher(d, cor.nomiss$max.col),
-        'Loosmore Hanby' = calc.gallagher(d, cor.nomiss$max.col, loosemore = T)
+        'Group Basis' = group.basis,
+        'Gallagher' = calc.gallagher(d, group.basis),
+        'Loosmore Hanby' = calc.gallagher(d, group.basis, loosemore = T)
       ),
       cor = cor,
       cor.wt = cor.wt,
@@ -178,7 +179,7 @@ gen.category.summary <- function(data, cat.defs) {
   }) %>% set_names(main.vars)
 }
 
-calc.correlations <- function(d, cats.to.drop = NULL, use.stat.match = T, use.weights = F) {
+calc.correlations <- function(d, cats.to.drop = NULL, use.weights = F) {
   country <- unique(d$Country)
   #cat("Calc correlations for", country, "\n")
   
@@ -193,44 +194,67 @@ calc.correlations <- function(d, cats.to.drop = NULL, use.stat.match = T, use.we
     if (drop.cats)
       d.g <- d.g %>% filter(! .data[[var]] %in% cats.to.drop)
     
-    if (nrow(d.g) == 0 || length(unique(d.g[[var]])) <= 1)
-      return(tibble(question = var, assoc = NA))
-    
-    if (use.stat.match) {
-      d.g <- d.g %>% mutate(
-        Party = fct_drop(Party),
-        "{var}" = fct_drop(.data[[var]])
-      )
-      
-      wt.var = NULL
-      if (use.weights)
-        wt.var = "Weight"
-      
-      assoc <- suppressWarnings(pw.assoc(as.formula(paste(var, "~ Party")), d.g, out.df = T, weights = wt.var))
-      t <- round(assoc$tau, digits = 3)
-    }
-    else {
-      t <- GKtau(d.g$Party, d.g[[var]])$tauxy  
+    if (nrow(d.g) == 0 || length(unique(d.g[[var]])) <= 1) {
+      return(tibble(question = var, tau = NA, entropy = NA))
     }
     
-    tibble(question = var, assoc = t)
+    d.g <- d.g %>% mutate(
+      Party = fct_drop(Party),
+      "{var}" = fct_drop(.data[[var]])
+    )
+    
+    wt.var = NULL
+    if (use.weights)
+      wt.var = "Weight"
+    
+    assoc <- suppressWarnings(pw.assoc(as.formula(paste(var, "~ Party")), d.g, out.df = T, weights = wt.var))
+    
+    res <- assoc %>%
+      select(tau) %>%
+      mutate(across(everything(), ~round(.x, digits = 3))) %>%
+      mutate(question = var)
+    
+    res$entropy <- entropy(table(d.g[[var]]))
+    
+    res
   })
   
-  if (all(is.nan(tau$assoc) | is.na(tau$assoc))) {
-    stop("Couldn't calculate any correlations, bad data for ", country, "?")
+  empty.cols <- tau %>% keep(~all(is.na(.x) | is.nan(.x))) %>% names
+  
+  if (length(empty.cols) > 0) {
+    stop("Couldn't calculate any correlations, bad data for ", country, "? (empty.cols: ", empty.cols, ")")
   }
 
-  tau <- tau %>%
-    pivot_longer(assoc) %>% 
-    pivot_wider(names_from = question) %>%
-    select(-name) %>%
-    mutate(across(everything(), ~ifelse(is.nan(.x) | .x == -Inf, NA, .x))) %>%
-    mutate(max.col = names(.)[which.max(c_across(everything()))])
+  tau %>% select(question, everything()) %>%
+    mutate(across(tau, ~ifelse(is.nan(.x) | .x == -Inf, NA, .x))) %>%
+    remove_rownames()
+}
+
+# Calculate the 'group basis' (i.e. group with highest GK Tau correlation)
+#  Any groups with entropy <= 0.2 are discarded for this calculation
+calc.group.basis <- function(cor, ret.max.val = F) {
+  cor <- cor %>% 
+    mutate(tau = if_else(entropy <= 0.2, NA_real_, tau))
   
-  tau
+  if (all(is.na(cor$tau)))
+    return (NA)
+  
+  max.val <- cor %>% 
+    summarise(max.tau = max(tau, na.rm = T)) %>%
+    pull(max.tau)
+  
+  if (ret.max.val)
+    return (max.val)
+  
+  cor %>% filter(tau == max.val) %>% 
+    slice_head() %>%
+    pull(question)
 }
 
 calc.gallagher <- function(d, group.to.use, max.groups = NULL, loosemore = F) {
+  if (is.na(group.to.use))
+    return (NA)
+  
   # Remove Missing/Other categories from Party and Grouping vars
   d <- d %>%
     filter(! .data[[group.to.use]] %in% c("Missing", "Other")) %>% 
@@ -300,9 +324,20 @@ calc.summary.data <- function(res) {
     sum <- orig.sum.data$general
     sum$Gallagher <- round(sum$Gallagher, 2)
     sum$`Loosmore Hanby` <- round(sum$`Loosmore Hanby`, 2)
-    sum$cor <- orig.sum.data$cor[[orig.sum.data$cor$max.col]]
-    sum$cor.nomiss <- orig.sum.data$cor.nomiss[[orig.sum.data$cor.nomiss$max.col]]
-    
+    sum$cor <- calc.group.basis(orig.sum.data$cor, ret.max.val = T)
+    sum$cor.nomiss <- calc.group.basis(orig.sum.data$cor.nomiss, ret.max.val = T)
+
+    if (is.na(sum$cor.nomiss)) {
+      sum$total.included <- NA
+      sum$total.included.pct <- NA
+      sum$party.missing <- NA
+      sum$party.missing.pct <- NA
+      sum$group.missing <- NA
+      sum$group.missing.pct <- NA
+      
+      return(sum)
+    }
+        
     main.crosstab <- country.data[[sum$`Group Basis`]]
     
     sum$total.included <- main.crosstab %>% 
@@ -347,6 +382,10 @@ get.group.size.summary <- function(res) {
   # Add in group sizes for 3 largest groups for each country,
   #  as well as breakdowns for each Party/Main Group combo
   map_dfr(res, function(country.data) {
+    if (is.na(country.data$Summary$general$`Group Basis`)) {
+      return(NULL)
+    }
+    
     main.crosstab <- country.data[[country.data$Summary$general$`Group Basis`]]
     
     gs.row <- country.data$Summary$general %>%
@@ -522,12 +561,12 @@ write.wvs.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") 
     
     writeData(wb, country, "Correlations", startCol = 1, startRow = startRow+4)
     addStyle(wb, sheet = country, hs2, rows = startRow+4, cols = 1)
-    writeData(wb, country, res[[country]]$Summary$cor %>% select(-max.col), startCol = 2, startRow = startRow+5)
+    writeData(wb, country, res[[country]]$Summary$cor, startCol = 2, startRow = startRow+5)
     
     writeData(wb, country, "Correlations (Party = None/Missing/DK removed)", startCol = 1, startRow = startRow+9)
     addStyle(wb, sheet = country, hs2, rows = startRow+9, cols = 1)
     
-    writeData(wb, country, res[[country]]$Summary$cor.nomiss %>% select(-max.col), startCol = 2, startRow = startRow+11)
+    writeData(wb, country, res[[country]]$Summary$cor.nomiss, startCol = 2, startRow = startRow+11)
   }
   
   saveWorkbook(wb, file, overwrite = T)

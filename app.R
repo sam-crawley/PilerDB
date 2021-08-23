@@ -248,10 +248,10 @@ server <- function(input, output, session) {
     output[[paste0("SampleSize", countryTabID)]] <- renderText({
       paste("Sample Size:", country.data$Summary$general$`Sample Size`)
     })
-    output[[paste0("CorTable", countryTabID)]] <- renderTable(country.data$Summary$cor %>% select(-max.col))
-    output[[paste0("CorWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.wt %>% select(-max.col))
-    output[[paste0("CorNoMissTable", countryTabID)]] <- renderTable(country.data$Summary$cor.nomiss %>% select(-max.col))
-    output[[paste0("CorNoMissWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.nomiss.wt %>% select(-max.col))
+    output[[paste0("CorTable", countryTabID)]] <- renderTable(country.data$Summary$cor)
+    output[[paste0("CorWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.wt)
+    output[[paste0("CorNoMissTable", countryTabID)]] <- renderTable(country.data$Summary$cor.nomiss)
+    output[[paste0("CorNoMissWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.nomiss.wt)
     output[[paste0("country.orig", countryTabID)]] <- renderText(country.data$Summary$country.orig)
     
     walk (group.names, function(group) {
