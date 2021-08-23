@@ -37,7 +37,7 @@ cat.defs <- list(
     "Missing" = c("No answer/refused", "Don't know", "Other missing; Multiple answers Mail (EVS)")
   ),
   Ethnicity = list(
-    "Other" = c("Other, Non-Hispanic", "Two plus, non-Hispanic"),
+    "Other" = c("Other, Non-Hispanic", "Two plus, non-Hispanic", "Cross breed", "Other Asian", "Other Africans", "Others"),
     "Missing" = c("Missing; Not specified", "Not asked", "Don\ub4t know", "No answer")
   )
 )

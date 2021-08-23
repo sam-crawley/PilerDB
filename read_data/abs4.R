@@ -26,13 +26,15 @@ data.spec <- list(
 cat.defs <- list(
   Party = list(
     "Missing" = c("Not applicable", "Cannot recall", "Invalid vote", "Do not understand the question",
-                  "Missing", "Can't choose", "Decline to answer")
+                  "Missing", "Can't choose", "Decline to answer"),
+    "Other" = c("Other party", "Independent", "Other", "Other Pan-democratic camp", "Other Pro-Beijing camp", "Parties in the respective region", "Individual Candidate")
   ),
   Religion = list(
     "Missing" = c("Missing", "Can't choose", "Decline to answer"),
     "Other" = c("Other", "Other Asian religions", "None")
   ),
   Ethnicity = list(
-    "Missing" = c("Missing", "Can't choose", "Decline to answer")
+    "Missing" = c("Missing", "Can't choose", "Decline to answer"),
+    "Other" = c("Others", "Other")
   )
 )

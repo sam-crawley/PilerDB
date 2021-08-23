@@ -31,15 +31,16 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Not applicable", "Refusal", "Don't know","No answer", "Nul", "Blanc", "Does not know if voted for a candidate list"),
+    "Missing" = c("Not applicable", "Refusal", "Don't know","No answer", "Nul", "Blanc", "Does not know if voted for a candidate list", "Blanco",
+                  "Ongeldig", "Blank paper"),
     "Other" = c("Andet - other", "Otros", "Autre", "Other (nir)", "Outro", "Other party", "Other")
   ),
   Language = list(
     "Missing" = c("777", "888", "999")
   ),
   Religion = list(
-    "Missing" = c("Refusal", "No answer"),
+    "Missing" = c("Refusal", "No answer", "Missing"),
     "Other" = c("Not applicable", "Other non-Christian religion, religion not specified", "Other non-Christian", "Other Religions",
-                "Other Non-Christian Religions")
+                "Other Non-Christian Religions", "Other non-Christian religions")
   )
 )

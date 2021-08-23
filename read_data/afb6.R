@@ -41,6 +41,6 @@ cat.defs <- list(
                 "Related to regional origin (Foros, Angulares, Cabo-verdianos)",
                 "National identity only, or 'doesnt think of self in those terms'"
             ),
-    "Missing" = c("Missing", "Don't know", "Refused to answer")
+    "Missing" = c("Missing", "Don't know", "Refused to answer", "Not asked in country")
   )
 )

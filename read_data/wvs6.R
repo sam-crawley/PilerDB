@@ -32,7 +32,7 @@ cat.defs <- list(
     "Other" = c("Other", "Other Chinese dialects", "Other local; aboriginal; tribal, community", "Other Oceania")
   ),
   Religion = list(
-    "Other" = c("Other; nfd", "Noneligious", "Other Christian; nfd")
+    "Other" = c("Other; nfd", "Noneligious", "Other Christian; nfd", "Non classified christian movements; nfd")
   ),
   Ethnicity = list(
     "Other" = c("Other, Non-Hispanic", "Two plus, non-Hispanic")

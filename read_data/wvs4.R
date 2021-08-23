@@ -38,6 +38,6 @@ cat.defs <- list(
   ),
   Ethnicity = list(
     "Missing" = c("Missing; Not specified", "Not asked", "No answer"),
-    "Other" = c("Other, Non-Hispanic")
+    "Other" = c("Other, Non-Hispanic", "Others")
   )
 )
