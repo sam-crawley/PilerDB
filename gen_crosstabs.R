@@ -3,6 +3,7 @@ library(janitor)
 library(openxlsx)
 library(here)
 library(StatMatch)
+library(entropy)
 
 source(here("Divided/read_data.R"))
 
