@@ -512,7 +512,8 @@ write.wvs.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") 
   addStyle(wb, sheet = "Group Sizes", hs2, rows = 2, cols = 1:header.cols)
   
   for (country in sort(names(res))) {
-    addWorksheet(wb, country)
+    country.sht <- str_trunc(country, 31)
+    addWorksheet(wb, country.sht)
     
     startRow <- 1
     for (table.name in group.names) {
@@ -521,19 +522,19 @@ write.wvs.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") 
       if (is.null(table))
         next()
       
-      writeData(wb, country, table.name, startCol = 1, startRow = startRow, rowNames = F)
-      addStyle(wb, sheet = country, hs1, rows = startRow, cols = 1)
+      writeData(wb, country.sht, table.name, startCol = 1, startRow = startRow, rowNames = F)
+      addStyle(wb, sheet = country.sht, hs1, rows = startRow, cols = 1)
       
       table <- reformat.table.for.excel(table)
       
       headers <- unique(str_remove(names(table), '\\..$'))
       headerCol <- 1
       for (header in headers) {
-        writeData(wb, country, header, startCol = headerCol, startRow = startRow + 1)
-        addStyle(wb, sheet = country, hs2, rows = startRow + 1, cols = headerCol)
+        writeData(wb, country.sht, header, startCol = headerCol, startRow = startRow + 1)
+        addStyle(wb, sheet = country.sht, hs2, rows = startRow + 1, cols = headerCol)
         
         if (header != "Party") {
-          mergeCells(wb, country, cols = headerCol:(headerCol+1), rows = startRow + 1)
+          mergeCells(wb, country.sht, cols = headerCol:(headerCol+1), rows = startRow + 1)
           headerCol <- headerCol+1
         }
         
@@ -547,27 +548,27 @@ write.wvs.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") 
         paste0(h, c(".%", ".n"))
       }))
       
-      writeData(wb, country, table %>% select(all_of(cols)), startCol = 1, startRow = startRow + 2, rowNames = F, colNames = F)
-      setColWidths(wb, sheet = country, cols = 1, widths = "auto")
-      setColWidths(wb, sheet = country, cols = 2:ncol(table), widths = "10")
+      writeData(wb, country.sht, table %>% select(all_of(cols)), startCol = 1, startRow = startRow + 2, rowNames = F, colNames = F)
+      setColWidths(wb, sheet = country.sht, cols = 1, widths = "auto")
+      setColWidths(wb, sheet = country.sht, cols = 2:ncol(table), widths = "10")
       
       startRow <- nrow(table) + 3 + startRow
     }
     
-    writeData(wb, country, "Statistics", startCol = 1, startRow = startRow)
-    addStyle(wb, sheet = country, hs1, rows = startRow, cols = 1)
+    writeData(wb, country.sht, "Statistics", startCol = 1, startRow = startRow)
+    addStyle(wb, sheet = country.sht, hs1, rows = startRow, cols = 1)
     
-    writeData(wb, country, "Sample Size", startCol = 1, startRow = startRow+2)
-    writeData(wb, country, res[[country]]$Summary$general$`Sample Size`, startCol = 2, startRow = startRow+2)
+    writeData(wb, country.sht, "Sample Size", startCol = 1, startRow = startRow+2)
+    writeData(wb, country.sht, res[[country]]$Summary$general$`Sample Size`, startCol = 2, startRow = startRow+2)
     
-    writeData(wb, country, "Correlations", startCol = 1, startRow = startRow+4)
-    addStyle(wb, sheet = country, hs2, rows = startRow+4, cols = 1)
-    writeData(wb, country, res[[country]]$Summary$cor, startCol = 2, startRow = startRow+5)
+    writeData(wb, country.sht, "Correlations", startCol = 1, startRow = startRow+4)
+    addStyle(wb, sheet = country.sht, hs2, rows = startRow+4, cols = 1)
+    writeData(wb, country.sht, res[[country]]$Summary$cor, startCol = 2, startRow = startRow+5)
     
-    writeData(wb, country, "Correlations (Party = None/Missing/DK removed)", startCol = 1, startRow = startRow+9)
-    addStyle(wb, sheet = country, hs2, rows = startRow+9, cols = 1)
+    writeData(wb, country.sht, "Correlations (Party = None/Missing/DK removed)", startCol = 1, startRow = startRow+9)
+    addStyle(wb, sheet = country.sht, hs2, rows = startRow+9, cols = 1)
     
-    writeData(wb, country, res[[country]]$Summary$cor.nomiss, startCol = 2, startRow = startRow+11)
+    writeData(wb, country.sht, res[[country]]$Summary$cor.nomiss, startCol = 2, startRow = startRow+11)
   }
   
   saveWorkbook(wb, file, overwrite = T)
