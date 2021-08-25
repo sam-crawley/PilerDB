@@ -78,7 +78,7 @@ read.div.data <- function(data.spec, raw = F) {
   return(data)
 }
 
-load.data.by.id <- function(id) {
+load.data.by.id <- function(id, process = T) {
   file <- paste0(here("Divided/read_data/"), tolower(id), ".R")
   
   e <- new.env()
@@ -87,7 +87,10 @@ load.data.by.id <- function(id) {
   
   data <- read.div.data(e$data.spec)
   
-  process.data(data, e$cat.defs)
+  if (process)
+    data <- process.data(data, e$cat.defs)
+  
+  data
 }
 
 # Do some checks on the data to find out if all countries included have enough data
