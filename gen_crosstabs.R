@@ -455,8 +455,8 @@ get.max.parties <- function(group.sizes) {
 }
 
 
-write.wvs.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") {
-  summary.sheet <- get.excel.summary.sheet(res) %>%
+write.divided.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") {
+  summary.sheet <- get.excel.summary.sheet(res$crosstabs) %>%
     select(-ID) %>%
     arrange(desc(cor))
   
@@ -485,9 +485,9 @@ write.wvs.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") 
   
   writeData(wb, "Summary", summary.sheet, startRow = 3, colNames = F, rowNames = F)
   
-  # Add Group Sizes sheet
+  # Add group sizes sheet
   addWorksheet(wb, "Group Sizes")
-  group.sizes <- get.group.size.summary(res)
+  group.sizes <- res$group.sizes
   max.parties <- get.max.parties(group.sizes)
   
   writeData(wb, "Group Sizes", "Largest Groups", startRow = 1, startCol = 5)
@@ -496,28 +496,28 @@ write.wvs.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") 
     col <- 4 + (summary.group.size * 2) + ( (party.num-1) * (2 + summary.group.size) ) + 1
     writeData(wb, "Group Sizes", paste("Supporters of Party", party.num), startRow = 1, startCol = col)
   }
-
+  
   group.size.names <- c(
     "Country", "Data Source", "Year", "Group Basis",
     rep(c("Name", "N"), summary.group.size),
     rep(c("Party", "Total N", paste("Group", 1:summary.group.size)), max.parties)
   )
-    
+  
   writeData(wb, "Group Sizes", data.frame(t(group.size.names)), startRow = 2, startCol = 1, colNames = F, rowNames = F)
   writeData(wb, "Group Sizes", group.sizes, startRow = 3, startCol = 1, colNames = F, rowNames = F)
   
   header.cols <- 4 + (summary.group.size * 2) + ( (max.parties) * (2 + summary.group.size) )
   setColWidths(wb, sheet = "Group Sizes", cols = 1:header.cols, widths = "auto")
   addStyle(wb, sheet = "Group Sizes", hs2, rows = 1, cols = 1:header.cols)
-  addStyle(wb, sheet = "Group Sizes", hs2, rows = 2, cols = 1:header.cols)
+  addStyle(wb, sheet = "Group Sizes", hs2, rows = 2, cols = 1:header.cols)  
   
-  for (country in sort(names(res))) {
+  for (country in sort(names(res$crosstabs))) {
     country.sht <- str_trunc(country, 31)
     addWorksheet(wb, country.sht)
     
     startRow <- 1
     for (table.name in group.names) {
-      table <- res[[country]][[table.name]]
+      table <- res$crosstabs[[country]][[table.name]]
       
       if (is.null(table))
         next()
@@ -559,16 +559,16 @@ write.wvs.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") 
     addStyle(wb, sheet = country.sht, hs1, rows = startRow, cols = 1)
     
     writeData(wb, country.sht, "Sample Size", startCol = 1, startRow = startRow+2)
-    writeData(wb, country.sht, res[[country]]$Summary$general$`Sample Size`, startCol = 2, startRow = startRow+2)
+    writeData(wb, country.sht, res$crosstabs[[country]]$Summary$general$`Sample Size`, startCol = 2, startRow = startRow+2)
     
     writeData(wb, country.sht, "Correlations", startCol = 1, startRow = startRow+4)
     addStyle(wb, sheet = country.sht, hs2, rows = startRow+4, cols = 1)
-    writeData(wb, country.sht, res[[country]]$Summary$cor, startCol = 2, startRow = startRow+5)
+    writeData(wb, country.sht, res$crosstabs[[country]]$Summary$cor, startCol = 2, startRow = startRow+5)
     
     writeData(wb, country.sht, "Correlations (Party = None/Missing/DK removed)", startCol = 1, startRow = startRow+9)
     addStyle(wb, sheet = country.sht, hs2, rows = startRow+9, cols = 1)
     
-    writeData(wb, country.sht, res[[country]]$Summary$cor.nomiss, startCol = 2, startRow = startRow+11)
+    writeData(wb, country.sht, res$crosstabs[[country]]$Summary$cor.nomiss, startCol = 2, startRow = startRow+11)
   }
   
   saveWorkbook(wb, file, overwrite = T)

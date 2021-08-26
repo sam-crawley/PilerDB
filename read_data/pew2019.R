@@ -32,6 +32,7 @@ data.spec <- list(
     
     for (var in main.vars) {
       levels(data[[var]]) <- str_remove(levels(data[[var]]), "\\s*\\(DO NOT READ\\)")
+      levels(data[[var]]) <- str_remove(levels(data[[var]]), "\\032")
     }
     
     data
