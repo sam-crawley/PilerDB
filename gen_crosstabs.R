@@ -90,7 +90,7 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
     unique()
   
   # Create crosstabs for each country
-  # (Produces a list of lists, keyed by country+data.source.year)
+  # (Produces a list of lists, keyed by country+data.source+year)
   res <- map(countries, function(cntry) {
     #cat(cntry, "\n")
     d <- data %>% filter(Country == cntry)
@@ -112,8 +112,8 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
     year <- max(as.numeric(d$Year))
     cor = calc.correlations(d)
     cor.wt = calc.correlations(d, use.weights = T)
-    cor.nomiss = calc.correlations(d, cats.to.drop = c("Missing", "Other"))
-    cor.nomiss.wt = calc.correlations(d, cats.to.drop = c("Missing", "Other"), use.weights = T)
+    cor.nomiss = calc.correlations(d, drop.cats = T)
+    cor.nomiss.wt = calc.correlations(d, drop.cats = T, use.weights = T)
     
     group.basis <- calc.group.basis(cor.nomiss)
     
@@ -180,20 +180,24 @@ gen.category.summary <- function(data, cat.defs) {
   }) %>% set_names(main.vars)
 }
 
-calc.correlations <- function(d, cats.to.drop = NULL, use.weights = F) {
+calc.correlations <- function(d, drop.cats = F, use.weights = F) {
   country <- unique(d$Country)
   #cat("Calc correlations for", country, "\n")
   
-  drop.cats <- ! is.null(cats.to.drop)
+  cats.to.drop <- c("Missing", "Other")
   
   if (drop.cats)
-    d <- d %>% filter(! Party %in% cats.to.drop)
+    d <- d %>% 
+      mutate(Party = fct_lump_prop(Party, 0.02)) %>%
+      filter(! Party %in% cats.to.drop)
   
   tau <- map_dfr(group.names, function(var) {
     d.g <- d 
     
     if (drop.cats)
-      d.g <- d.g %>% filter(! .data[[var]] %in% cats.to.drop)
+      d.g <- d.g %>% 
+        mutate(across(all_of(var), ~fct_lump_prop(.x, 0.02))) %>%
+        filter(! .data[[var]] %in% cats.to.drop)
     
     if (nrow(d.g) == 0 || length(unique(d.g[[var]])) <= 1) {
       return(tibble(question = var, tau = NA, entropy = NA))
@@ -223,7 +227,7 @@ calc.correlations <- function(d, cats.to.drop = NULL, use.weights = F) {
   empty.cols <- tau %>% keep(~all(is.na(.x) | is.nan(.x))) %>% names
   
   if (length(empty.cols) > 0) {
-    stop("Couldn't calculate any correlations, bad data for ", country, "? (empty.cols: ", empty.cols, ")")
+    #stop("Couldn't calculate any correlations, bad data for ", country, "? (empty.cols: ", empty.cols, ")")
   }
 
   tau %>% select(question, everything()) %>%
@@ -234,9 +238,6 @@ calc.correlations <- function(d, cats.to.drop = NULL, use.weights = F) {
 # Calculate the 'group basis' (i.e. group with highest GK Tau correlation)
 #  Any groups with entropy <= 0.2 are discarded for this calculation
 calc.group.basis <- function(cor, ret.max.val = F) {
-  cor <- cor %>% 
-    mutate(tau = if_else(entropy <= 0.2, NA_real_, tau))
-  
   if (all(is.na(cor$tau)))
     return (NA)
   
@@ -321,6 +322,7 @@ calc.summary.data <- function(res) {
   map_dfr(res, function(country.data) {
     orig.sum.data <- country.data$Summary
     #cat(orig.sum.data$general$Country, "\n")
+    #cat(orig.sum.data$general$`Data Source`, "\n")
     
     sum <- orig.sum.data$general
     sum$Gallagher <- round(sum$Gallagher, 2)
