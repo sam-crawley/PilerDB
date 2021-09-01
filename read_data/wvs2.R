@@ -25,8 +25,8 @@ data.spec <- list(
 cat.defs <- list(
   Party = list(
     "Missing" = c("No answer", "I would not vote", "Missing, Not available", "Dont know",
-                  "I would cast a blank ballot; White vote", "None", "Not asked"),
-    "Other" = c("Other")
+                  "I would cast a blank ballot; White vote", "None", "Not asked", "Undocumented"),
+    "Other" = c("Other", "Independent")
   ),
   Religion = list(
     "Missing" = c("Missing; Not asked by the interviewer", "No answer", "Dont know"),

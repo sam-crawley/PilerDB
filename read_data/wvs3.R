@@ -19,6 +19,9 @@ data.spec <- list(
       levels(data[[var]]) <- str_remove(levels(data[[var]]), "^\\w+:\\s*")
     }
     
+    # Combine SrpSka Republic data with Bosnia
+    data <- data %>% mutate(Country = if_else(Country == "SrpSka Republic", "Bosnia & Herzegovina", Country))
+    
     data
   }
 )
@@ -27,7 +30,8 @@ cat.defs <- list(
   Party = list(
     "Missing" = c("No answer", "No right to vote", "I would not vote", "Missing, Not available", "Dont know",
                   "I would cast a blank ballot; White vote", "None", "Not asked"),
-    "Other" = c("Other", "Other party", "Other 1", "Other 2")
+    "Other" = c("Other", "Other party", "Other 1", "Other 2", "Independent", "Candidatos Independientes (no partidistas)",
+                "Independent Candidate")
   ),
   Language = list(
     "Missing" = c("Not asked", "No answer", "Dont know"),

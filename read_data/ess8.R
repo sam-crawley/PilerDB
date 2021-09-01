@@ -32,7 +32,7 @@ cat.defs <- list(
   Party = list(
     "Missing" = c("Not applicable", "Refusal", "Don't know", "Don't know if voted for a multi-member nationwide candidate list", "No party",
                   "Blank vote", "No answer", "Nul", "Blanc", "Did not vote for a multi-member nationwide candidate list", "Invalid ballot",
-                  "Blank paper"),
+                  "Blank paper", "White ballot", "Refused to tell if voted for a multi-member nationwide candidate list", "Invalid vote"),
     "Other" = c("Autre", "Other (nir)", "Independent", "Altro")
   ),
   Language = list(

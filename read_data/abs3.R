@@ -30,7 +30,7 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Not applicable", "Missing", "Can't choose", "Decline to answer", "No vote", "Dont' know", "None"),
+    "Missing" = c("Not applicable", "Missing", "Can't choose", "Decline to answer", "No vote", "Dont' know", "None", "Cast invalid vote"),
     "Other" = c("Other (Termasuk undi rosak)", "others", "Others(HK)", "Others", "independent")
   ),
   Religion = list(
