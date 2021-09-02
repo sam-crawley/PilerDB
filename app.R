@@ -77,16 +77,23 @@ ui <- navbarPage(title = "Divided Society Data",
        sidebarPanel(
          pickerInput("cat.datasrc", 
                      label = "Data source", 
-                     sort(names(category.sum))
+                     sort(unique(summary.table$`Data Source`)), 
+                     multiple = T,
+                     options = list(
+                       `none-selected-text` = "All"
+                     )
          ),
          pickerInput("cat.var", 
                      label = "Variable", 
-                     main.vars
+                     main.vars,
+                     multiple = T,
+                     options = list(
+                       `none-selected-text` = "All"
+                     )
          ),
          width = 2
        ),
        mainPanel(
-         p("Question: ", textOutput("catSumQuestion")),
          DTOutput("catSumTable", height = "auto"),
          width = 10
        )
@@ -140,12 +147,27 @@ gen.group.size.names <- function(max.parties) {
   )
 }
 
-get.cat.sum.table <- function(data.src, var.name) {
-  category.sum[[data.src]][[var.name]]$categories
-}
-
 get.cat.sum.question <- function(data.src, var.name) {
   category.sum[[data.src]][[var.name]]$question
+}
+
+get.cat.sum.table <- function(category.sum, data.src, variable) {
+  srcs <- names(category.sum)
+  if (! is.null(data.src))
+    srcs <- data.src
+  
+  res <- map_dfr(srcs, function(data.src) {
+    dfs <- map(category.sum[[data.src]], ~ .x$categories)
+    
+    bind_rows(dfs, .id = "Variable") %>%
+      mutate("Data Source" = data.src) %>%
+      select(`Data Source`, everything())
+  })
+  
+  if (! is.null(variable))
+    res <- res %>% filter(Variable %in% variable)
+  
+  res
 }
 
 get.country.list <- function(data.src, var.name) {
@@ -156,6 +178,7 @@ get.country.list <- function(data.src, var.name) {
   
   res
 }
+
 
 server <- function(input, output, session) {
   
@@ -174,10 +197,10 @@ server <- function(input, output, session) {
   )
   
   output$catSumTable = renderDT(
-    get.cat.sum.table(input$cat.datasrc, input$cat.var),
+    get.cat.sum.table(category.sum, input$cat.datasrc, input$cat.var),
     options = list(
-      paging = F,
-      order = list(list(2, 'desc')),
+      paging = T,
+      pageLength = 1000,
       buttons = c('excel'),
       dom = 'Bfrtip'
     ),

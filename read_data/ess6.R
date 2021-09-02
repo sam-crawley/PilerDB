@@ -36,8 +36,8 @@ cat.defs <- list(
   Party = list(
     "Missing" = c("Not applicable", "Refusal", "Don't know","No answer", "Nul", "Blanc", "Does not know if voted for a candidate list", "Ongeldig",
                   "A white ballot (empty ballot note)", "Blank paper", "Votou em branco / nulo", "Blanco", "Votó en blanco", "Votó nulo"),
-    "Other" = c("Andet - other", "Otros", "Autre", "Other (nir)", "Outro", "Other party", "Other", "Autres mouvements écologistes", "Independent",
-                "Altro", "Other (Write in)", "Mixed vote", "Did not vote for a candidate list")
+    "Other" = c("Andet - other", "Otros", "Autre", "Other (nir)", "Outro", "Other", "Autres mouvements écologistes", "Independent",
+                "Other (Write in)", "Mixed vote", "Did not vote for a candidate list")
   ),
   Language = list(
     "Missing" = c("777", "888", "999", "ZXX")
