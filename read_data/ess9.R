@@ -1,7 +1,9 @@
 data.spec <- list(
   file.name = "Divided/data/ess/Round 9/ESS9e03_1.dta",
   file.type = 'dta',
-  skip.countries = c(),
+  skip.countries = list(
+    no_group = c("Croatia", "Cyprus", "Czechia", "Denmark", "France", "Iceland", "Ireland", "Portugal")
+  ),
   country.format = 'iso2c',
   field.def = c(
     "Party" = "prtvt",

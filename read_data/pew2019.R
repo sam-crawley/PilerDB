@@ -1,7 +1,10 @@
 data.spec <- list(
   file.name = "Divided/data/pew/2019/Pew Research Center Global Attitudes Spring 2019 Dataset WEB.sav",
   file.type = 'sav',
-  skip.countries = c('Lebanon', 'South Korea'),
+  skip.countries = list(
+    no_party = c('Lebanon', 'South Korea'),
+    no_group = c("Tunisia", "Turkey")
+  ),
   country.format = 'country.name',
   field.def = c(
     "Party" = "prty",

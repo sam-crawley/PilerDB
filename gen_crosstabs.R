@@ -19,10 +19,12 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
   
   tabs <- list()
   cat.sum <- list()
+  countries <- list()
   
   if (! is.null(existing.data)) {
     tabs <- existing.data$crosstabs
     cat.sum <- existing.data$cat.sum
+    countries <- existing.data$countries
     
     if (! is.null(ids.to.load)) {
       # Remove ids.to.load from existing data
@@ -32,6 +34,7 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
       }
       
       cat.sum[ids.to.load] <- NULL
+      countries[ids.to.load] <- NULL
     }
   }
   
@@ -55,13 +58,15 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
     
     cat.sum[[id]] <- gen.category.summary(data, e$cat.defs)
     src.tabs <- gen.country.crosstabs(data, e$cat.defs, id)
+    countries[[id]] <- get.country.list(data, e$data.spec)
     
     tabs <- append(tabs, src.tabs)
   }
   
   res <- list(
     crosstabs = tabs,
-    cat.sum = cat.sum
+    cat.sum = cat.sum,
+    countries = countries
   )
   
   if (calc.summaries) {
@@ -180,6 +185,12 @@ gen.category.summary <- function(data, cat.defs) {
   }) %>% set_names(main.vars)
 }
 
+get.country.list <- function(data, data.def) {
+  c <- data.def$skip.countries
+  c$included <- data %>% filter(! Country %in% global.country.skip) %>% distinct(Country) %>% pull(Country)
+  return(c)
+}
+
 calc.correlations <- function(d, drop.cats = F, use.weights = F) {
   country <- unique(d$Country)
   #cat("Calc correlations for", country, "\n")
@@ -188,7 +199,7 @@ calc.correlations <- function(d, drop.cats = F, use.weights = F) {
   
   if (drop.cats)
     d <- d %>% 
-      mutate(Party = fct_lump_prop(Party, 0.02)) %>%
+      mutate(across(all_of(main.vars), ~fct_lump_prop(.x, 0.02))) %>%
       filter(! Party %in% cats.to.drop)
   
   tau <- map_dfr(group.names, function(var) {
@@ -196,7 +207,6 @@ calc.correlations <- function(d, drop.cats = F, use.weights = F) {
     
     if (drop.cats)
       d.g <- d.g %>% 
-        mutate(across(all_of(var), ~fct_lump_prop(.x, 0.02))) %>%
         filter(! .data[[var]] %in% cats.to.drop)
     
     if (nrow(d.g) == 0 || length(unique(d.g[[var]])) <= 1) {

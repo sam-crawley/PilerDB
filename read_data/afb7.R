@@ -6,7 +6,10 @@
 data.spec <- list(
   file.name = "Divided/data/afrobarom/r7_merged_data_34ctry.release.sav",
   file.type = 'sav',
-  skip.countries = c("Eswatini"),
+  skip.countries = list(
+    no_party = c("Eswatini"),
+    no_group = c("Sudan")
+  ),
   country.format = 'country.name',
   field.def = c(
     "Party" = "Q99",

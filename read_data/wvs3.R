@@ -1,7 +1,10 @@
 data.spec <- list(
   file.name = "Divided/data/WVS/W3/WV3_Data_Stata_v20180912.dta",
   file.type = 'dta',
-  skip.countries = c('China', 'Nigeria', 'Pakistan', 'South Korea'),
+  skip.countries = list(
+    no_party = c('China', 'Nigeria', 'Pakistan', 'South Korea'),
+    no_group = c("Argentina", "Croatia", "Japan", "Poland", "Slovenia", "Turkey", "United Kingdom")
+  ),
   country.format = 'country.name',
   country.custom = c("SrpSka Republic" = "SrpSka Republic"),
   field.def = c(

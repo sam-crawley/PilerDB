@@ -2,7 +2,9 @@ data.spec <- list(
   file.name = "Divided/data/ess/Round 6/ESS6e02_4.dta",
   file.type = 'dta',
   file.encoding = "latin1",
-  skip.countries = c(),
+  skip.countries = list(
+    no_group = c("Cyprus", "Czechia", "Iceland", "Italy", "Poland", "Slovenia")
+  ),
   country.format = 'iso2c',
   country.custom = c("XK" = "Kosovo"),
   field.def = c(

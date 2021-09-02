@@ -1,7 +1,10 @@
 data.spec <- list(
   file.name = "Divided/data/WVS/W6/WV6_Data_stata_v20201117.dta",
   file.type = 'dta',
-  skip.countries = c("Belarus", "China", "Kuwait", "Lebanon", "Qatar", "Trinidad & Tobago", "Uzbekistan", "Egypt", "Tunisia", "Palestinian Territories"),
+  skip.countries = list(
+    no_party = c("Belarus", "China", "Kuwait", "Lebanon", "Qatar", "Trinidad & Tobago", "Uzbekistan"),
+    no_group = c("Argentina", "Armenia", "Egypt", "Japan", "Jordan", "Kuwait", "Palestinian Territories", "Poland", "Slovenia", "Spain", "Tunisia", "Yemen")
+  ),
   country.format = 'iso3c',
   field.def = c(
     "Party" = "V228",

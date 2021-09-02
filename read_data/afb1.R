@@ -2,7 +2,9 @@ data.spec <- list(
   file.name = "Divided/data/afrobarom/merged_r1_data.sav",
   file.type = 'sav',
   file.encoding = "latin1",
-  skip.countries = c(),
+  skip.countries = list(
+    no_group = c("Botswana", "Lesotho")
+  ),
   country.format = 'country.name',
   field.def = c(
     "Party" = "party",

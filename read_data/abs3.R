@@ -1,7 +1,9 @@
 data.spec <- list(
   file.name = "Divided/data/asain barom/ABS3w.0.Merged/ABS3 merge20210506.sav",
   file.type = 'sav',
-  skip.countries = c("China", "Singapore", "Vietnam"),
+  skip.countries = list(
+    no_party = c("China", "Singapore", "Vietnam")
+  ),
   country.format = 'country.name',
   field.def = c(
     "Party" = "q33",

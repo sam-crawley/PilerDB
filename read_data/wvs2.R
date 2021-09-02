@@ -1,7 +1,10 @@
 data.spec <- list(
   file.name = "Divided/data/WVS/W2/WV2_Data_Stata_v20180912.dta",
   file.type = 'dta',
-  skip.countries = c('Argentina', 'China', 'Russia', 'South Korea', "Belarus", "Poland"),
+  skip.countries = list(
+    no_party = c('Argentina', 'China', 'Russia', 'South Korea'),
+    no_group = c("Belarus", "Japan", "Poland", "Spain", "Turkey")
+  ),
   country.format = 'country.name',
   field.def = c(
     "Party" = "V351",

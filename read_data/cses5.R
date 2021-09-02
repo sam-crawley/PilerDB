@@ -1,7 +1,9 @@
 data.spec <- list(
   file.name = "Divided/data/cses/Module 5/cses5.dta",
   file.type = 'dta',
-  skip.countries = c('Hungary', 'Portugal'),
+  skip.countries = list(
+    no_group = c('Hungary', 'Portugal', "Greece", "Sweden")
+  ),
   country.format = 'country.name',
   field.def = c(
     "Party" = "E3024_3",

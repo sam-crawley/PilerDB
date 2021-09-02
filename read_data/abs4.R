@@ -6,7 +6,10 @@
 data.spec <- list(
   file.name = "Divided/data/asain barom/W4 Merged Data/W4_v15_merged20181211_release.dta",
   file.type = 'dta',
-  skip.countries = c("China", "Vietnam"),
+  skip.countries = list(
+    no_party = c("China", "Vietnam"),
+    no_group = c("Cambodia", "Japan", "Mongolia", "Thailand")
+  ),
   country.format = 'country.name',
   field.def = c(
     "Party" = "q34",

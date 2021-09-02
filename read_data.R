@@ -19,7 +19,7 @@ group.names <- c("Language", "Religion", "Ethnicity")
 main.vars <- c("Party", group.names)
 allowed.field.names <- c(main.vars, "Country", "Year", "Weight")
 
-read.div.data <- function(data.spec, raw = F) {
+read.div.data <- function(data.spec, raw = F, ignore.skip.countries = F) {
   if (! all(names(data.spec$field.def) %in% allowed.field.names))
     stop("field.def contains invalid field names")
   
@@ -53,8 +53,11 @@ read.div.data <- function(data.spec, raw = F) {
     mutate(
       Country.orig = Country,
       Country = countrycode(Country, origin = data.spec$country.format, destination = 'country.name', custom_match = data.spec$country.custom),
-    ) %>%
-    filter(! Country %in% data.spec$skip.countries)
+    )
+  
+  if (! ignore.skip.countries)
+    data <- data %>%
+      filter(! Country %in% unlist(data.spec$skip.countries))
   
   main.var.def <- data.spec$field.def[main.vars]
   
@@ -78,14 +81,14 @@ read.div.data <- function(data.spec, raw = F) {
   return(data)
 }
 
-load.data.by.id <- function(id, process = T) {
+load.data.by.id <- function(id, process = T, ignore.skip.countries = F) {
   file <- paste0(here("Divided/read_data/"), tolower(id), ".R")
   
   e <- new.env()
   
   source(file, local = e)
   
-  data <- read.div.data(e$data.spec)
+  data <- read.div.data(e$data.spec, ignore.skip.countries = ignore.skip.countries)
   
   if (process)
     data <- process.data(data, e$cat.defs)
@@ -93,27 +96,44 @@ load.data.by.id <- function(id, process = T) {
   data
 }
 
-# Do some checks on the data to find out if all countries included have enough data
-check.data <- function(data, cat.defs) {
-  data <- process.data(data, cat.defs)
+check.data.by.id <- function(id) {
+  data <- load.data.by.id(id, ignore.skip.countries = T)
   
+  check.data(data)
+}
+
+# Do some checks on the data to find out if all countries included have enough data
+check.data <- function(data) {
   # Check for countries without Party data
   res <- data %>% 
     group_by(Country) %>% 
-    summarise(party.resp.count = sum(Party != "Missing")) %>%
+    mutate(Party = fct_lump_prop(Party, 0.02)) %>%
+    summarise(party.resp.count = sum(! Party %in% c("Missing", "Other"))) %>%
     filter(party.resp.count == 0)
   
   if (nrow(res) > 0)
-    stop("The following countries have no Party data (they should be added to skip.countries): ", paste(res %>% pull(Country), collapse = ", "))
+    warning("The following countries have no Party data (they should be added to skip.countries): ", paste(res %>% pull(Country), collapse = ", "))
   
   missing.all <- keep(unique(data$Country), function(c) {
-    combos <- data %>% filter(Country == c) %>% count(Religion, Ethnicity, Language)
+    d <- data %>% filter(Country == c) 
     
-    nrow(combos) == 1
+    groups <- map(group.names, function(g) {
+      f <- fct_lump_prop(d[[g]], 0.02)
+      
+      res <- fct_count(f) %>% 
+        filter(! f %in% c("Missing", "Other"))
+      
+      if (nrow(res) <= 1)
+        return (NULL)
+      else
+        return (g)
+    })
+    
+    length(unlist(groups)) == 0
   })
   
   if (length(missing.all) > 0)
-    stop("The following counrties do not appear to have any usable group data: ", paste(missing.all, collapse = ", "))
+    warning("The following counrties do not appear to have any usable group data: ", paste(missing.all, collapse = ", "))
 }
 
 ### Some util functions

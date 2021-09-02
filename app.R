@@ -9,6 +9,7 @@ source("gen_crosstabs.R")
 res <- read_rds("output/divided.rds")
 crosstabs <- res$crosstabs
 category.sum <- res$cat.sum
+countries <- res$countries
 summary.table <- res$summary
 group.sizes <- res$group.sizes
 max.parties <- res$max.parties
@@ -49,6 +50,27 @@ ui <- navbarPage(title = "Divided Society Data",
       )
     )
   ),
+  tabPanel("Data Sources", 
+     pageWithSidebar(
+       headerPanel('Data Sources'),
+       sidebarPanel(
+         pickerInput("info.datasrc", 
+                     label = "Data source", 
+                     sort(names(category.sum))
+         ),
+         width = 2
+       ),
+       mainPanel(
+         h4("Countries included"),
+         textOutput("info.cntry.included"),
+         h4("Countries excluded due to no (usable) party data"),
+         textOutput("info.cntry.excluded.no_party"),
+         h4("Countries excluded due to not (usable) group data"),
+         textOutput("info.cntry.excluded.no_group"),
+         width = 10
+       )
+     )
+  ),  
   tabPanel("Category Data", 
      pageWithSidebar(
        headerPanel('Category Data'),
@@ -126,6 +148,15 @@ get.cat.sum.question <- function(data.src, var.name) {
   category.sum[[data.src]][[var.name]]$question
 }
 
+get.country.list <- function(data.src, var.name) {
+  res <- paste(countries[[data.src]][[var.name]], collapse = ", ")
+  
+  if (str_length(res) == 0)
+    return ("None")
+  
+  res
+}
+
 server <- function(input, output, session) {
   
   output$tableOutput = renderDT(
@@ -155,6 +186,10 @@ server <- function(input, output, session) {
   )
   
   output$catSumQuestion <- renderText(get.cat.sum.question(input$cat.datasrc, input$cat.var))
+  
+  output$info.cntry.included <- renderText(get.country.list(input$info.datasrc, "included"))
+  output$info.cntry.excluded.no_party <- renderText(get.country.list(input$info.datasrc, "no_party"))
+  output$info.cntry.excluded.no_group <- renderText(get.country.list(input$info.datasrc, "no_group"))
   
   sketch = htmltools::withTags(table(
     class = 'display compact',

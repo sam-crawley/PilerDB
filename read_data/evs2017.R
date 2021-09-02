@@ -1,7 +1,9 @@
 data.spec <- list(
   file.name = "Divided/data/evs/2017/ZA7500_v4-0-0.dta",
   file.type = 'dta',
-  skip.countries = c(),
+  skip.countries = list(
+    no_group = c("Armenia", "Azerbaijan", "Croatia", "Czechia", "Denmark", "Finland", "Italy", "Poland", "Portugal", "Serbia")
+  ),
   country.format = 'iso2c',
   field.def = c(
     "Party" = "v174_cs",
