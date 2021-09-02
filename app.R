@@ -67,6 +67,8 @@ ui <- navbarPage(title = "Divided Society Data",
          textOutput("info.cntry.excluded.no_party"),
          h4("Countries excluded due to not (usable) group data"),
          textOutput("info.cntry.excluded.no_group"),
+         h4("Countries excluded to to low effective N"),
+         textOutput("info.cntry.excluded.low_n"),         
          width = 10
        )
      )
@@ -162,7 +164,8 @@ get.cat.sum.table <- function(category.sum, data.src, variable) {
     bind_rows(dfs, .id = "Variable") %>%
       mutate("Data Source" = data.src) %>%
       select(`Data Source`, everything())
-  })
+  }) %>%
+    filter(N != 0)
   
   if (! is.null(variable))
     res <- res %>% filter(Variable %in% variable)
@@ -213,6 +216,7 @@ server <- function(input, output, session) {
   output$info.cntry.included <- renderText(get.country.list(input$info.datasrc, "included"))
   output$info.cntry.excluded.no_party <- renderText(get.country.list(input$info.datasrc, "no_party"))
   output$info.cntry.excluded.no_group <- renderText(get.country.list(input$info.datasrc, "no_group"))
+  output$info.cntry.excluded.low_n <- renderText(get.country.list(input$info.datasrc, "low_n"))
   
   sketch = htmltools::withTags(table(
     class = 'display compact',

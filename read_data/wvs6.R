@@ -3,7 +3,8 @@ data.spec <- list(
   file.type = 'dta',
   skip.countries = list(
     no_party = c("Belarus", "China", "Kuwait", "Lebanon", "Qatar", "Trinidad & Tobago", "Uzbekistan"),
-    no_group = c("Argentina", "Armenia", "Egypt", "Japan", "Jordan", "Kuwait", "Palestinian Territories", "Poland", "Slovenia", "Spain", "Tunisia", "Yemen")
+    no_group = c("Argentina", "Armenia", "Egypt", "Japan", "Jordan", "Kuwait", "Palestinian Territories", "Poland", "Slovenia", "Spain", "Tunisia", "Yemen"),
+    low_n = c("Morocco")
   ),
   country.format = 'iso3c',
   field.def = c(

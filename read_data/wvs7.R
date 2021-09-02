@@ -3,7 +3,8 @@ data.spec <- list(
   file.type = 'dta',
   skip.countries = list(
     no_party = c("China", "Egypt", "Vietnam", "Jordan", "Singapore"),
-    no_group = c("Japan", "New Zealand", "Tunisia", "Turkey")
+    no_group = c("Japan", "New Zealand", "Tunisia", "Turkey"),
+    low_n = c("Chile", "Nicaragua")
   ),
   country.format = 'iso3c',
   field.def = c(

@@ -2,7 +2,9 @@ data.spec <- list(
   file.name = "Divided/data/afrobarom/merged_r3_data.sav",
   file.type = 'sav',
   file.encoding = "latin1",
-  skip.countries = c(),
+  skip.countries = list(
+    low_n = c('Cape Verde')
+  ),
   country.format = 'country.name',
   field.def = c(
     "Party" = "q86",
