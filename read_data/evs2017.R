@@ -3,7 +3,7 @@ data.spec <- list(
   file.type = 'dta',
   skip.countries = list(
     no_group = c("Armenia", "Azerbaijan", "Croatia", "Czechia", "Denmark", "Finland", "Italy", "Poland", "Portugal", "Serbia"),
-    low_n = c("Estonia")
+    low_n = c("Estonia", "Belarus")
   ),
   country.format = 'iso2c',
   field.def = c(

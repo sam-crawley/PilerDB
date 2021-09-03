@@ -3,7 +3,8 @@ data.spec <- list(
   file.type = 'sav',
   skip.countries = list(
     no_party = c("Eswatini"),
-    no_group = c("Egypt", "Sudan")
+    no_group = c("Egypt", "Sudan"),
+    low_n = c("Mauritius")
   ),
   country.format = 'country.name',
   field.def = c(

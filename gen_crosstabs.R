@@ -209,8 +209,10 @@ calc.correlations <- function(d, drop.cats = F, use.weights = F) {
       d.g <- d.g %>% 
         filter(! .data[[var]] %in% cats.to.drop)
     
-    if (nrow(d.g) == 0 || length(unique(d.g[[var]])) <= 1) {
-      return(tibble(question = var, tau = NA, entropy = NA))
+    n.eff <- nrow(d.g)
+    
+    if (n.eff <= 200 || length(unique(d.g[[var]])) <= 1) {
+      return(tibble(question = var, tau = NA, entropy = NA, N.eff = n.eff))
     }
     
     d.g <- d.g %>% mutate(
@@ -227,7 +229,7 @@ calc.correlations <- function(d, drop.cats = F, use.weights = F) {
     res <- assoc %>%
       select(tau) %>%
       mutate(across(everything(), ~round(.x, digits = 3))) %>%
-      mutate(question = var)
+      mutate(question = var, N.eff = n.eff)
     
     res$entropy <- entropy(table(d.g[[var]]))
     
@@ -236,17 +238,12 @@ calc.correlations <- function(d, drop.cats = F, use.weights = F) {
   
   empty.cols <- tau %>% keep(~all(is.na(.x) | is.nan(.x))) %>% names
   
-  if (length(empty.cols) > 0) {
-    #stop("Couldn't calculate any correlations, bad data for ", country, "? (empty.cols: ", empty.cols, ")")
-  }
-
   tau %>% select(question, everything()) %>%
     mutate(across(tau, ~ifelse(is.nan(.x) | .x == -Inf, NA, .x))) %>%
     remove_rownames()
 }
 
 # Calculate the 'group basis' (i.e. group with highest GK Tau correlation)
-#  Any groups with entropy <= 0.2 are discarded for this calculation
 calc.group.basis <- function(cor, ret.max.val = F) {
   if (all(is.na(cor$tau)))
     return (NA)
@@ -353,12 +350,9 @@ calc.summary.data <- function(res) {
         
     main.crosstab <- country.data[[sum$`Group Basis`]]
     
-    sum$total.included <- main.crosstab %>% 
-      pivot_longer(-Party, names_to = "Group") %>%
-      filter(! Party %in% c("Missing", "Other")) %>% 
-      filter(! Group %in% c("Missing", "Other")) %>% 
-      summarise(v = sum(value)) %>%
-      pull(v)
+    sum$total.included <- orig.sum.data$cor.nomiss %>%
+      filter(question == sum$`Group Basis`) %>%
+      pull(N.eff)
     sum$total.included.pct <- sum$total.included / sum$`Sample Size`
     
     if (main.crosstab %>% filter(Party %in% c("Missing", "Other")) %>% count() > 0) {

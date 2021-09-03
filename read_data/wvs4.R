@@ -4,7 +4,7 @@ data.spec <- list(
   skip.countries = list(
     no_party = c('China', 'Saudi Arabia', 'Singapore', 'South Korea', 'Vietnam'),
     no_group = c('Japan', 'Turkey'),
-    low_n = c("Jordan")
+    low_n = c("Jordan", "Morocco")
   ),
   country.format = 'country.name',
   field.def = c(
