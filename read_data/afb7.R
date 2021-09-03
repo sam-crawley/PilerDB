@@ -22,7 +22,8 @@ data.spec <- list(
     "Year" = NA
   ),
   fixups = function(data) {
-    data %>% mutate(Year = format(DATEINTR, format = "%Y"))
+    data %>% mutate(Year = format(DATEINTR, format = "%Y")) %>%
+      mutate(Religion = fct_recode(Religion, "Independent Protestant" = "Independent"))
   }  
 )
 
