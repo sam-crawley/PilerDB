@@ -1,11 +1,12 @@
-# Q99 - Party
-# Q98 - Religion
-# Q2A - Language
-# Q84 - Ethnicity
-
 data.spec <- list(
   file.name = "Divided/data/afrobarom/r7_merged_data_34ctry.release.sav",
   file.type = 'sav',
+  question.text = c(
+    "Party" = "If a presidential election were held tomorrow, which party’s candidate would you vote for?",
+    "Language" = "Which [ENTER NATIONALITY] language is your mother tongue or language of origin?",
+    "Religion" = "What is your religion, if any?",
+    "Ethnicity" = "What is your ethnic community, cultural group or tribe?"
+  ),    
   skip.countries = list(
     no_party = c("Eswatini"),
     no_group = c("Sudan"),

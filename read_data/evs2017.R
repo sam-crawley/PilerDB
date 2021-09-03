@@ -1,6 +1,10 @@
 data.spec <- list(
   file.name = "Divided/data/evs/2017/ZA7500_v4-0-0.dta",
   file.type = 'dta',
+  question.text = c(
+    "Party" = "Which (political) party appeals to you most?",
+    "Religion" = "Do you belong to a religious denomination? [If yes] Which one?"
+  ),  
   skip.countries = list(
     no_group = c("Armenia", "Azerbaijan", "Croatia", "Czechia", "Denmark", "Finland", "Italy", "Poland", "Portugal", "Serbia"),
     low_n = c("Estonia", "Belarus")

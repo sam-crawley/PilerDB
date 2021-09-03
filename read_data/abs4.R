@@ -6,6 +6,11 @@
 data.spec <- list(
   file.name = "Divided/data/asain barom/W4 Merged Data/W4_v15_merged20181211_release.dta",
   file.type = 'dta',
+  question.text = c(
+    "Party" = "Which parties (or candidates for president if it was presidential race) did you vote for?",
+    "Religion" = "What is your religion?",
+    "Ethnicity" = "What's your racial (ethnic) background?"
+  ),  
   skip.countries = list(
     no_party = c("China", "Vietnam"),
     no_group = c("Cambodia", "Japan", "Mongolia", "Thailand")

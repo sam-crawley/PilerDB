@@ -2,6 +2,11 @@ data.spec <- list(
   file.name = "Divided/data/afrobarom/merged_r2_data.sav",
   file.type = 'sav',
   file.encoding = "latin1",
+  question.text = c(
+    "Party" = "Do you feel close to any particular political party or political organization? If so, which party or organization is that?",
+    "Language" = "Which language is your home language?",
+    "Religion" = "What is your religion, if any?"
+  ),
   skip.countries = c(),
   country.format = 'country.name',
   field.def = c(

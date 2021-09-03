@@ -19,12 +19,12 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
   
   tabs <- list()
   cat.sum <- list()
-  countries <- list()
+  data.src.info <- list()
   
   if (! is.null(existing.data)) {
     tabs <- existing.data$crosstabs
     cat.sum <- existing.data$cat.sum
-    countries <- existing.data$countries
+    data.src.info <- existing.data$data.src.info
     
     if (! is.null(ids.to.load)) {
       # Remove ids.to.load from existing data
@@ -34,7 +34,7 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
       }
       
       cat.sum[ids.to.load] <- NULL
-      countries[ids.to.load] <- NULL
+      data.src.info[ids.to.load] <- NULL
     }
   }
   
@@ -58,7 +58,7 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
     
     cat.sum[[id]] <- gen.category.summary(data, e$cat.defs)
     src.tabs <- gen.country.crosstabs(data, e$cat.defs, id)
-    countries[[id]] <- get.country.list(data, e$data.spec)
+    data.src.info[[id]] <- get.data.src.info(data, e$data.spec)
     
     tabs <- append(tabs, src.tabs)
   }
@@ -66,7 +66,7 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
   res <- list(
     crosstabs = tabs,
     cat.sum = cat.sum,
-    countries = countries
+    data.src.info = data.src.info
   )
   
   if (calc.summaries) {
@@ -167,7 +167,7 @@ process.data <- function(data, cat.defs) {
 
 gen.category.summary <- function(data, cat.defs) {
   map(main.vars, function(var.name) {
-    categories <- fct_count(data[[var.name]]) %>%
+    fct_count(data[[var.name]]) %>%
       mutate("Collapsed To" = case_when(
         f %in% cat.defs[[var.name]]$Missing ~ 'Missing',
         f %in% cat.defs[[var.name]]$Other ~ 'Other',
@@ -177,18 +177,24 @@ gen.category.summary <- function(data, cat.defs) {
         "Category" = f,
         "N" = n
       )
-    
-    list(
-      question = attr(data[[var.name]], "label"),
-      categories = categories
-    )
   }) %>% set_names(main.vars)
 }
 
-get.country.list <- function(data, data.def) {
-  c <- data.def$skip.countries
-  c$included <- data %>% filter(! Country %in% global.country.skip) %>% distinct(Country) %>% pull(Country)
-  return(c)
+get.data.src.info <- function(data, data.def) {
+  countries <- data.def$skip.countries
+  countries$included <- data %>% filter(! Country %in% global.country.skip) %>% distinct(Country) %>% pull(Country)
+  
+  questions <- map(main.vars, function(v) {
+    if (has_name(data.def, 'question.text') && has_name(data.def$question.text, v))
+      return(data.def$question.text[[v]])
+    else
+      attr(data[[v]], "label")
+  }) %>% set_names(main.vars)
+  
+  list(
+    questions = questions,
+    countries = countries
+  )
 }
 
 calc.correlations <- function(d, drop.cats = F, use.weights = F) {

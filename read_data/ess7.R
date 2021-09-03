@@ -1,6 +1,11 @@
 data.spec <- list(
   file.name = "Divided/data/ess/Round 7/ESS7e02_2.dta",
   file.type = 'dta',
+  question.text = c(
+    "Party" = "Party voted for in last national election [Which party did you vote for in that election?]",
+    "Religion" = "Do you consider yourself as belonging to any particular religion or denomination? [If yes] Which one?",
+    "Language" = "What language or languages do you speak most often at home? [First mentioned]"
+  ),  
   file.encoding = "latin1",
   skip.countries = list(
     no_group = c("Czechia", "Denmark", "France", "Portugal", "Slovenia")

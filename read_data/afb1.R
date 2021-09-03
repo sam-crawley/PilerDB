@@ -2,6 +2,9 @@ data.spec <- list(
   file.name = "Divided/data/afrobarom/merged_r1_data.sav",
   file.type = 'sav',
   file.encoding = "latin1",
+  question.text = c(
+    "Party" = "Do you usually think of yourself as close to any particular political party? [If yes] Which party is that?"
+  ),
   skip.countries = list(
     no_group = c("Botswana", "Lesotho")
   ),

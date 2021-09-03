@@ -9,7 +9,7 @@ source("gen_crosstabs.R")
 res <- read_rds("output/divided.rds")
 crosstabs <- res$crosstabs
 category.sum <- res$cat.sum
-countries <- res$countries
+data.src.info <- res$data.src.info
 summary.table <- res$summary
 group.sizes <- res$group.sizes
 max.parties <- res$max.parties
@@ -56,19 +56,28 @@ ui <- navbarPage(title = "Divided Society Data",
        sidebarPanel(
          pickerInput("info.datasrc", 
                      label = "Data source", 
-                     sort(names(category.sum))
+                     sort(names(data.src.info))
          ),
          width = 2
        ),
        mainPanel(
-         h4("Countries included"),
+         h3("Countries"),
          textOutput("info.cntry.included"),
          h4("Countries excluded due to no (usable) party data"),
          textOutput("info.cntry.excluded.no_party"),
-         h4("Countries excluded due to not (usable) group data"),
+         h4("Countries excluded due to no (usable) group data"),
          textOutput("info.cntry.excluded.no_group"),
-         h4("Countries excluded to to low effective N"),
-         textOutput("info.cntry.excluded.low_n"),         
+         h4("Countries excluded due to low effective N"),
+         textOutput("info.cntry.excluded.low_n"),
+         h3("Questions"),
+         h4("Party"),
+         textOutput("info.var.party"),
+         h4("Language"),
+         textOutput("info.var.language"),
+         h4("Religion"),
+         textOutput("info.var.religion"),
+         h4("Ethnicity"),
+         textOutput("info.var.ethnicity"),
          width = 10
        )
      )
@@ -149,8 +158,13 @@ gen.group.size.names <- function(max.parties) {
   )
 }
 
-get.cat.sum.question <- function(data.src, var.name) {
-  category.sum[[data.src]][[var.name]]$question
+get.data.src.question <- function(data.src, var.name) {
+  q <- data.src.info[[data.src]][['questions']][[var.name]]
+  
+  if (is.null(q))
+    return("N/A")
+  
+  q
 }
 
 get.cat.sum.table <- function(category.sum, data.src, variable) {
@@ -159,9 +173,7 @@ get.cat.sum.table <- function(category.sum, data.src, variable) {
     srcs <- data.src
   
   res <- map_dfr(srcs, function(data.src) {
-    dfs <- map(category.sum[[data.src]], ~ .x$categories)
-    
-    bind_rows(dfs, .id = "Variable") %>%
+    bind_rows(category.sum[[data.src]], .id = "Variable") %>%
       mutate("Data Source" = data.src) %>%
       select(`Data Source`, everything())
   }) %>%
@@ -174,7 +186,7 @@ get.cat.sum.table <- function(category.sum, data.src, variable) {
 }
 
 get.country.list <- function(data.src, var.name) {
-  res <- paste(countries[[data.src]][[var.name]], collapse = ", ")
+  res <- paste(data.src.info[[data.src]]$countries[[var.name]], collapse = ", ")
   
   if (str_length(res) == 0)
     return ("None")
@@ -211,12 +223,15 @@ server <- function(input, output, session) {
     extensions = 'Buttons'
   )
   
-  output$catSumQuestion <- renderText(get.cat.sum.question(input$cat.datasrc, input$cat.var))
-  
   output$info.cntry.included <- renderText(get.country.list(input$info.datasrc, "included"))
   output$info.cntry.excluded.no_party <- renderText(get.country.list(input$info.datasrc, "no_party"))
   output$info.cntry.excluded.no_group <- renderText(get.country.list(input$info.datasrc, "no_group"))
   output$info.cntry.excluded.low_n <- renderText(get.country.list(input$info.datasrc, "low_n"))
+  
+  output$info.var.party <- renderText(get.data.src.question(input$info.datasrc, "Party"))
+  output$info.var.religion <- renderText(get.data.src.question(input$info.datasrc, "Religion"))
+  output$info.var.language <- renderText(get.data.src.question(input$info.datasrc, "Language"))
+  output$info.var.ethnicity <- renderText(get.data.src.question(input$info.datasrc, "Ethnicity"))
   
   sketch = htmltools::withTags(table(
     class = 'display compact',

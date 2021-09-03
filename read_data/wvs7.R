@@ -9,7 +9,7 @@ data.spec <- list(
   field.def = c(
     "Party" = "Q223",
     "Language" = "Q272",
-    "Religion" = "Q289",
+    "Religion" = "Q289CS9",
     "Ethnicity" = "Q290",
     "Country" = "B_COUNTRY_ALPHA",
     "Year" = "A_YEAR",
@@ -36,8 +36,8 @@ cat.defs <- list(
     "Missing" = c("Missing; Not available", "Not asked", "Don\ub4t know", "No answer")
   ),
   Religion = list(
-    "Other" = c("Other", "Other Christian (Pentecostal/Free church/Jehova...)", "Do not belong to a denomination"),
-    "Missing" = c("No answer/refused", "Don't know", "Other missing; Multiple answers Mail (EVS)")
+    "Other" = c("Non-religious", "Agnostic", "Atheist", "Other; nfd"),
+    "Missing" = c("No answer", "Dont know", "Other missing", "Item not included")
   ),
   Ethnicity = list(
     "Other" = c("Other, Non-Hispanic", "Two plus, non-Hispanic", "Cross breed", "Other Asian", "Other Africans", "Others"),

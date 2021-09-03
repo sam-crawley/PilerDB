@@ -2,10 +2,16 @@ data.spec <- list(
   file.name = "Divided/data/afrobarom/merged_r4_data.sav",
   file.type = 'sav',
   file.encoding = "latin1",
+  question.text = c(
+    "Party" = "If a presidential election were held tomorrow, which party’s candidate would you vote for?",
+    "Language" = "Which [Ghanaian/Kenyan/etc.] language is your home language?",
+    "Religion" = "What is your religion, if any?",
+    "Ethnicity" = "What is your tribe? You know, your ethnic or cultural group."
+  ),  
   skip.countries = c(),
   country.format = 'country.name',
   field.def = c(
-    "Party" = "Q86",
+    "Party" = "Q97",
     "Language" = "Q3",
     "Religion" = "Q90",
     "Ethnicity" = "Q79",
@@ -22,8 +28,9 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Missing", "Don't know", "Refused to answer", "Not Applicable"),
-    "Other" = c("Others", "Any winning party", "Any other than LCD", "Ind\xc2\xa0Ápendance")
+    "Missing" = c("Missing", "Don't know", "Refused to answer", "Would not vote"),
+    "Other" = c("Others", "Any winning party", "Any other than LCD", "Ind\xc2\xa0Ápendance", "Would vote for candidate and not party",
+                "An independent candidate", "An opposition candidate", "A person who can help the country/address problems/change th")
   ),
   Language = list(
     "Missing" = c("Missing"),

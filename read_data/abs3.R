@@ -1,6 +1,9 @@
 data.spec <- list(
   file.name = "Divided/data/asain barom/ABS3w.0.Merged/ABS3 merge20210506.sav",
   file.type = 'sav',
+  question.text = c(
+    "Religion" = "What is your religion?"
+  ),  
   skip.countries = list(
     no_party = c("China", "Singapore", "Vietnam")
   ),

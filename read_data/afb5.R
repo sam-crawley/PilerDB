@@ -1,14 +1,19 @@
 data.spec <- list(
   file.name = "Divided/data/afrobarom/merged-round-5-data-34-countries-2011-2013-last-update-july-2015.sav",
   file.type = 'sav',
+  question.text = c(
+    "Party" = "If a presidential election were held tomorrow, which party’s candidate would you vote for?",
+    "Language" = "Which language is your home language?",
+    "Religion" = "What is your religion, if any?",
+    "Ethnicity" = "What is your ethnic community, cultural group or tribe?"
+  ),  
   skip.countries = list(
     no_party = c('Eswatini'),
-    no_group = c("Sudan"),
-    low_n = c("Morocco", "Egypt")
+    no_group = c("Sudan")
   ),
   country.format = 'country.name',
   field.def = c(
-    "Party" = "Q89B",
+    "Party" = "Q99",
     "Language" = "Q2",
     "Religion" = "Q98A",
     "Ethnicity" = "Q84",
@@ -25,8 +30,8 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Missing", "Don't know", "Refused to answer", "Not Applicable"),
-    "Other" = c("Others")
+    "Missing" = c("Missing", "Don't know", "Refused to answer", "Undecided", "Would not vote"),
+    "Other" = c("Others", "Best capable candidate/party with best policy", "Party of the mayor / husband / brother / village chief")
   ),
   Language = list(
     "Missing" = c("Missing", "Don't know"),
