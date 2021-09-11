@@ -1,6 +1,9 @@
 data.spec <- list(
   file.name = "Divided/data/asain barom/W1 Merged Data/Wave.1_Data/Merge/Wave1_20170906.sav",
   file.type = 'sav',
+  question.text = c(
+    "Religion" = "What is your religion? [Exact question wording not supplied]"
+  ),
   skip.countries = list(
     no_party = c('China', 'Philippines'),
     no_group = c('Mongolia')

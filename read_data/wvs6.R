@@ -1,6 +1,12 @@
 data.spec <- list(
   file.name = "Divided/data/WVS/W6/WV6_Data_stata_v20201117.dta",
   file.type = 'dta',
+  question.text = c(
+    "Party" = "If there were a national election tomorrow, for which party on this list would you vote?",
+    "Religion" = "Do you belong to a religious denomination? (If yes) Which one?",
+    "Ethnicity" = "Ethnic group [exact question wording not supplied]",
+    "Language" = "What language do you normally speak at home?"
+  ),  
   skip.countries = list(
     no_party = c("Belarus", "China", "Kuwait", "Lebanon", "Qatar", "Trinidad & Tobago", "Uzbekistan"),
     no_group = c("Argentina", "Armenia", "Egypt", "Japan", "Jordan", "Kuwait", "Palestinian Territories", "Poland", "Slovenia", "Spain", "Tunisia", "Yemen"),
