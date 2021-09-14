@@ -3,7 +3,6 @@ data.spec <- list(
   file.type = 'sav',
   question.text = c(
     "Party" = "Which party do you most identify with/feel closest to? [Question wording varies by country]",
-    #"Language" = "What language do you speak at home?",
     "Religion" = "What is your present religion, if any? / How would you define yourself religiously? [Question wording varies by country]",
     "Ethnicity" = "Which ethnic [or tribal] group do you belong to?"
   ),

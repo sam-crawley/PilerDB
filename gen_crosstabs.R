@@ -38,7 +38,7 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
     }
   }
   
-  data.defs <- list.files(here("Divided/read_data"), pattern="*.R", full.names=T)
+  data.defs <- list.files(here("Divided/read_data"), pattern="*.R$", full.names=T)
   
   for (data.def in data.defs) {
     id <- toupper( str_match(data.def, "/(\\w+?).R$")[,2] )
