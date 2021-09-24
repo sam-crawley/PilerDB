@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "Divided/data/cses/Module 5/cses5.dta",
+  file.name = "Divided/datasets/cses/Module 5/cses5.dta",
   file.type = 'dta',
   skip.countries = list(
     no_group = c('Hungary', 'Portugal', "Greece", "Sweden")

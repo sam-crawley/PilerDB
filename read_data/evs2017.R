@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "Divided/data/evs/2017/ZA7500_v4-0-0.dta",
+  file.name = "Divided/datasets/evs/2017/ZA7500_v4-0-0.dta",
   file.type = 'dta',
   question.text = c(
     "Party" = "Which (political) party appeals to you most?",

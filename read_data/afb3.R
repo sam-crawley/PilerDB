@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "Divided/data/afrobarom/merged_r3_data.sav",
+  file.name = "Divided/datasets/afrobarom/merged_r3_data.sav",
   file.type = 'sav',
   file.encoding = "latin1",
   question.text = c(

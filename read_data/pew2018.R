@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "Divided/data/pew/2018/Pew Research Global Attitudes Spring 2018 Dataset WEB FINAL.sav",
+  file.name = "Divided/datasets/pew/2018/Pew Research Global Attitudes Spring 2018 Dataset WEB FINAL.sav",
   file.type = 'sav',
   question.text = c(
     "Party" = "Which party do you most identify with/feel closest to? [Question wording varies by country]",

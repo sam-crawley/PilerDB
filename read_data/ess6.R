@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "Divided/data/ess/Round 6/ESS6e02_4.dta",
+  file.name = "Divided/datasets/ess/Round 6/ESS6e02_4.dta",
   file.type = 'dta',
   question.text = c(
     "Party" = "Party voted for in last national election [Which party did you vote for in that election?]",
