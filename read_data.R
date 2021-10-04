@@ -99,29 +99,55 @@ load.data.by.id <- function(id, process = T, ignore.skip.countries = F) {
 check.data.by.id <- function(id) {
   data <- load.data.by.id(id, ignore.skip.countries = T)
   
-  check.data(data)
+  file <- paste0(here("Divided/read_data/"), tolower(id), ".R")
+  
+  e <- new.env()
+  
+  source(file, local = e)  
+  
+  check.data(data, e$data.spec$skip.countries)
 }
 
-# Do some checks on the data to find out if all countries included have enough data
-check.data <- function(data) {
+get.data.def.list <- function() {
+  list.files(here("Divided/read_data"), pattern="*.R$", full.names=T)
+}
+
+get.data.def.id <- function(filename) {
+  toupper( str_match(filename, "/(\\w+?).R$")[,2] )
+}
+
+# Check the skip.countries list to see if it contains the correct list of countries
+# Note, we assume countries should only be excluded if they have no (non-missing) parties and/or groups
+#  (This doesn't necessarily mean we can calculate Gallagher, etc)
+# TODO: check low_n skipped countries
+check.data <- function(data, skip.countries) {
   # Check for countries without Party data
   res <- data %>% 
     group_by(Country) %>% 
-    mutate(Party = fct_lump_prop(Party, 0.02)) %>%
-    summarise(party.resp.count = sum(! Party %in% c("Missing", "Other"))) %>%
+    summarise(party.resp.count = sum(Party != "Missing")) %>%
     filter(party.resp.count == 0)
   
-  if (nrow(res) > 0)
-    warning("The following countries have no Party data (they should be added to skip.countries): ", paste(res %>% pull(Country), collapse = ", "))
+  no_party_list = res %>% pull(Country)
   
-  missing.all <- keep(unique(data$Country), function(c) {
+  diff.list <- function(a, b) {
+    setdiff(a, b) %>% discard(~ .x %in% global.country.skip)
+  }
+  
+  no_country_additional <- diff.list(skip.countries[['no_party']], no_party_list)
+  no_country_missing <- diff.list(no_party_list, skip.countries[['no_party']])
+  if (length(no_country_additional > 0)) {
+    cat("The following countries are on skip.countries no_party list, but should not be: ", paste(no_country_additional, collapse = ", "), "\n")
+  }
+  if (length(no_country_missing > 0)) {
+    cat("The following countries are missing from skip.countries no_party list: ", paste(no_country_missing, collapse = ", "), "\n")
+  }      
+  
+  no_group_list <- keep(unique(data$Country), function(c) {
     d <- data %>% filter(Country == c) 
     
     groups <- map(group.names, function(g) {
-      f <- fct_lump_prop(d[[g]], 0.02)
-      
-      res <- fct_count(f) %>% 
-        filter(! f %in% c("Missing", "Other"))
+      res <- fct_count(d[[g]]) %>%
+        filter(f != "Missing")
       
       if (nrow(res) <= 1)
         return (NULL)
@@ -132,11 +158,30 @@ check.data <- function(data) {
     length(unlist(groups)) == 0
   })
   
-  if (length(missing.all) > 0)
-    warning("The following counrties do not appear to have any usable group data: ", paste(missing.all, collapse = ", "))
+  no_group_additional <- diff.list(skip.countries[['no_group']], no_group_list)
+  no_group_missing <- diff.list(no_group_list, skip.countries[['no_group']])
+  if (length(no_group_additional > 0)) {
+    cat("The following countries are on skip.countries no_group list, but should not be: ", paste(no_group_additional, collapse = ", "), "\n")
+  }
+  if (length(no_group_missing > 0)) {
+    cat("The following countries are missing from skip.countries no_group list: ", paste(no_group_missing, collapse = ", "), "\n")
+  }
 }
 
-### Some util functions
+# Check all datasets to see if the list of skip countries matches what we think should be skipped
+check.all.datasets <- function() {
+  data.defs <- get.data.def.list()
+  
+  for (data.def in data.defs) {
+    id <- get.data.def.id(data.def)
+    
+    cat("Checking", id, "\n")
+    
+    check.data.by.id(id)
+  }
+}
+
+### Util functions that can be called when loading data (i.e. as part of 'fixups')
 
 # Coalesce a list of variables into a single column
 #  (Needed because ESS has separate columns per country)

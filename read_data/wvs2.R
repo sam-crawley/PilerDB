@@ -7,8 +7,7 @@ data.spec <- list(
     "Ethnicity" = "Ethnic group [exact question wording not supplied]"
   ),
   skip.countries = list(
-    no_party = c('Argentina', 'China', 'Russia', 'South Korea'),
-    no_group = c("Belarus", "Japan", "Poland", "Spain", "Turkey")
+    no_party = c('Argentina', 'China', 'Russia', 'South Korea')
   ),
   country.format = 'country.name',
   field.def = c(

@@ -8,8 +8,7 @@ data.spec <- list(
     "Ethnicity" = "Which ethnic [or tribal] group do you belong to?"
   ),
   skip.countries = list(
-    no_party = c("China"),
-    no_group = c("Greece", "Japan")
+    no_party = c("China")
   ),
   country.format = 'country.name',
   field.def = c(
@@ -25,7 +24,10 @@ data.spec <- list(
     # Coalece necessary vars
     data <- coalese.vars(data, str_subset(names(data), regex("^Q109", ignore_case = T)), "relig")
     
-    data <- coalese.vars(data, c("q126us", str_subset(names(data), regex("^Q131", ignore_case = T))), "prty")
+    party.vars <- c("q126us", str_subset(names(data), regex("^Q131", ignore_case = T))) %>%
+      discard(~ .x %in% c('Q131CHI')) # China removed since they don't ask about party choice
+    
+    data <- coalese.vars(data, party.vars, "prty")
     
     eth.vars <- str_subset(names(data), "^Q119") %>% discard(~.x %in% c("Q119CAN", "Q119RSAb"))
     data <- coalese.vars(data, eth.vars, "eth")

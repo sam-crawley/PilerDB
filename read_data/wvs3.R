@@ -9,7 +9,6 @@ data.spec <- list(
   ),
   skip.countries = list(
     no_party = c('China', 'Nigeria', 'Pakistan', 'South Korea'),
-    no_group = c("Argentina", "Croatia", "Japan", "Poland", "Slovenia", "Turkey", "United Kingdom"),
     low_n = c("Montenegro")
   ),
   country.format = 'country.name',

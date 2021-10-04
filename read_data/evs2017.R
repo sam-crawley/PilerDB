@@ -6,7 +6,6 @@ data.spec <- list(
     "Religion" = "Do you belong to a religious denomination? [If yes] Which one?"
   ),  
   skip.countries = list(
-    no_group = c("Armenia", "Azerbaijan", "Croatia", "Czechia", "Denmark", "Finland", "Italy", "Poland", "Portugal", "Serbia"),
     low_n = c("Estonia", "Belarus")
   ),
   country.format = 'iso2c',

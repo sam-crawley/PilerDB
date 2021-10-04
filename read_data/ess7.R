@@ -7,9 +7,7 @@ data.spec <- list(
     "Language" = "What language or languages do you speak most often at home? [First mentioned]"
   ),  
   file.encoding = "latin1",
-  skip.countries = list(
-    no_group = c("Czechia", "Denmark", "France", "Portugal", "Slovenia")
-  ),
+  skip.countries = list(),
   country.format = 'iso2c',
   field.def = c(
     "Party" = "prtvt",

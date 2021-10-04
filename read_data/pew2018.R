@@ -8,7 +8,6 @@ data.spec <- list(
   ),
   skip.countries = list(
     no_party = c("Japan", "South Korea"),
-    no_group = c("Greece", "Poland", "Tunisia"),
     low_n = c("Philippines")
   ),
   country.format = 'country.name',

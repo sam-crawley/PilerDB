@@ -5,9 +5,7 @@ data.spec <- list(
   question.text = c(
     "Party" = "Do you usually think of yourself as close to any particular political party? [If yes] Which party is that?"
   ),
-  skip.countries = list(
-    no_group = c("Botswana", "Lesotho")
-  ),
+  skip.countries = list(),
   country.format = 'country.name',
   field.def = c(
     "Party" = "party",

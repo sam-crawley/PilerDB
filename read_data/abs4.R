@@ -12,8 +12,7 @@ data.spec <- list(
     "Ethnicity" = "What's your racial (ethnic) background?"
   ),  
   skip.countries = list(
-    no_party = c("China", "Vietnam"),
-    no_group = c("Cambodia", "Japan", "Mongolia", "Thailand")
+    no_party = c("China", "Vietnam")
   ),
   country.format = 'country.name',
   field.def = c(

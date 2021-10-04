@@ -8,7 +8,6 @@ data.spec <- list(
   ),
   skip.countries = list(
     no_party = c("South Korea", "Vietnam"),
-    no_group = c("Italy","Poland", "Tunisia", "Turkey"),
     low_n = c("Philippines", "Chile", "Peru")
   ),
   country.format = 'country.name',
@@ -28,7 +27,10 @@ data.spec <- list(
     
     data <- coalese.vars(data, rel.vars, "relig")
     
-    data <- coalese.vars(data, str_subset(names(data), regex("^D_PTYID_", ignore_case = T)), "prty")
+    party.vars <- str_subset(names(data), regex("^D_PTYID_", ignore_case = T)) %>%
+      discard(~ .x %in% c('d_ptyid_vietnam')) # Vietnam removed since they don't ask about party choice
+    
+    data <- coalese.vars(data, party.vars, "prty")
     
     data <- coalese.vars(data, c(str_subset(names(data), "^d_ethnicity"), "d_race_us"), "eth")
     

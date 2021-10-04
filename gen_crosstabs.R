@@ -38,10 +38,10 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
     }
   }
   
-  data.defs <- list.files(here("Divided/read_data"), pattern="*.R$", full.names=T)
+  data.defs <- get.data.def.list()
   
   for (data.def in data.defs) {
-    id <- toupper( str_match(data.def, "/(\\w+?).R$")[,2] )
+    id <- get.data.def.id(data.def)
     
     if (! is.null(ids.to.load)) {
       if (! id %in% ids.to.load)
