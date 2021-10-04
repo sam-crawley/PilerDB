@@ -1,6 +1,7 @@
 library(tidyverse)
 library(haven)
 library(countrycode)
+library(here)
 
 # Data Spec fields
 # * file.name = file name to load
@@ -82,7 +83,10 @@ read.div.data <- function(data.spec, raw = F, ignore.skip.countries = F) {
 }
 
 load.data.by.id <- function(id, process = T, ignore.skip.countries = F) {
-  file <- paste0(here("Divided/read_data/"), tolower(id), ".R")
+  file <- paste0(here("Divided/read_data"), "/", tolower(id), ".R")
+  
+  if (! file.exists(file))
+    stop("Cannot find data.def file: ", file)
   
   e <- new.env()
   
@@ -99,7 +103,7 @@ load.data.by.id <- function(id, process = T, ignore.skip.countries = F) {
 check.data.by.id <- function(id) {
   data <- load.data.by.id(id, ignore.skip.countries = T)
   
-  file <- paste0(here("Divided/read_data/"), tolower(id), ".R")
+  file <- paste0(here("Divided/read_data/"), "/", tolower(id), ".R")
   
   e <- new.env()
   
@@ -124,7 +128,7 @@ check.data <- function(data, skip.countries) {
   # Check for countries without Party data
   res <- data %>% 
     group_by(Country) %>% 
-    summarise(party.resp.count = sum(Party != "Missing")) %>%
+    summarise(party.resp.count = sum(! Party %in% c("Missing", "Other"))) %>%
     filter(party.resp.count == 0)
   
   no_party_list = res %>% pull(Country)
@@ -147,7 +151,7 @@ check.data <- function(data, skip.countries) {
     
     groups <- map(group.names, function(g) {
       res <- fct_count(d[[g]]) %>%
-        filter(f != "Missing")
+        filter(! f %in% c("Missing", "Other"))
       
       if (nrow(res) <= 1)
         return (NULL)
