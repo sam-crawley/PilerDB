@@ -146,12 +146,12 @@ check.data <- function(data, skip.countries) {
     cat("The following countries are missing from skip.countries no_party list: ", paste(no_country_missing, collapse = ", "), "\n")
   }      
   
-  no_group_list <- keep(unique(data$Country), function(c) {
+  no_group_list <- keep(unique(data$Country) %>% discard(~ .x %in% no_party_list), function(c) {
     d <- data %>% filter(Country == c) 
     
     groups <- map(group.names, function(g) {
       res <- fct_count(d[[g]]) %>%
-        filter(! f %in% c("Missing", "Other"))
+        filter(! f %in% c("Missing", "Other") & n != 0)
       
       if (nrow(res) <= 1)
         return (NULL)

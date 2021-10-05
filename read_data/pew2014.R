@@ -1,0 +1,75 @@
+data.spec <- list(
+  file.name = "Divided/datasets/pew/2014/Pew Research Global Attitudes Spring 2014 Dataset for Web.sav",
+  file.type = 'sav',
+  question.text = c(
+    "Party" = "Which party do you most identify with/feel closest to? [Question wording varies by country]",
+    "Language" = "What is your home language? / Which language do you, yourself, usually speak at home?  (If you speak more than one language, which one do you speak most often?)",
+    "Religion" = "What is your current/present religion, if any?? [Question wording varies by country]",
+    "Ethnicity" = "Which ethnic [or tribal] group do you belong to?"
+  ),
+  skip.countries = list(
+    no_party = c("China", "Mexico", "Thailand", "Vietnam"),
+    no_group = c("Tunisia")
+  ),
+  country.format = 'country.name',
+  field.def = c(
+    "Party" = "prty",
+    "Language" = "lang",
+    "Religion" = "relig",
+    "Ethnicity" = "eth",
+    "Weight" = "weight",
+    "Country" = "COUNTRY",
+    "Year" = NA
+  ),
+  pre_fixups = function(data) {
+    # Coalece necessary vars
+    data <- coalese.vars(data, c('RELIG', str_subset(names(data), regex("^QREL", ignore_case = T))), "relig")
+    
+    party.vars <- c("PARTY", str_subset(names(data), regex("^Q158", ignore_case = T))) %>%
+      discard(~ .x %in% c('Q158CHI', 'Q158MEX')) # China / Mexico removed since they don't ask about party choice
+    
+    data <- coalese.vars(data, party.vars, "prty")
+    
+    eth.vars <- str_subset(names(data), "^Q152")
+    data <- coalese.vars(data, eth.vars, "eth")
+    
+    data <- coalese.vars(data, c("UKR11"), "lang")
+    
+    data
+  },
+  fixups = function(data) {
+    data <- data %>% mutate(Year = 2014)
+    
+    for (var in main.vars) {
+      levels(data[[var]]) <- str_remove(levels(data[[var]]), "\\s*\\(DO NOT READ\\)")
+    }    
+    
+    data
+  }  
+)
+
+cat.defs <- list(
+  Party = list(
+    "Missing" = c("Refused", "Don't know", "None/No party", "None/No party (Volunteered)", "None", "None (Volunteered)",
+                  "None/No party  (Volunteered)", "None\\No party (Volunteered)", "None/No party", "None / No party (Volunteered)",
+                  "None/No party (Volunteered)", "Would not vote (Volunteered)", "Would not vote (Volunteered)",
+                  "Don\u2019t know/haven\u2019t decided yet (Volunteered)", "Don t know", "No preference (Volunteered)", "Blank", "Missing",
+                  "Don\u2019t know", "None / No party", "Dont know", "Would not vote  (Volunteered)", "Blank /null vote (Volunteered)"),
+    "Other" = c("Independent", "Other party (Volunteered)", "Other", "Other   (Volunteered)", "Other (Volunteered)",
+                "Other  (Volunteered)", "Other (SPECIFY)", "Other party (SPECIFY)", "A party with credible candidate (Volunteered)",
+                "Any party (Volunteered)", "Independent candidate/Azaad Umeedwaar")
+  ),
+  Language = list(
+    "Missing" = c("Missing"),
+    "Other" = c("Other")
+  ),
+  Religion = list(
+    "Missing" = c("Don\u2019t know", "Don't know", "Nothing in particular", "Refused", "Don't Know/Refused"),
+    "Other" = c("Something else", "Agnostic (not sure if there is a God)", "Something else (SPECIFY)", "Atheist (do not believe in God)",
+                "Something else (Volunteered)")
+  ),
+  Ethnicity = list(
+    "Missing" = c("Missing", "Refused", "Don't know", "Don\u2019t know"),
+    "Other" = c("Other", "Others")
+  )
+)
