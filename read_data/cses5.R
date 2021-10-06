@@ -2,6 +2,7 @@ data.spec <- list(
   file.name = "Divided/datasets/cses/Module 5/cses5.dta",
   file.type = 'dta',
   skip.countries = list(),
+  split.by.year = T,
   country.format = 'country.name',
   field.def = c(
     "Party" = "E3024_3",
@@ -10,7 +11,7 @@ data.spec <- list(
     "Ethnicity" = NA,
     "Weight" = "E1010_2",
     "Country" = "E1006_NAM",
-    "Year" = "E1034"
+    "Year" = "E1008"
   ),
   fixups = function(data) {
     # Strip out country prefixes from levels
