@@ -49,7 +49,7 @@ cat.defs <- list(
   Party = list(
     "Missing" = c("Refused", "Don't know","None/No party (Volunteered)", "None", "None (Volunteered)", "None / No party (Volunteered)",
                   "None/No party (Volunteered)", "Would not vote (Volunteered)", "Would not vote (Volunteered)", "Blank /null vote (Volunteered)",
-                  "No preference (Volunteered)", "Don't know", "None / No party", "Missing", "Will not vote (Volunteered)", "Nothing (Volunteered)",
+                  "No preference (Volunteered)", "Don't know", "None / No party", "Will not vote (Volunteered)", "Nothing (Volunteered)",
                   "None\\No Party (Volunteered)", "Blank (Volunteered)", "Don\u2019t know", "Don\u2019t know/haven't decided yet", "Undecided"),
     "Other" = c("Independent", "Other party (Volunteered)", "Other", "Other (Volunteered)", "Independent candidate",
                 "Independent candidate/Azaad Umeedwaar", "Other party")
@@ -60,7 +60,7 @@ cat.defs <- list(
     "Other" = c("Something else", "Agnostic (not sure if there is a God)", "Atheist (do not believe in God)", "Other religion (Volunteered)",
                 "No religion/not a believer/Atheist/Agnostic (Volunteered)", "No believer / atheist / agnostic (Volunteered)",
                 "No religion/not a believer/atheist/agnostic (Volunteered)", "Other (Volunteered)",
-                "Other", "No specific religious belief/atheist/not religious", "No religion", "Without religion/Atheist",
+                "Other", "No religion", "Without religion/Atheist",
                 "A believer of no religion in particular", "No religion/not a believer/atheist/agnostic")
   ),
   Ethnicity = list(
