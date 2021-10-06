@@ -88,7 +88,7 @@ ui <- navbarPage(title = "Divided Society Data",
        sidebarPanel(
          pickerInput("cat.datasrc", 
                      label = "Data source", 
-                     sort(unique(summary.table$`Data Source`)), 
+                     sort(names(data.src.info)),
                      multiple = T,
                      options = list(
                        `none-selected-text` = "All"

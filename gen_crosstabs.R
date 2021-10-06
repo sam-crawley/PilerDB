@@ -29,7 +29,7 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
     if (! is.null(ids.to.load)) {
       # Remove ids.to.load from existing data
       for (tab in names(tabs)) {
-        if (tabs[[tab]]$Summary$general$`Data Source` %in% ids.to.load)
+        if (tabs[[tab]]$Summary$general$`Data Source Orig` %in% ids.to.load)
           tabs[[tab]] <- NULL
       }
       
@@ -89,10 +89,8 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL) 
   # Do common processing of dataset
   data <- process.data(data, cat.defs)
   
-  countries <- data %>%
-    filter(! Country %in% global.country.skip) %>%
-    pull(Country) %>%
-    unique()
+  data <- data %>%
+    filter(! Country %in% global.country.skip)
   
   # Split data up by country
   split.factor <- data$Country
@@ -106,6 +104,7 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL) 
   # (Produces a list of lists, keyed by country+data.source+year)
   res <- map(names(data.by.country), function(key) {
     cntry <- key
+    data.source.orig = data.source
     
     if (! is.null(wave.var)) {
       splt <- str_split(key, "\\.", simplify = T)
@@ -113,7 +112,7 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL) 
       data.source <- paste0(data.source, splt[[2]])
     }
     
-    gen.single.country.data(data.by.country[[key]], cntry, data.source)
+    gen.single.country.data(data.by.country[[key]], cntry, data.source, data.source.orig)
   })
   
   res <- set_names(res, map_chr(res, ~ .x$Summary$general$ID))
@@ -121,7 +120,7 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL) 
   return(res)
 }
 
-gen.single.country.data <- function(d, cntry, data.source) {
+gen.single.country.data <- function(d, cntry, data.source, data.source.orig) {
   
   country.orig <- d %>% distinct(Country.orig) %>% pull(Country.orig)
   
@@ -150,6 +149,7 @@ gen.single.country.data <- function(d, cntry, data.source) {
       'ID' = paste(cntry, data.source, year),
       'Country' = cntry,
       'Data Source' = data.source,
+      'Data Source Orig' = data.source.orig,
       'Year' = year,
       'Sample Size' = nrow(d),
       'Group Basis' = group.basis,

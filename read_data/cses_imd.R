@@ -2,7 +2,7 @@ data.spec <- list(
   file.name = "Divided/datasets/cses/IMD/cses_imd.dta",
   file.type = 'dta',
   skip.countries = list(
-    no_group = c("Denmark", "Lithuania")
+    no_group = c("Denmark", "Lithuania", "Italy")
   ),
   wave_var = "module",
   country.format = 'country.name',
@@ -17,9 +17,9 @@ data.spec <- list(
   ),
   fixups = function(data) {
     # Strip out country prefixes from levels
-    #levels(data$Party) <- str_remove(levels(data$Party), "^\\d+\\. \\w+ - \\s*")
+    levels(data$Party) <- str_remove(levels(data$Party), "^\\d+\\. \\w+ - \\s*")
     
-    for (var in c("Language", "Religion")) {
+    for (var in c("Language", "Religion", "Ethnicity")) {
       levels(data[[var]]) <- str_remove(levels(data[[var]]), "^\\d+\\. ")
     }
     
@@ -36,17 +36,21 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("999997. VOLUNTEERED: REFUSED", "999998. VOLUNTEERED: DON'T KNOW", "999999. MISSING"),
-    "Other" = c("999989. INDEPENDENT CANDIDATE", "999990. OTHER LEFT WING CANDIDATE/PARTY (NOT FURTHER SPECIFIED)", 
-                "999991. OTHER RIGHT WING CANDIDATE/PARTY (NOT FURTHER SPECIFIED)", "999992. OTHER CANDIDATE/PARTY (NOT FURTHER SPECIFIED)")
+    "Missing" = c("9999997. VOLUNTEERED: REFUSED", "9999998. VOLUNTEERED: DON'T KNOW", "9999999. MISSING", "9999988. NONE OF THE CANDIDATES PARTIES"),
+    "Other" = c("9999989. INDEPENDENT CANDIDATE", "9999990. OTHER LEFT WING CANDIDATE/PARTY", 
+                "9999991. OTHER RIGHT WING CANDIDATE/PARTY", "9999992. OTHER CANDIDATE/PARTY (NOT FURTHER SPECIFIED)")
   ),
   Language = list(
     "Missing" = c("VOLUNTEERED: REFUSED", "VOLUNTEERED: DON'T KNOW", "MISSING"),
-    "Other" = c("[SEE ELECTION STUDY NOTES]", "OTHER: NOT SPECIFIED")
+    "Other" = c("OTHER: NOT SPECIFIED", "OTHER: TWO OR MORE LANGUAGES", "OTHER: LOCAL DIALECT", "OTHER: PACIFIC ISLAND LANGUAGE",
+                "OTHER: FIRST PEOPLES / INDIGENOUS LANGUAGE")
   ),
   Religion = list(
     "Missing" = c("VOLUNTEERED: REFUSED", "VOLUNTEERED: DON'T KNOW", "MISSING"),
-    "Other" = c("INDEPENDENT, OTHER [SEE ELECTION STUDY NOTES]", "AGNOSTIC", "ATHEIST", "EHTNORELIGIONIST, OTHER [SEE ELECTION STUDY NOTES]", "NONE",
-                "[SEE ELECTION STUDY NOTES]", "OTHER: NOT SPECIFIED")
+    "Other" = c("AGNOSTICS", "NON-BELIEVERS", "ETHNORELIGIONS", "INDIGENOUS", "OTHER: NOT SPECIFIED")
+  ),
+  Ethnicity = list(
+    "Missing" = c("VOLUNTEERED: REFUSED", "VOLUNTEERED: DON'T KNOW", "MISSING"),
+    "Other" = c("OTHER: NOT SPECIFIED", "MIXED")
   )
 )
