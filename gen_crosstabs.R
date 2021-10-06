@@ -4,6 +4,7 @@ library(openxlsx)
 library(here)
 library(StatMatch)
 library(entropy)
+library(rlist)
 
 source(here("Divided/read_data.R"))
 
@@ -57,7 +58,7 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
     data <- read.div.data(e$data.spec)
     
     cat.sum[[id]] <- gen.category.summary(data, e$cat.defs)
-    src.tabs <- gen.country.crosstabs(data, e$cat.defs, id, wave.var = e$data.spec$wave_var)
+    src.tabs <- gen.country.crosstabs(data, e$cat.defs, id, wave.var = e$data.spec$wave_var, split.by.year = e$data.spec$split.by.year)
     data.src.info[[id]] <- get.data.src.info(data, e$data.spec)
     
     tabs <- append(tabs, src.tabs)
@@ -85,7 +86,10 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
 # Produce a data structure for a single dataset that includes crosstabs for each country
 #  At this level, we should only be doing summarising that requires access to the original dataset
 #  (Because the idea is that the original data will not be available after this point)
-gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL) {
+gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL, split.by.year = F) {
+  if (is.null(split.by.year))
+    split.by.year = F
+  
   # Do common processing of dataset
   data <- process.data(data, cat.defs)
   
@@ -93,9 +97,12 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL) 
     filter(! Country %in% global.country.skip)
   
   # Split data up by country
-  split.factor <- data$Country
+  split.factor <- list(data$Country)
   if (! is.null(wave.var)) {
-    split.factor <- list(data$Country, data[[wave.var]])
+    split.factor <- list.append(split.factor, data[[wave.var]])
+  }
+  if (split.by.year) {
+    split.factor <- list.append(split.factor, data$Year)
   }
   
   data.by.country <- split(data, split.factor, drop = T)
@@ -105,14 +112,21 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL) 
   res <- map(names(data.by.country), function(key) {
     cntry <- key
     data.source.orig = data.source
+    year <- NULL
     
+    splt <- str_split(key, "\\.", simplify = T)
+    cntry <- splt[[1]]
+    
+    splt.idx <- 2
     if (! is.null(wave.var)) {
-      splt <- str_split(key, "\\.", simplify = T)
-      cntry <- splt[[1]]
-      data.source <- paste0(data.source, splt[[2]])
+      data.source <- paste0(data.source, splt[[splt.idx]])
+      splt.idx <- splt.idx+1
+    }
+    if (split.by.year) {
+      year <- as.integer(splt[[splt.idx]])
     }
     
-    gen.single.country.data(data.by.country[[key]], cntry, data.source, data.source.orig)
+    gen.single.country.data(data.by.country[[key]], cntry, data.source, data.source.orig, year)
   })
   
   res <- set_names(res, map_chr(res, ~ .x$Summary$general$ID))
@@ -120,7 +134,7 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL) 
   return(res)
 }
 
-gen.single.country.data <- function(d, cntry, data.source, data.source.orig) {
+gen.single.country.data <- function(d, cntry, data.source, data.source.orig, year = NULL) {
   
   country.orig <- d %>% distinct(Country.orig) %>% pull(Country.orig)
   
@@ -136,7 +150,9 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig) {
   
   names(tables) <- group.names
   
-  year <- max(as.numeric(d$Year))
+  if (is.null(year))
+    year <- max(as.numeric(d$Year), na.rm = T)
+  
   cor = calc.correlations(d)
   cor.wt = calc.correlations(d, use.weights = T)
   cor.nomiss = calc.correlations(d, drop.cats = T)
@@ -355,6 +371,7 @@ calc.summary.data <- function(res) {
     #cat(orig.sum.data$general$`Data Source`, "\n")
     
     sum <- orig.sum.data$general
+    sum$`Data Source Orig` <- NULL
     sum$Gallagher <- round(sum$Gallagher, 2)
     sum$`Loosmore Hanby` <- round(sum$`Loosmore Hanby`, 2)
     sum$cor <- calc.group.basis(orig.sum.data$cor, ret.max.val = T)

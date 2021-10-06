@@ -5,6 +5,7 @@ data.spec <- list(
     no_group = c("Denmark", "Lithuania", "Italy")
   ),
   wave_var = "module",
+  split.by.year = T,
   country.format = 'country.name',
   field.def = c(
     "Party" = "IMD3005_3",
@@ -13,7 +14,7 @@ data.spec <- list(
     "Ethnicity" = "IMD2010",
     "Weight" = "IMD1010_1",
     "Country" = "IMD1006_NAM",
-    "Year" = "IMD1013_Y"
+    "Year" = "IMD1008_YEAR"
   ),
   fixups = function(data) {
     # Strip out country prefixes from levels
@@ -29,7 +30,7 @@ data.spec <- list(
       IMD1008_MOD_3 == 1 ~ 3,
       IMD1008_MOD_4 == 1 ~ 4
     ))
-    
+
     data
   }  
 )

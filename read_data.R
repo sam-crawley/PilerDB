@@ -11,10 +11,17 @@ library(here)
 #               (names should be ones from field.names)
 #               For the main vars, if the field is missing from the dataset, it should be set
 #               to NA
+# * wave_var = for multiwave datasets, this variable in the data indicates the wave/module
+#             Data is split based on this variable, and the value of the variable is appended
+#             to the data source ID (meaning each wave appears as a different data source)
+# * split_by_year = logical. If true, splits out data by the value of the Year variable
+#                   Some datasets (CSES) contain multiple surveys for the same country,
+#                   so this separates them out.
 # * country.format = the original format of the country (see countrycode::codelist)
 # * country.custom = names vector to be passed to custom_match parameter of countrycode()
 # * skip.countries = list of countries to skip completely (using full country.name text)
 # * fixups = a function to apply some custom fixups to the data before returning it
+# * pre_fixups = a function to apply custom fixups to the data *before* other processing is done
 
 group.names <- c("Language", "Religion", "Ethnicity")
 main.vars <- c("Party", group.names)
