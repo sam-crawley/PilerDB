@@ -57,7 +57,7 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
     data <- read.div.data(e$data.spec)
     
     cat.sum[[id]] <- gen.category.summary(data, e$cat.defs)
-    src.tabs <- gen.country.crosstabs(data, e$cat.defs, id)
+    src.tabs <- gen.country.crosstabs(data, e$cat.defs, id, wave.var = e$data.spec$wave_var)
     data.src.info[[id]] <- get.data.src.info(data, e$data.spec)
     
     tabs <- append(tabs, src.tabs)
@@ -85,7 +85,7 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
 # Produce a data structure for a single dataset that includes crosstabs for each country
 #  At this level, we should only be doing summarising that requires access to the original dataset
 #  (Because the idea is that the original data will not be available after this point)
-gen.country.crosstabs <- function(data, cat.defs, data.source) {
+gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL) {
   # Do common processing of dataset
   data <- process.data(data, cat.defs)
   
@@ -94,60 +94,77 @@ gen.country.crosstabs <- function(data, cat.defs, data.source) {
     pull(Country) %>%
     unique()
   
+  # Split data up by country
+  split.factor <- data$Country
+  if (! is.null(wave.var)) {
+    split.factor <- list(data$Country, data[[wave.var]])
+  }
+  
+  data.by.country <- split(data, split.factor, drop = T)
+  
   # Create crosstabs for each country
   # (Produces a list of lists, keyed by country+data.source+year)
-  res <- map(countries, function(cntry) {
-    #cat(cntry, "\n")
-    d <- data %>% filter(Country == cntry)
+  res <- map(names(data.by.country), function(key) {
+    cntry <- key
     
-    country.orig <- d %>% distinct(Country.orig) %>% pull(Country.orig)
-
-    tables <- map(group.names, function(var) {
-      if (all( d[var] == "Missing" )) {
-        return (NULL)
-      }
-      
-      t <- d %>% 
-        tabyl(Party, .data[[var]], show_missing_levels = F)
-      t
-    })
+    if (! is.null(wave.var)) {
+      splt <- str_split(key, "\\.", simplify = T)
+      cntry <- splt[[1]]
+      data.source <- paste0(data.source, splt[[2]])
+    }
     
-    names(tables) <- group.names
-    
-    year <- max(as.numeric(d$Year))
-    cor = calc.correlations(d)
-    cor.wt = calc.correlations(d, use.weights = T)
-    cor.nomiss = calc.correlations(d, drop.cats = T)
-    cor.nomiss.wt = calc.correlations(d, drop.cats = T, use.weights = T)
-    
-    group.basis <- calc.group.basis(cor.nomiss)
-    
-    tables$Summary <- list(
-      general = tibble(
-        'ID' = paste(cntry, data.source, year),
-        'Country' = cntry,
-        'Data Source' = data.source,
-        'Year' = year,
-        'Sample Size' = nrow(d),
-        'Group Basis' = group.basis,
-        'Gallagher' = calc.gallagher(d, group.basis),
-        'Loosmore Hanby' = calc.gallagher(d, group.basis, loosemore = T)
-      ),
-      cor = cor,
-      cor.wt = cor.wt,
-      cor.nomiss = cor.nomiss,
-      cor.nomiss.wt = cor.nomiss.wt,
-      country.orig = country.orig
-      
-    )
-    
-    tables
-    
+    gen.single.country.data(data.by.country[[key]], cntry, data.source)
   })
   
   res <- set_names(res, map_chr(res, ~ .x$Summary$general$ID))
 
   return(res)
+}
+
+gen.single.country.data <- function(d, cntry, data.source) {
+  
+  country.orig <- d %>% distinct(Country.orig) %>% pull(Country.orig)
+  
+  tables <- map(group.names, function(var) {
+    if (all( d[var] == "Missing" )) {
+      return (NULL)
+    }
+    
+    t <- d %>% 
+      tabyl(Party, .data[[var]], show_missing_levels = F)
+    t
+  })
+  
+  names(tables) <- group.names
+  
+  year <- max(as.numeric(d$Year))
+  cor = calc.correlations(d)
+  cor.wt = calc.correlations(d, use.weights = T)
+  cor.nomiss = calc.correlations(d, drop.cats = T)
+  cor.nomiss.wt = calc.correlations(d, drop.cats = T, use.weights = T)
+  
+  group.basis <- calc.group.basis(cor.nomiss)
+  
+  tables$Summary <- list(
+    general = tibble(
+      'ID' = paste(cntry, data.source, year),
+      'Country' = cntry,
+      'Data Source' = data.source,
+      'Year' = year,
+      'Sample Size' = nrow(d),
+      'Group Basis' = group.basis,
+      'Gallagher' = calc.gallagher(d, group.basis),
+      'Loosmore Hanby' = calc.gallagher(d, group.basis, loosemore = T)
+    ),
+    cor = cor,
+    cor.wt = cor.wt,
+    cor.nomiss = cor.nomiss,
+    cor.nomiss.wt = cor.nomiss.wt,
+    country.orig = country.orig
+    
+  )
+  
+  tables
 }
 
 # Do initial common data processing
