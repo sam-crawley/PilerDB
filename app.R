@@ -36,7 +36,10 @@ ui <- navbarPage(title = "Divided Society Data",
                         multiple = T,
                         options = list(
                           `none-selected-text` = "All"
-                        )),          
+                        )),
+            checkboxInput("incomplete.data",
+                          label = "Show countries with incomplete data"
+            ),
             width = 2
           ),
           mainPanel(
@@ -123,7 +126,7 @@ ui <- navbarPage(title = "Divided Society Data",
   )
 )
 
-get.summary.table <- function(datasrc, country, with.id = F) {
+get.summary.table <- function(datasrc, country, incomplete.data = F, with.id = F) {
   tab <- summary.table  %>%
     mutate(across(ends_with('.pct'), ~round(.x, digits = 2) * 100)) %>%
     rename(
@@ -147,6 +150,10 @@ get.summary.table <- function(datasrc, country, with.id = F) {
   if (! is.null(country))
     tab <- tab %>%
       filter(Country %in% country)
+  
+  if (! incomplete.data)
+    tab <- tab %>%
+      filter(! is.na(`Group Basis`))
   
   tab
 }
@@ -198,7 +205,7 @@ get.country.list <- function(data.src, var.name) {
 server <- function(input, output, session) {
   
   output$tableOutput = renderDT(
-    get.summary.table(input$datasrc, input$country), 
+    get.summary.table(input$datasrc, input$country, input$incomplete.data), 
     options = list(
       lengthChange = F, 
       paging = F, 
