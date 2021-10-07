@@ -558,7 +558,9 @@ write.divided.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xls
   addStyle(wb, sheet = "Group Sizes", hs2, rows = 2, cols = 1:header.cols)  
   
   for (country in sort(names(res$crosstabs))) {
-    country.sht <- str_trunc(country, 31)
+    country.sht <- str_replace(country, "Palestinian Territories", "Palestine")
+    country.sht <- str_trunc(country.sht, 31)
+    
     addWorksheet(wb, country.sht)
     
     startRow <- 1
