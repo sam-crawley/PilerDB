@@ -1,6 +1,7 @@
 data.spec <- list(
   file.name = "Divided/datasets/asain barom/W2 Merged Data/2w-3rd_release_all/merge/Wave2_20170724.sav",
   file.type = 'sav',
+  file.encoding = "latin1",
   question.text = c(
     "Religion" = "What is your religion?"
   ),
