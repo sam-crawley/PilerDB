@@ -279,7 +279,7 @@ server <- function(input, output, session) {
   observeEvent(input$tableOutput_rows_selected, {
     row <- input$tableOutput_rows_selected
     
-    displayed.sum.table <- get.summary.table(input$datasrc, input$country, with.id = T)
+    displayed.sum.table <- get.summary.table(input$datasrc, input$country, input$incomplete.data, with.id = T)
     selected.row <- displayed.sum.table[row,]
     
     country.data <- crosstabs[[selected.row$ID]]
