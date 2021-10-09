@@ -18,6 +18,7 @@ library(here)
 #                   Some datasets (CSES) contain multiple surveys for the same country,
 #                   so this separates them out.
 # * country.format = the original format of the country (see countrycode::codelist)
+# * country.dict = country dict (passed to custom_dict) to use
 # * country.custom = names vector to be passed to custom_match parameter of countrycode()
 # * skip.countries = list of countries to skip completely (using full country.name text)
 # * fixups = a function to apply some custom fixups to the data before returning it
@@ -26,6 +27,14 @@ library(here)
 group.names <- c("Language", "Religion", "Ethnicity")
 main.vars <- c("Party", group.names)
 allowed.field.names <- c(main.vars, "Country", "Year", "Weight")
+
+country.dict.es <- data.frame(spanish = countrycode::codelist$cldr.name.es,
+                          country.name = countrycode::codelist$cldr.name.en,
+                          stringsAsFactors = FALSE) %>%
+                bind_rows(c(
+                  'spanish' = 'Rep. Dominicana',
+                  'country.name' = 'Dominican Republic'
+                ))
 
 read.div.data <- function(data.spec, raw = F, ignore.skip.countries = F) {
   if (! all(names(data.spec$field.def) %in% allowed.field.names))
@@ -55,12 +64,17 @@ read.div.data <- function(data.spec, raw = F, ignore.skip.countries = F) {
     rename(all_of(rename.spec))
   
   if (is.labelled(data$Country))
-    data$Country <- as.character(haven::as_factor(data$Country))
+    data$Country <- str_trim(as.character(haven::as_factor(data$Country)))
   
   data <- data %>%
     mutate(
       Country.orig = Country,
-      Country = countrycode(Country, origin = data.spec$country.format, destination = 'country.name', custom_match = data.spec$country.custom),
+      Country = countrycode(Country, 
+                            origin = data.spec$country.format, 
+                            destination = 'country.name', 
+                            custom_match = data.spec$country.custom,
+                            custom_dict = data.spec$country.dict
+      )
     )
   
   if (! ignore.skip.countries)
