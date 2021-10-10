@@ -1,0 +1,47 @@
+data.spec <- list(
+  file.name = "Divided/datasets/evs/2008/ZA4800_v4-0-0.dta",
+  file.type = 'dta',
+  file.encoding = "latin1",
+  question.text = c(
+    "Party" = "Which party would you vote for?",
+    "Religion" = "Do you belong to a religious denomination? [If yes] Which one?"
+  ),  
+  skip.countries = list(
+    no_group = c("Cyprus", "Moldova", "Turkey")
+  ),
+  country.format = 'iso2c',
+  country.custom = c(
+    "CY-TCC" = "Cyprus",
+    "GB-GBN" = "United Kingdom",
+    "GB-NIR" = "United Kingdom",
+    "RS-KM" = "Kosovo"
+  ),
+  field.def = c(
+    "Party" = "v264",
+    "Language" = NA,
+    "Religion" = "v106_cs",
+    "Ethnicity" = NA,
+    "Weight" = "weight_g",
+    "Country" = "c_abrv",
+    "Year" = "year"
+  ),
+  fixups = function(data) {
+    # Strip out country prefixes from levels
+    for (var in main.vars) {
+      levels(data[[var]]) <- str_remove(levels(data[[var]]), "^\\s*[\\w-]+:\\s*")
+    }
+    
+    data
+  }
+)
+
+cat.defs <- list(
+  Party = list(
+    "Missing" = c("Blank", "Invalid", "Empty ballot", "Missing"),
+    "Other" = c("Other", "Other Environmentalist Parties", "Other Left Wing Parties (Radical Leftist Party, Republicain's and Citizen's Movement)")
+  ),
+  Religion = list(
+    "Missing" = c("Missing"),
+    "Other" = c("Other")
+  )
+)
