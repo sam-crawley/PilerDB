@@ -28,14 +28,6 @@ group.names <- c("Language", "Religion", "Ethnicity")
 main.vars <- c("Party", group.names)
 allowed.field.names <- c(main.vars, "Country", "Year", "Weight")
 
-country.dict.es <- data.frame(spanish = countrycode::codelist$cldr.name.es,
-                          country.name = countrycode::codelist$cldr.name.en,
-                          stringsAsFactors = FALSE) %>%
-                bind_rows(c(
-                  'spanish' = 'Rep. Dominicana',
-                  'country.name' = 'Dominican Republic'
-                ))
-
 read.div.data <- function(data.spec, raw = F, ignore.skip.countries = F) {
   if (! all(names(data.spec$field.def) %in% allowed.field.names))
     stop("field.def contains invalid field names")
@@ -222,3 +214,19 @@ coalese.vars <- function(data, cols, new_var)  {
   
   data
 }
+
+get.es.countries <- function() {
+  c <- tibble(spanish = countrycode::codelist$cldr.name.es,
+             country.name = countrycode::codelist$cldr.name.en) %>%
+    bind_rows(c(
+      'spanish' = 'Rep. Dominicana',
+      'country.name' = 'Dominican Republic'
+    ))
+  
+  c.no.accent <- tibble(spanish = stringi::stri_trans_general(countrycode::codelist$cldr.name.es, id = "Latin-ASCII"),
+                        country.name = countrycode::codelist$cldr.name.en)
+  
+  bind_rows(c, c.no.accent) %>% distinct(spanish, .keep_all = T)
+}
+
+country.dict.es <- get.es.countries()
