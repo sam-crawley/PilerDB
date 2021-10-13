@@ -263,7 +263,13 @@ calc.correlations <- function(d, drop.cats = F, use.weights = F) {
     if (use.weights)
       wt.var = "Weight"
     
-    assoc <- suppressWarnings(pw.assoc(as.formula(paste(var, "~ Party")), d.g, out.df = T, weights = wt.var))
+    assoc <- NULL
+    try({
+      assoc <- suppressWarnings(pw.assoc(as.formula(paste(var, "~ Party")), d.g, out.df = T, weights = wt.var))
+    })
+    
+    if (is.null(assoc))
+      return (tibble(question = var, tau = NA, entropy = NA, N.eff = n.eff))
     
     res <- assoc %>%
       select(tau) %>%
