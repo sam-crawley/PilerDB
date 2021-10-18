@@ -3,8 +3,8 @@ data.spec <- list(
   file.type = 'sav',
   question.text = c(
     "Party" = "Which party do you most identify with/feel closest to? [Question wording varies by country]",
-    "Religion" = "What is your current/present religion, if any?? [Question wording varies by country]",
-    "Ethnicity" = "Which ethnic [or tribal] group do you belong to?"
+    "Religion" = "Do you consider yourself as belonging to a particular religion? (If yes) Which one? [Question wording varies by country]",
+    "Ethnicity" = "Which ethnic/nationality/tribal group do you belong to? [Question wording varies by country]"
   ),
   skip.countries = list(
     no_party = c("China", "France", "Germany", "Mexico", "Spain", "United Kingdom")
@@ -20,7 +20,7 @@ data.spec <- list(
     "Year" = NA
   ),
   pre_fixups = function(data) {
-    # Coalece necessary vars
+    # Coalesce necessary vars
     data <- coalese.vars(data, c('RELIG', str_subset(names(data), regex("^Q34", ignore_case = T))), "relig")
     
     party.vars <- c("PARTY", str_subset(names(data), regex("^Q129", ignore_case = T))) %>%

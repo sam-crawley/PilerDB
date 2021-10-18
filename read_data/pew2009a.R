@@ -4,8 +4,8 @@ data.spec <- list(
   file.encoding = "latin1",
   question.text = c(
     "Party" = "Which party do you most identify with/feel closest to? [Question wording varies by country]",
-    "Religion" = "What is your current/present religion, if any?? [Question wording varies by country]",
-    "Ethnicity" = "Which ethnic [or tribal] group do you belong to?"
+    "Religion" = "What is your present religion, if any?",
+    "Ethnicity" = "Which ethnic/nationality/tribal group do you belong to? [Question wording varies by country]"
   ),
   skip.countries = list(
     no_party = c("China", "Mexico"),
@@ -22,7 +22,7 @@ data.spec <- list(
     "Year" = NA
   ),
   pre_fixups = function(data) {
-    # Coalece necessary vars
+    # Coalesce necessary vars
     party.vars <- c("PARTY", str_subset(names(data), regex("^Q103", ignore_case = T))) %>%
       discard(~ .x %in% c('Q103MEX'))
     

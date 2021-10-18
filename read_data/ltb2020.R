@@ -2,6 +2,10 @@ data.spec <- list(
   file.name = "Divided/datasets/latino/2020/Latinobarometro_2020_Eng_Stata_v1_0.dta",
   file.type = 'dta',
   question.text = c(
+    "Party" = "If elections where this Sunday, which party would you vote for?",
+    "Religion" = "What is your religion?",
+    "Language" = "What is your native language?",
+    "Ethnicity" = "What ethnicity or race you identify best with?"
   ),
   skip.countries = list(),
   country.format = 'spanish',

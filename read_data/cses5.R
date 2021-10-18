@@ -4,6 +4,11 @@ data.spec <- list(
   skip.countries = list(),
   split.by.year = T,
   country.format = 'country.name',
+  question.text = c(
+    "Party" = "Which party do you feel closest to?",
+    "Language" = "Language usually spoken at home",
+    "Religion" = "Religious denomination"
+  ),  
   field.def = c(
     "Party" = "E3024_3",
     "Language" = "E2019",

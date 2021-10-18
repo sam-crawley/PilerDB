@@ -7,6 +7,12 @@ data.spec <- list(
   wave_var = "module",
   split.by.year = T,
   country.format = 'country.name',
+  question.text = c(
+    "Party" = "Which party do you feel closest to?",
+    "Language" = "Language usually spoken at home",
+    "Religion" = "Religious denomination",
+    "Ethnicity" = "Race of respondent"
+  ),  
   field.def = c(
     "Party" = "IMD3005_3",
     "Language" = "IMD2013",

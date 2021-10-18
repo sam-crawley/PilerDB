@@ -3,9 +3,9 @@ data.spec <- list(
   file.type = 'sav',
   question.text = c(
     "Party" = "Which party do you most identify with/feel closest to? [Question wording varies by country]",
-    "Language" = "What is your home language? / Which language do you, yourself, usually speak at home?  (If you speak more than one language, which one do you speak most often?)",
-    "Religion" = "What is your present religion, if any? / How would you define yourself religiously? [Question wording varies by country]",
-    "Ethnicity" = "Which ethnic [or tribal] group do you belong to?"
+    "Language" = "What is your home language? / Which language do you, yourself, usually speak at home?",
+    "Religion" = "What is your present religion, if any? [Question wording varies by country]",
+    "Ethnicity" = "Which ethnic group do you belong to?"
   ),
   skip.countries = list(
     no_party = c("China")
