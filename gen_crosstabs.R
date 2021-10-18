@@ -382,6 +382,9 @@ calc.summary.data <- function(res) {
     sum$`Loosmore Hanby` <- round(sum$`Loosmore Hanby`, 2)
     sum$cor <- calc.group.basis(orig.sum.data$cor, ret.max.val = T)
     sum$cor.nomiss <- calc.group.basis(orig.sum.data$cor.nomiss, ret.max.val = T)
+    
+    available <- map(group.names, ~ !is.null(country.data[[.x]])) %>% set_names(group.names)
+    sum <- bind_cols(sum, available)
 
     if (is.na(sum$cor.nomiss)) {
       sum$total.included <- NA
@@ -495,9 +498,9 @@ reformat.table.for.excel <- function(table) {
 }
 
 get.excel.summary.sheet <- function(res) {
-  summary.sheet <- calc.summary.data(res) %>%
-    mutate(across(ends_with('.pct'), ~set.class('percentage', .)))
-  
+  summary.sheet <- res$summary %>%
+    mutate(across(ends_with('.pct'), ~set.class('percentage', .))) %>%
+    select(-Religion, -Ethnicity, -Language)
 
   return(summary.sheet)
 }
@@ -505,7 +508,6 @@ get.excel.summary.sheet <- function(res) {
 get.max.parties <- function(group.sizes) {
   max.parties <- length(names(group.sizes)[str_detect(names(group.sizes), "^Party.Grp")])
 }
-
 
 write.divided.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") {
   summary.sheet <- get.excel.summary.sheet(res$crosstabs) %>%

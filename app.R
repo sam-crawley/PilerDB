@@ -137,8 +137,12 @@ get.summary.table <- function(datasrc, country, incomplete.data = F, with.id = F
       "Party Missing / Other (N)" = party.missing,
       "Party Missing / Other (%)" = party.missing.pct,
       "Group Missing / Other (N)" = group.missing,
-      "Group Missing / Other (%)" = group.missing.pct
-    )
+      "Group Missing / Other (%)" = group.missing.pct,
+      "Lng" = Language,
+      "Rel" = Religion,
+      "Eth" = Ethnicity
+    ) %>%
+    mutate(across(c(Lng, Rel, Eth), ~if_else(.x, "\u{2713}", "\u{2716}")))
   
   if (! with.id)
     tab <- tab %>% select(-ID)
@@ -205,12 +209,13 @@ get.country.list <- function(data.src, var.name) {
 server <- function(input, output, session) {
   
   output$tableOutput = renderDT(
-    get.summary.table(input$datasrc, input$country, input$incomplete.data), 
+    get.summary.table(input$datasrc, input$country, input$incomplete.data),
     options = list(
       lengthChange = F, 
       paging = F, 
       searching = F,
-      order = list(list(8, 'desc'))
+      order = list(list(8, 'desc')),
+      columnDefs = list(list(className = 'dt-center', targets = 9:11))
     ),
     server = T, 
     selection = 'single',
