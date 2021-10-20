@@ -230,23 +230,34 @@ get.data.src.info <- function(data, data.def) {
   )
 }
 
+# This function removes rows from a country data frame that will not be used in
+#  the analysis. i.e. rows for party or group that are coded as Missing/Other
+#  *and* rows for parties/groups that are less than 2% of the *total* sample
+# Note, this is done based on one particular group (Ethnicity/Language/Religion)
+#  at a time, since someone could be a member of a language group that is smaller
+#  than 2%, but be a member of a large religion group. We would want to keep this
+#  person in the analysis for religion, but not for language
+drop.rows.from.country.data <- function(d, group.var) {
+  cats.to.drop <- c("Missing", "Other")
+  
+  d <- d %>% 
+    mutate(across(all_of(c("Party", group.var)), ~fct_lump_prop(.x, 0.02))) %>%
+    filter(
+      ! .data[[group.var]] %in% cats.to.drop & ! Party %in% cats.to.drop
+    )
+  
+  d
+}
+
 calc.correlations <- function(d, drop.cats = F, use.weights = F) {
   country <- unique(d$Country)
   #cat("Calc correlations for", country, "\n")
-  
-  cats.to.drop <- c("Missing", "Other")
-  
-  if (drop.cats)
-    d <- d %>% 
-      mutate(across(all_of(main.vars), ~fct_lump_prop(.x, 0.02))) %>%
-      filter(! Party %in% cats.to.drop)
-  
+
   tau <- map_dfr(group.names, function(var) {
     d.g <- d 
     
     if (drop.cats)
-      d.g <- d.g %>% 
-        filter(! .data[[var]] %in% cats.to.drop)
+      d.g <- drop.rows.from.country.data(d.g, var)
     
     n.eff <- nrow(d.g)
     
@@ -310,9 +321,7 @@ calc.gallagher <- function(d, group.to.use, max.groups = NULL, loosemore = F) {
     return (NA)
   
   # Remove Missing/Other categories from Party and Grouping vars
-  d <- d %>%
-    filter(! .data[[group.to.use]] %in% c("Missing", "Other")) %>% 
-    filter(! Party %in% c("Missing", "Other"))
+  d <- drop.rows.from.country.data(d, group.to.use)
   
   grp.sizes <- tabyl(d, {{group.to.use}}, show_missing_levels = F)
   
