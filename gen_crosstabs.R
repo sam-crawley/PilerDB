@@ -328,18 +328,28 @@ calc.gallagher <- function(d, group.to.use, max.groups = NULL, loosemore = F) {
   }
   
   grp.sizes <- grp.sizes %>%
-    mutate(percent = percent*100)
+    rename(group = group.to.use)
 
-  # Create lookup of group sizes
-  grp.size.list <- map(grp.sizes[[group.to.use]], ~grp.sizes %>% filter(.data[[group.to.use]] == .x) %>% pull(percent)) %>%
-    set_names(grp.sizes[[group.to.use]])
-  
   party.sizes.by.grp <- tabyl(d, Party, .data[[group.to.use]], show_missing_levels = F) %>% adorn_percentages()
+  
+  party.sizes <- tabyl(d, Party, show_missing_levels = F)
+  
+  gallagher.impl(party.sizes.by.grp, grp.sizes, party.sizes, loosemore = loosemore)
+  
+}
+
+gallagher.impl <- function(party.sizes.by.grp, grp.sizes, party.sizes, loosemore = F) {
+  grp.sizes <- grp.sizes %>%
+    mutate(percent = percent*100)
+  
+  # Create lookup of group sizes
+  grp.size.list <- map(grp.sizes$group, ~grp.sizes %>% filter(group == .x) %>% pull(percent)) %>%
+    set_names(grp.sizes$group)
   
   # Calculate unweighted values for each party
   res <- party.sizes.by.grp %>% 
-    pivot_longer(-Party) %>% 
-    mutate(value = unlist(grp.size.list[name]) - as.numeric(value)*100)
+    pivot_longer(-Party) %>%
+    mutate(value = as.numeric(value)*100 - unlist(grp.size.list[name]))
   
   if (loosemore) {
     res <- res %>% 
@@ -355,18 +365,14 @@ calc.gallagher <- function(d, group.to.use, max.groups = NULL, loosemore = F) {
   }
   
   # Apply weights
-  res.wt <- d %>%
-     group_by(Party) %>%
-     count(Party) %>%
-     mutate(weight = n / nrow(d)) %>%
-     inner_join(res, by = "Party") %>%
-     mutate(total = total * weight)
+  res.wt <- party.sizes %>%
+    inner_join(res, by = "Party") %>%
+    mutate(total = total * percent)
   
- res.wt %>% 
-   ungroup() %>% 
-   summarise(total = sum(total)) %>%
-   pull(total)
-  
+  res.wt %>% 
+    ungroup() %>% 
+    summarise(total = sum(total)) %>%
+    pull(total)
 }
 
 # Calculate a DF summarising all countries
