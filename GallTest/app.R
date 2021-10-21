@@ -29,17 +29,12 @@ server <- function(input, output) {
     output$gallTable <- renderUI({
         group.headers <- map(1:input$group.count, ~tags$td(paste("Group", .x)))
         
-        def.group.size <- round(1/as.numeric(input$group.count), 2)
-        group.sizes <- map(1:input$group.count, ~tags$td(textInput(paste0("g", .x, ".size"), "Size", def.group.size, width = "80px")))
-        def.party.size <- round(1/as.numeric(input$party.count), 2)
-        
         rows <- map(1:input$party.count, function(p) {
-            party.size <- tags$td(textInput(paste0("p", p, ".size"), "Size", def.party.size, width = "80px"))
-            cells <- map(1:input$group.count, ~ tags$td(textInput(paste0("p", p, "g", .x), "", def.group.size, width = "80px")) )
+            cells <- map(1:input$group.count, ~ tags$td(textInput(paste0("p", p, "g", .x), "", "0", width = "80px")) )
             
             tags$tr(
                 tags$td(paste("Party", p)),
-                party.size,
+                #party.size,
                 cells
             )
         })
@@ -47,13 +42,7 @@ server <- function(input, output) {
         tags$table(
             tags$tr(
                 tags$td(""),
-                tags$td(""),
                 group.headers
-            ),
-            tags$tr(
-                tags$td(""),
-                tags$td(""),
-                group.sizes
             ),
             rows
         )
@@ -64,37 +53,38 @@ server <- function(input, output) {
             map_dfr(c(1:input$group.count), function(g) {
                 tibble(
                     Party = paste("Party", p),
-                    Group = g,
+                    Group = paste("Group", g),
                     val = as.numeric(input[[paste0("p", p, "g", g)]])
                 )
             })
-        }) %>% pivot_wider(names_from = "Group", values_from = "val", names_glue = "Group {Group}")
-    })
-    
-    party.sizes.dat <- reactive({
-        map_dfr(c(1:input$party.count), function(p) {
-            tibble(
-                Party = paste("Party", p),
-                percent = as.numeric(input[[paste0("p", p, ".size")]])
-            )
         })
     })
+
     
-    group.sizes.dat <- reactive({
-        map_dfr(c(1:input$group.count), function(g) {
-            tibble(
-                group = paste("Group", g),
-                percent = as.numeric(input[[paste0("g", g, ".size")]])
-            )
-        })
-    })    
-    
-    output$gall.res <- renderText(calc.test.gall(party.by.grp.size.dat(),  group.sizes.dat(), party.sizes.dat()))
+    output$gall.res <- renderText(calc.test.gall(party.by.grp.size.dat()))
 
 }
 
-calc.test.gall <- function(party.by.grp, party.sizes, group.sizes) {
-    gallagher.impl(party.by.grp, party.sizes, group.sizes)
+calc.test.gall <- function(party.by.grp) {
+  if (nrow(party.by.grp) == 0)
+    return (0)
+  
+  total.votes <- sum(party.by.grp$val)
+  
+  if (total.votes <= 0)
+    return (0)
+  
+  party.sizes <- party.by.grp %>% group_by(Party) %>% summarise(percent = sum(val) / total.votes)
+  group.sizes <- party.by.grp %>% group_by(Group) %>% summarise(percent = sum(val) / total.votes) %>%
+    rename(group = Group)
+  
+  party.by.grp.mod <- party.by.grp %>%
+    group_by(Party) %>%
+    mutate(percent = val / sum(val)) %>% 
+    select(-val) %>% 
+    pivot_wider(names_from = Group, values_from = percent)
+  
+  gallagher.impl(party.by.grp.mod, group.sizes, party.sizes)
 }
 
 # Run the application 
