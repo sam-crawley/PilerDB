@@ -359,10 +359,18 @@ server <- function(input, output, session) {
         group.cols.order <- unlist( map(group.cols, ~paste0(.x, c(".n", '.%'))))
         
         crosstab <- inner_join(crosstab, attr(crosstab, "core"), by = "Party", suffix = c(".%", ".n")) %>%
-          select( Party, all_of(group.cols.order) ) %>% 
+          select( Party, all_of(group.cols.order) ) %>%
           adorn_totals("col")
         
-        col.totals <- crosstab %>% adorn_totals("row", fill = '') %>% filter(Party == "Total")
+        col.totals.n <- country.data[[group]] %>% select(-Party) %>% summarise(across(everything(), ~sum(.x)))
+        col.totals <- country.data[[group]] %>% select(-Party) %>% 
+          summarise(across(everything(), ~paste0(round(sum(.x)/sum(col.totals.n)*100, 1), '%'))) %>% 
+          bind_cols(col.totals.n, .name_repair = "unique") %>% 
+          set_names(c(paste0(names(col.totals.n), '.%'), paste0(names(col.totals.n), '.n'))) %>%
+          mutate(Party = "Total") %>%
+          select( Party, all_of(group.cols.order) )
+        
+        #col.totals <- crosstab %>% adorn_totals("row", fill = '') %>% filter(Party == "Total")
         
         sketch = htmltools::withTags(table(
           class = 'display compact',
