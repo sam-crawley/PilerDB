@@ -331,11 +331,13 @@ server <- function(input, output, session) {
       textOutput(paste0("country.orig", countryTabID))
     )
     
+    sample.size <- country.data$Summary$general$`Sample Size`
+    
     output[[paste0("CountryName", countryTabID)]] <- renderText(country.data$Summary$general$Country)
     output[[paste0("GroupBasis", countryTabID)]] <- renderText(country.data$Summary$general$`Group Basis`)
     
     output[[paste0("SampleSize", countryTabID)]] <- renderText({
-      paste("Sample Size:", country.data$Summary$general$`Sample Size`)
+      paste("Sample Size:", sample.size)
     })
     output[[paste0("CorTable", countryTabID)]] <- renderTable(country.data$Summary$cor)
     output[[paste0("CorWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.wt)
@@ -360,17 +362,16 @@ server <- function(input, output, session) {
         
         crosstab <- inner_join(crosstab, attr(crosstab, "core"), by = "Party", suffix = c(".%", ".n")) %>%
           select( Party, all_of(group.cols.order) ) %>%
-          adorn_totals("col")
+          adorn_totals("col") %>%
+          mutate(pct = paste0(round(Total / sample.size, 2)*100, '%'))
         
         col.totals.n <- country.data[[group]] %>% select(-Party) %>% summarise(across(everything(), ~sum(.x)))
         col.totals <- country.data[[group]] %>% select(-Party) %>% 
-          summarise(across(everything(), ~paste0(round(sum(.x)/sum(col.totals.n)*100, 1), '%'))) %>% 
+          summarise(across(everything(), ~paste0(round(sum(.x)/sample.size*100, 1), '%'))) %>% 
           bind_cols(col.totals.n, .name_repair = "unique") %>% 
           set_names(c(paste0(names(col.totals.n), '.%'), paste0(names(col.totals.n), '.n'))) %>%
-          mutate(Party = "Total") %>%
-          select( Party, all_of(group.cols.order) )
-        
-        #col.totals <- crosstab %>% adorn_totals("row", fill = '') %>% filter(Party == "Total")
+          mutate(Party = "Total", Total = sample.size, pct = "") %>%
+          select( Party, all_of(group.cols.order), Total, pct )
         
         sketch = htmltools::withTags(table(
           class = 'display compact',
@@ -379,10 +380,10 @@ server <- function(input, output, session) {
             tr(
               th("Party", rowspan = 2),
               lapply(group.cols, function (x) { th(colspan = 2, x) }),
-              th("Total", rowspan = 2)
+              th("Total", colspan = 2)
             ),
             tr(
-              lapply(rep(c('N', '%'), length(group.cols)), th)
+              lapply(rep(c('N', '%'), length(group.cols)+1), th)
             )
           ),
           tfoot(
