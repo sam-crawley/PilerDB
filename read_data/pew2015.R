@@ -8,8 +8,7 @@ data.spec <- list(
     "Ethnicity" = "Which ethnic/racial/tribal group do you belong to? [Question wording varies by country]"
   ),
   skip.countries = list(
-    no_party = c("Ethiopia", "Vietnam", "China", "Mexico"),
-    low_n = c("Chile", "Philippines")
+    no_party = c("Ethiopia", "Vietnam", "China", "Mexico")
   ),
   country.format = 'country.name',
   field.def = c(

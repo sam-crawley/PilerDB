@@ -8,8 +8,7 @@ data.spec <- list(
     "Ethnicity" = "What is your ethnic community, cultural group or tribe?"
   ),    
   skip.countries = list(
-    no_party = c("Eswatini"),
-    low_n = c("Morocco", "Tunisia")
+    no_party = c("Eswatini")
   ),
   country.format = 'country.name',
   field.def = c(

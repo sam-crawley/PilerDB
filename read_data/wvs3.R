@@ -8,8 +8,7 @@ data.spec <- list(
     "Language" = "What language do you normally speak at home?"
   ),
   skip.countries = list(
-    no_party = c('China', 'Nigeria', 'Pakistan', 'South Korea'),
-    low_n = c("Montenegro")
+    no_party = c('China', 'Nigeria', 'Pakistan', 'South Korea')
   ),
   country.format = 'country.name',
   country.custom = c("SrpSka Republic" = "SrpSka Republic"),
