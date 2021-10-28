@@ -3,7 +3,6 @@ library(janitor)
 library(openxlsx)
 library(here)
 library(StatMatch)
-library(entropy)
 library(rlist)
 
 source(here("Divided/read_data.R"))
@@ -160,6 +159,10 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   
   group.basis <- calc.group.basis(cor.nomiss)
   
+  gallagher <- NA
+  if (! is.na(group.basis))
+    gallagher <- cor.nomiss %>% filter(question == group.basis) %>% pull(gallagher)
+  
   tables$Summary <- list(
     general = tibble(
       'ID' = paste(cntry, data.source, year),
@@ -169,7 +172,7 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
       'Year' = year,
       'Sample Size' = nrow(d),
       'Group Basis' = group.basis,
-      'Gallagher' = calc.gallagher(d, group.basis),
+      'Gallagher' = gallagher,
       'Loosmore Hanby' = calc.gallagher(d, group.basis, loosemore = T)
     ),
     cor = cor,
@@ -261,8 +264,10 @@ calc.correlations <- function(d, drop.cats = F, use.weights = F) {
     
     n.eff <- nrow(d.g)
     
+    empty.res <- tibble(question = var, tau = NA, N.eff = n.eff, gallagher = NA)
+    
     if (n.eff <= 200 || length(unique(d.g[[var]])) <= 1) {
-      return(tibble(question = var, tau = NA, entropy = NA, N.eff = n.eff))
+      return(empty.res)
     }
     
     d.g <- d.g %>% mutate(
@@ -280,19 +285,16 @@ calc.correlations <- function(d, drop.cats = F, use.weights = F) {
     })
     
     if (is.null(assoc))
-      return (tibble(question = var, tau = NA, entropy = NA, N.eff = n.eff))
+      return(empty.res)
     
     res <- assoc %>%
       select(tau) %>%
       mutate(across(everything(), ~round(.x, digits = 3))) %>%
-      mutate(question = var, N.eff = n.eff)
-    
-    res$entropy <- entropy(table(d.g[[var]]))
+      mutate(question = var, N.eff = n.eff) %>%
+      mutate(gallagher = calc.gallagher(d.g, var, drop.cats = F))
     
     res
   })
-  
-  empty.cols <- tau %>% keep(~all(is.na(.x) | is.nan(.x))) %>% names
   
   tau %>% select(question, everything()) %>%
     mutate(across(tau, ~ifelse(is.nan(.x) | .x == -Inf, NA, .x))) %>%
@@ -316,12 +318,13 @@ calc.group.basis <- function(cor, ret.max.val = F) {
     pull(question)
 }
 
-calc.gallagher <- function(d, group.to.use, max.groups = NULL, loosemore = F) {
+calc.gallagher <- function(d, group.to.use, max.groups = NULL, drop.cats = T, loosemore = F) {
   if (is.na(group.to.use))
     return (NA)
   
   # Remove Missing/Other categories from Party and Grouping vars
-  d <- drop.rows.from.country.data(d, group.to.use)
+  if (drop.cats)
+    d <- drop.rows.from.country.data(d, group.to.use)
   
   grp.sizes <- tabyl(d, {{group.to.use}}, show_missing_levels = F)
   
