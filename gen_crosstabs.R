@@ -4,6 +4,7 @@ library(openxlsx)
 library(here)
 library(StatMatch)
 library(rlist)
+library(stringi)
 
 source(here("Divided/read_data.R"))
 
@@ -52,7 +53,7 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
     
     e <- new.env()
     
-    source(data.def, local = e)
+    source(data.def, local = e, encoding = "UTF-8")
     
     data <- read.div.data(e$data.spec)
     

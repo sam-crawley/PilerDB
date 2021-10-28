@@ -103,7 +103,7 @@ load.data.by.id <- function(id, process = T, ignore.skip.countries = F) {
   
   e <- new.env()
   
-  source(file, local = e)
+  source(file, local = e, encoding = "UTF-8")
   
   data <- read.div.data(e$data.spec, ignore.skip.countries = ignore.skip.countries)
   
@@ -120,7 +120,7 @@ check.data.by.id <- function(id) {
   
   e <- new.env()
   
-  source(file, local = e)  
+  source(file, local = e, encoding = "UTF-8")  
   
   check.data(data, e$data.spec$skip.countries)
 }
