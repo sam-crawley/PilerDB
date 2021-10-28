@@ -15,9 +15,12 @@ data.spec <- list(
     "Language" = "S5A",
     "Ethnicity" = "S23",
     "Country" = "idenpa",
-    "Year" = "numinves",
+    "Year" = NA,
     "Weight" = "wt"
-  )
+  ),
+  fixups = function(data) {
+    data %>% mutate(Year = 2015)
+  }
 )
 
 cat.defs <- list(
