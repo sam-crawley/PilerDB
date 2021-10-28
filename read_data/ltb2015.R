@@ -25,7 +25,7 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("No responde", "No sabe", "Vota nulo/Blanco", "No vota/Ninguno", "No inscrito/No tenía edad"),
+    "Missing" = c("No responde", "No sabe", "Vota nulo/Blanco", "No vota/Ninguno", "No inscrito/No ten\u{00ED}a edad"),
     "Other" = c("Otros (partidos nacionales y provinciales)")
   ),
   Language = list(
@@ -36,7 +36,7 @@ cat.defs <- list(
     "Other" = c("None", "Others", "Believer, not belonging to any church", "Agnostic", "Atheist")
   ),
   Ethnicity = list(
-    "Missing" = c("No answer", "Don´t know", "Not applicable"),
+    "Missing" = c("No answer", "Don\u{00B4}t know", "Not applicable"),
     "Other" = c("Other race")
   )
 )
