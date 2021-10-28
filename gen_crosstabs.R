@@ -391,8 +391,7 @@ gallagher.impl <- function(party.sizes.by.grp, grp.sizes, party.sizes, loosemore
 calc.summary.data <- function(res) {
   map_dfr(res, function(country.data) {
     orig.sum.data <- country.data$Summary
-    #cat(orig.sum.data$general$Country, "\n")
-    #cat(orig.sum.data$general$`Data Source`, "\n")
+    #cat(orig.sum.data$general$ID, "\n")
     
     sum <- orig.sum.data$general
     sum$`Data Source Orig` <- NULL
@@ -401,7 +400,13 @@ calc.summary.data <- function(res) {
     sum$cor <- calc.group.basis(orig.sum.data$cor, ret.max.val = T)
     sum$cor.nomiss <- calc.group.basis(orig.sum.data$cor.nomiss, ret.max.val = T)
     
-    available <- map(group.names, ~ !is.null(country.data[[.x]])) %>% set_names(group.names)
+    # Add summary columns indicating whether the group variable is 'available'.
+    #  Available is defined as the correlations were able to be calculated
+    #  (so includes, eg., cases where there was only one group)
+    available <- country.data$Summary$cor.nomiss %>% 
+      mutate(available = !is.na(tau)) %>% 
+      select(question, available) %>% 
+      pivot_wider(names_from = question, values_from = available)
     sum <- bind_cols(sum, available)
 
     if (is.na(sum$cor.nomiss)) {
