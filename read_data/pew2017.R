@@ -52,7 +52,7 @@ cat.defs <- list(
     "Missing" = c("Do not feel close to any party", "No responde (Refused)", "Refused", "No preference", "Don’t know", "Don't know",
                   "Recusa (Refused)", "Menolak (Refused)", "Tidak tahu (Don’t know)", "No sabe (Don’t know)", "No contestó (Refused)",
                   "Nao sabe (Don’t know)", "Ne sait pas (Don’t know)", "Refus (Refused)", "Kataa Kujibu (refused to respond)",
-                  "Hajui (Don’t know)", "No sabe (Don’t Know)"),
+                  "Hajui (Don’t know)", "No sabe (Don’t Know)", "Don’t Know"),
     "Other" = c("Independent", "Other (SPECIFY))", "Other (Specify)", "Otro (ESPECIFICAR) (Other (SPECIFY))", "Other party",
                 "Outro (ESPECIFICAR) (Other(SPECIFY))", "Other (SPECIFY)", "Lainnya (Specify) (Other (SPECIFY))",
                 "Autres (A PRECISER) (Other (SPECIFY))", "Vingine (SPECIFY) (Other (SPECIFY))")

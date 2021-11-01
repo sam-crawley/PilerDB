@@ -47,20 +47,21 @@ data.spec <- list(
 cat.defs <- list(
   Party = list(
     "Missing" = c("Do not feel close to any party", "No responde (Refused)", "Don’t know", "Refused", "No contest", "No sabe (Don't know)",
-                   "Recusa (Refused)", "Menolak (Refused)", "Tidak tahu (Don’t know)", "No preference", "Don't know"),
+                   "Recusa (Refused)", "Menolak (Refused)", "Tidak tahu (Don’t know)", "No preference", "Don't know", "No sabe (Don't Know)",
+                  "Nao sabe (Don't know)"),
     "Other" = c("Other", "Independent", "Other party", "Other (SPECIFY))", "Other (Specify)", "Otro (ESPECIFICAR) (Other (SPECIFY))",
                 "Outro (ESPECIFICAR) (Other(SPECIFY))", "Other (SPECIFY)", "Lainnya (Specify) (Other (SPECIFY))")
   ),
   Language = list(
   ),
   Religion = list(
-    "Missing" = c("Refused", "Don’t know", "Something else (SPECIFY), or"),
+    "Missing" = c("Refused", "Don’t know", "Something else (SPECIFY), or", "Don't know"),
     "Other" = c("Atheist (do not believe in God)", "Agnostic (not sure if there is a God)", "Nothing in particular",
-                "Atheist (I do not believe in any gods or God)", "Something else (SPECIFY)")
+                "Atheist (I do not believe in any gods or God)", "Something else (SPECIFY)", "Agnostic (I don't really know whether there is a god, or whether there are any gods)")
   ),
   Ethnicity = list(
     "Missing" = c("Missing", "Don't know", "Some other race (Specify____ IF NEEDED: What race or races is that?)",
-                    "Don't know", "Refused (e.g., non-race answers like American, human, purple)"),
+                    "Don't know", "Refused (e.g., non-race answers like American, human, purple)", "Don’t know"),
     "Other" = c("Other (SPECIFY)", "Other (UNSPECIFIED)")
   )
 )

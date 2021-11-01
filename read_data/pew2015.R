@@ -50,7 +50,8 @@ data.spec <- list(
 cat.defs <- list(
   Party = list(
     "Missing" = c("Refused", "Don’t know", "Don't know", "None/No party", "None/No party (Volunteered)", "None", "None (Volunteered)",
-                  "None/No party  (Volunteered)", "None\\No party (Volunteered)", "None/No party", "None / No party (Volunteered)"),
+                  "None/No party  (Volunteered)", "None\\No party (Volunteered)", "None/No party", "None / No party (Volunteered)",
+                  "Don't Know", "None of the above/No party"),
     "Other" = c("Independent", "Other party (Volunteered)", "Other", "Other (Volunteered)", "Other (Specify) (Volunteered)",
                 "Other (Volunteered)")
   ),
@@ -63,7 +64,7 @@ cat.defs <- list(
     "Other" = c("Something else", "Agnostic", "Something else (SPECIFY)", "Atheist")
   ),
   Ethnicity = list(
-    "Missing" = c("Missing", "Refused"),
+    "Missing" = c("Missing", "Refused", "Don't know", "Don’t know"),
     "Other" = c()
   )
 )
