@@ -303,7 +303,7 @@ server <- function(input, output, session) {
     tab <- tabPanel(country.data$Summary$general$ID,
       h3(textOutput(paste0("CountryName", countryTabID))),
       h4("Group basis: ", textOutput(paste0("GroupBasis", countryTabID), inline = T)),
-      
+
       br(),
     
       h4(textOutput(paste0("LanguageHeading", countryTabID))),
@@ -355,7 +355,7 @@ server <- function(input, output, session) {
         crosstab <- country.data[[group]] %>% 
           adorn_percentages("row") %>% 
           adorn_pct_formatting()
-        
+
         group.cols.order <- unlist( map(group.cols, ~paste0(.x, c(".n", '.%'))))
         
         crosstab <- inner_join(crosstab, attr(crosstab, "core"), by = "Party", suffix = c(".%", ".n")) %>%

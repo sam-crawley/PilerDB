@@ -58,6 +58,6 @@ cat.defs <- list(
   ),
   Ethnicity = list(
     "Missing" = c("Refused", "Don't know", "Don\u0092t know"),
-    "Other" = c("Other", "Others", "From another country", "Other or mixed race", "Mixed race", "other", "Other (Volunteered)", "Mixed/ Mulatto")
+    "Other" = c("Other", "Others", "From another country", "Other or mixed race", "other", "Other (Volunteered)")
   )
 )

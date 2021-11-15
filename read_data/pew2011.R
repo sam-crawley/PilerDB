@@ -47,14 +47,15 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Refused", "Don't know", "None", "Don't know", "None / No party", "Undecided", "Don\u2019t know", "None/No party", "None of the parties"),
-    "Other" = c("Independent", "Independent candidate", "Other", "Other (SPECIFY)",
+    "Missing" = c("Refused", "Don't know", "None", "Don't know", "None / No party", "Undecided", "Don\u2019t know", "None/No party", "None of the parties",
+                  "No preference"),
+    "Other" = c("Independent", "Independent candidate", "Other", "Other (SPECIFY)", "Independents",
                 "Independent candidate/Azaad Umeedwaar", "Other party")
   ),
   Religion = list(
     "Missing" = c("Don't know", "Nothing in particular", "Refused", "None", "Don\u2019t know"),
     "Other" = c("Atheist (do not believe in God)", "Other", "No religion", "No religion/not a believer/atheist/agnostic", "Other religion", "Other (SPECIFY)",
-                "Any other", "Agnostic (not sure if there is a God)")
+                "Any other", "Agnostic (not sure if there is a God)", "Atheist/No religion")
   ),
   Ethnicity = list(
     "Missing" = c("Refused", "Don\u2019t know"),

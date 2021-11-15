@@ -50,7 +50,8 @@ data.spec <- list(
 cat.defs <- list(
   Party = list(
     "Missing" = c("Refused", "No preference", "Don’t know", "Don't know", "None/No party", "None/No party (Volunteered)", "None", "None (Volunteered)",
-                  "Would not vote (Volunteered)", "None/ No party", "Don?t know", "Don’t know/haven’t decided yet (Volunteered)"),
+                  "Would not vote (Volunteered)", "None/ No party", "Don?t know", "Don’t know/haven’t decided yet (Volunteered)",
+                  "Blank /null vote (Volunteered)", "Not enrolled to vote"),
     "Other" = c("Independent", "Other party", "Other (Specify)", "Other party (Volunteered)", "Other", "Other (Volunteered)", "Other (SPECIFY)")
   ),
   Language = list(
@@ -59,7 +60,8 @@ cat.defs <- list(
   ),
   Religion = list(
     "Missing" = c("Don’t know", "Don't know", "Don?t know", "Don\u{0092}t know", "Nothing in particular", "Refused", "Nothing in particular, or"),
-    "Other" = c("Something else", "Agnostic", "Something else (SPECIFY)", "Atheist")
+    "Other" = c("Something else", "Agnostic", "Something else (SPECIFY)", "Atheist", "Agnostic (not sure if there is a God)",
+                "Atheist (do not believe in God)")
   ),
   Ethnicity = list(
     "Missing" = c("Missing"),

@@ -37,11 +37,12 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Blank", "Invalid", "Empty ballot", "Missing"),
-    "Other" = c("Other", "Other Environmentalist Parties", "Other Left Wing Parties (Radical Leftist Party, Republicain's and Citizen's Movement)")
+    "Missing" = c("Blank", "Invalid", "Empty ballot", "Missing", "Would cast a blank vote"),
+    "Other" = c("Other", "Other Left Wing Parties (Radical Leftist Party, Republicain's and Citizen's Movement)",
+                "Independents")
   ),
   Religion = list(
     "Missing" = c("Missing"),
-    "Other" = c("Other")
+    "Other" = c("Other", "Une autre religion")
   )
 )

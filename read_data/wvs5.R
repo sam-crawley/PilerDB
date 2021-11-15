@@ -39,7 +39,7 @@ cat.defs <- list(
   ),
   Language = list(
     "Missing" = c("Not asked", "No answer", "Dont know"),
-    "Other" = c("Other", "Other local; aboriginal; tribal, community", "Other South Asian", "Other African")
+    "Other" = c("Other", "Other South Asian", "Other African")
   ),
   Religion = list(
     "Missing" = c("Missing; Not asked by the interviewer", "No answer", "Dont know"),

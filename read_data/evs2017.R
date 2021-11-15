@@ -28,16 +28,15 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("not applicable", "no answer", "dont know"),
+    "Missing" = c("not applicable", "no answer", "dont know", "Blank vote"),
     "Other" = c("No (other) party appeals to me (spontaneous)", "No [no other] party appeals to me (spontaneous)", "No [,no other] party appeals to me",
                 "No [,no other] party appeals to me (spontaneous)", "No [, no other] party appeals to me (spontaneous)", "Other", "Other, please specify (WRITE IN)",
-                "No [no other] party appeals to me", "Other Left Wing Parties (Radical Leftist Party, Republicain's and Citizen's Movement", "Other Environmentalist Parties",
-                "Other Right Wing Extremist Parties (The Patriots, National Republican Movement)", "No (no other) party appeals to me", "No [, no other] party appeals to me",
+                "No [no other] party appeals to me", "No (no other) party appeals to me", "No [, no other] party appeals to me",
                 "Other, please specify (WRITE IN):", "Other party (WRITE IN)", "No party appeals to me (spontaneous)")
   ),
   Religion = list(
     "Missing" = c("not applicable", "no answer", "dont know"),
     "Other" = c("Other, please specify (Write in)", "Other than Christian", "Other", "Other religious denomination, please specify (Write in)", "Other, which?",
-                "Other Non Christian", "Other, Non-Christian Religion", "Other non-Christian (WRITE IN)")
+                "Other Non Christian", "Other non-Christian (WRITE IN)", "Small religious communities")
   )
 )

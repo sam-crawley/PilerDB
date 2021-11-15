@@ -36,8 +36,8 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Not applicable", "Refusal", "Don't know","No answer", "Nul", "Blanc", "Blank paper", 
-                  "Blank vote", "Spoiled vote", "Blank", "Invalid", "Cast invalid vote"),
+    "Missing" = c("Not applicable", "Refusal", "Don't know","No answer", "Nul", "Blanc", "Blank paper", "blank ballot",
+                  "Blank vote", "Spoiled vote", "Blank", "Invalid", "Cast invalid vote", "Votou em branco / nulo"),
     "Other" = c("Autre", "Other", "Autres mouvements écologistes", "Independent", "Mixed vote", "Other party", "other",
                 "Other: FDGR", "Other: PR", "Other party or independent candidate")
   ),

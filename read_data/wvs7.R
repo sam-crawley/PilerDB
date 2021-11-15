@@ -37,7 +37,7 @@ cat.defs <- list(
     "Other" = c("Other", "Independent candidate")
   ),
   Language = list(
-    "Other" = c("Other", "Other European", "Other Chinese dialects", "Other local; aboriginal; tribal, community"),
+    "Other" = c("Other", "Other European"),
     "Missing" = c("Missing; Not available", "Not asked", "Don\ub4t know", "No answer")
   ),
   Religion = list(
@@ -45,7 +45,7 @@ cat.defs <- list(
     "Missing" = c("No answer", "Dont know", "Other missing", "Item not included")
   ),
   Ethnicity = list(
-    "Other" = c("Other, Non-Hispanic", "Two plus, non-Hispanic", "Cross breed", "Other Asian", "Other Africans", "Others"),
+    "Other" = c("Other, Non-Hispanic", "Two plus, non-Hispanic", "Others"),
     "Missing" = c("Missing; Not specified", "Not asked", "Don\ub4t know", "No answer")
   )
 )

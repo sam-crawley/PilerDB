@@ -63,7 +63,7 @@ cat.defs <- list(
     "Other" = c("Atheist (do not believe in God)", "Other", "No religion", "Other religion",  "Agnostic (not sure if there is a God)",
                 "Does not belong to a religion", "Other, not directly classifiable", "Other not catholic", "No, I do not profess any religion",
                 "Yes, I profess another faith", "I do not belong to any religion", "Do not belong to a religion", "Other (Volunteered)",
-                "None (Volunteered)", "No particular religion", "Something else", "I am non-affiliated")
+                "None (Volunteered)", "No particular religion", "Something else", "I am non-affiliated", "Non-believer")
   ),
   Ethnicity = list(
     "Missing" = c("Refused", "Don't know", "Don\u0092t know"),

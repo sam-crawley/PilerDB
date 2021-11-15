@@ -54,19 +54,20 @@ cat.defs <- list(
                   "None/No party  (Volunteered)", "None\\No party (Volunteered)", "None/No party", "None / No party (Volunteered)",
                   "None/No party (Volunteered)", "Would not vote (Volunteered)", "Would not vote (Volunteered)",
                   "Don\u2019t know/haven\u2019t decided yet (Volunteered)", "Don t know", "No preference (Volunteered)", "Blank", "Missing",
-                  "Don\u2019t know", "None / No party", "Dont know", "Would not vote  (Volunteered)", "Blank /null vote (Volunteered)"),
+                  "Don\u2019t know", "None / No party", "Dont know", "Would not vote  (Volunteered)", "Blank /null vote (Volunteered)",
+                  "Undecided", "Nothing (Volunteered)"),
     "Other" = c("Independent", "Other party (Volunteered)", "Other", "Other   (Volunteered)", "Other (Volunteered)",
                 "Other  (Volunteered)", "Other (SPECIFY)", "Other party (SPECIFY)", "A party with credible candidate (Volunteered)",
-                "Any party (Volunteered)", "Independent candidate/Azaad Umeedwaar")
+                "Any party (Volunteered)", "Independent candidate/Azaad Umeedwaar", "Independents")
   ),
   Language = list(
     "Missing" = c("Missing"),
     "Other" = c("Other")
   ),
   Religion = list(
-    "Missing" = c("Don\u2019t know", "Don't know", "Nothing in particular", "Refused", "Don't Know/Refused"),
+    "Missing" = c("Don\u2019t know", "Don't know", "Nothing in particular", "Refused", "Don't Know/Refused", "Nothing in particular, or", "Nothing in particular or"),
     "Other" = c("Something else", "Agnostic (not sure if there is a God)", "Something else (SPECIFY)", "Atheist (do not believe in God)",
-                "Something else (Volunteered)")
+                "Something else (Volunteered)", "Agnostic", "Atheist")
   ),
   Ethnicity = list(
     "Missing" = c("Missing", "Refused", "Don't know", "Don\u2019t know"),

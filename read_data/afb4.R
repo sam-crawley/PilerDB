@@ -29,7 +29,7 @@ data.spec <- list(
 cat.defs <- list(
   Party = list(
     "Missing" = c("Missing", "Don't know", "Refused to answer", "Would not vote"),
-    "Other" = c("Others", "Any winning party", "Any other than LCD", "Ind\xc2\xa0Ápendance", "Would vote for candidate and not party",
+    "Other" = c("Others", "Any winning party", "Any other than LCD", "Would vote for candidate and not party",
                 "An independent candidate", "An opposition candidate", "A person who can help the country/address problems/change th")
   ),
   Language = list(

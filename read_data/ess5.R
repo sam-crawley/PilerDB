@@ -37,9 +37,10 @@ data.spec <- list(
 cat.defs <- list(
   Party = list(
     "Missing" = c("Not applicable", "Refusal", "Don't know","No answer", "Nul", "Blanc", "Does not know if voted for a candidate list", "Ongeldig",
-                  "A white ballot (empty ballot note)", "Blank paper", "Votou em branco / nulo", "Blanco", "Blank vote", "Spoiled vote", "Did not vote"),
-    "Other" = c("Autre", "Outro", "Other", "Autres mouvements écologistes", "Independent",
-                "Mixed vote", "Did not vote for a candidate list")
+                  "A white ballot (empty ballot note)", "Blank paper", "Votou em branco / nulo", "Blanco", "Blank vote", "Spoiled vote", "Did not vote",
+                  "Invalid", "Null", "No one"),
+    "Other" = c("Autre", "Outro", "Other", "Autres mouvements écologistes", "Independent", "Andet - other", "Other party",
+                "Mixed vote", "Did not vote for a candidate list", "Üksikkandidaat", "Annat parti", "Andere Partei")
   ),
   Language = list(
     "Missing" = c("777", "888", "999", "ZXX")

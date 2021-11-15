@@ -45,8 +45,9 @@ cat.defs <- list(
                 "Related to Race",
                 "National identity only",
                 "Other",
-                "Other white/ European",
-                "Other Northern Languages"
+                "Other Northern Languages",
+                "Related to Occupation/Profession",
+                "Related to Politics/Partizan"
     ),
     "Missing" = c("Don't know", "Refused", "Missing data", "Not asked")
   )
