@@ -52,7 +52,7 @@ cat.defs <- list(
     "Missing" = c("Don’t know", "Refused")
   ),
   Religion = list(
-    "Missing" = c("Refused", "Don’t know", "Dont know", "(VOL) Refused", "Something else (SPECIFY), or", "(VOL)\xc2\xa0Don't know"),
+    "Missing" = c("Refused", "Don’t know", "Dont know", "(VOL) Refused", "Something else (SPECIFY), or", "(VOL)\u00a0Don\'t know"),
     "Other" = c("Atheist (do not believe in God)", "Agnostic (not sure if there is a God)", "Something else, or", "Nothing in particular",
                 "Agnostic (I dont really know whether there is a god, or whether there are any gods)", "Atheist (I do not believe in any gods or God)")
   ),

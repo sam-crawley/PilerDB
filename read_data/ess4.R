@@ -38,14 +38,14 @@ cat.defs <- list(
   Party = list(
     "Missing" = c("Not applicable", "Refusal", "Don't know","No answer", "Nul", "Blanc", "Blank paper", "blank ballot",
                   "Blank vote", "Spoiled vote", "Blank", "Invalid", "Cast invalid vote", "Votou em branco / nulo"),
-    "Other" = c("Autre", "Other", "Autres mouvements écologistes", "Independent", "Mixed vote", "Other party", "other",
-                "Other: FDGR", "Other: PR", "Other party or independent candidate")
+    "Other" = c("Autre", "Other", "Independent", "Mixed vote", "Other party", "other",
+                "Other: FDGR", "Other: PR", "Other party or independent candidate", "Andet \u0096 other")
   ),
   Language = list(
     "Missing" = c("777", "888", "999")
   ),
   Religion = list(
     "Missing" = c("Refusal", "No answer"),
-    "Other" = c("Not applicable", "Other non-Christian religions")
+    "Other" = c("Not applicable")
   )
 )

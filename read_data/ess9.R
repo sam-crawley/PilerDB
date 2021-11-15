@@ -39,14 +39,13 @@ cat.defs <- list(
                   "Blank vote", "Invalid vote", "Did not vote for a multi-member nationwide candidate list",
                   "Refused to tell if voted for a multi-member nationwide candidate list", "Blanc", "Blank paper",
                   "Votou em branco/ nulo"),
-    "Other" = c("Independent(s) (nir)", "Other (nir)", "Altro", "Independent", "Autre", "Annat parti", "Üksikkandidaadid või mud", "Ostalo")
+    "Other" = c("Independent(s) (nir)", "Other (nir)", "Altro", "Independent", "Autre", "Annat parti","\u00dcksikkandidaadid v\u00f5i muud", "Ostalo")
   ),
   Language = list(
     "Missing" = c("777", "888", "999", "ZXX")
   ),
   Religion = list(
     "Missing" = c("Refusal", "No answer"),
-    "Other" = c("Not applicable", "Other non-Christian religion, religion not specified", "Other non-Christian", "Other Non-Christian Religions",
-                "Other Non-Christian religions")
+    "Other" = c("Not applicable")
   )
 )

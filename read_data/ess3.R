@@ -33,13 +33,13 @@ cat.defs <- list(
   Party = list(
     "Missing" = c("Not applicable", "Refusal", "Don't know","No answer", "Blanc", "Votou em branco / nulo",
                   "Blank vote", "Spoiled vote", "Blank", "Invalid"),
-    "Other" = c("Autre", "Other", "Autres mouvements écologistes", "Independent", "Other party", "other", "Others")
+    "Other" = c("Autre", "Other", "Independent", "Other party", "other", "Others")
   ),
   Language = list(
     "Missing" = c("777", "888", "999")
   ),
   Religion = list(
     "Missing" = c("Refusal", "No answer"),
-    "Other" = c("Not applicable", "Other non-Christian religions")
+    "Other" = c("Not applicable")
   )
 )

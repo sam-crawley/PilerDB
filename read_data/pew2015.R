@@ -52,7 +52,7 @@ cat.defs <- list(
     "Missing" = c("Refused", "Don’t know", "Don't know", "None/No party", "None/No party (Volunteered)", "None", "None (Volunteered)",
                   "None/No party  (Volunteered)", "None\\No party (Volunteered)", "None/No party", "None / No party (Volunteered)",
                   "Don't Know", "Undecided", "None of the above/No party", "Nothing (Volunteered)", "No preference (Volunteered)",
-                  "Not enrolled to vote", "Would not vote (Volunteered)"),
+                  "Not enrolled to vote", "Would not vote  (Volunteered)"),
     "Other" = c("Independent", "Other party (Volunteered)", "Other", "Other (Volunteered)", "Other (Specify) (Volunteered)",
                 "Other (Volunteered)", "Others (Volunteered)", "Independents", "Independent candidate/Azaad Umeedwaar")
   ),

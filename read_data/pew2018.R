@@ -61,7 +61,7 @@ cat.defs <- list(
   ),
   Ethnicity = list(
     "Missing" = c("Missing", "Don't know", "Some other race (Specify____ IF NEEDED: What race or races is that?)",
-                    "Don't know", "Refused (e.g., non-race answers like American, human, purple)", "Don’t know"),
+                    "Don't know", "Refused (e.g., non-race answers like American, human, purple)", "Don’t know", "Refused"),
     "Other" = c("Other (SPECIFY)", "Other (UNSPECIFIED)")
   )
 )
