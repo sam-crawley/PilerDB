@@ -22,6 +22,11 @@ data.spec <- list(
     # Strip out country prefixes from levels
     levels(data$Party) <- str_remove(levels(data$Party), "^\\d+\\. \\w+ - \\s*")
     
+    # Special case for Taiwan, where Taiwanese is coded as a "generic" category
+    data <- data %>% 
+      mutate(Language = fct_expand(Language, "Taiwanese")) %>% 
+      mutate(Language = replace(Language, Country == "Taiwan" & Language == "980. [SEE ELECTION STUDY NOTES]", "Taiwanese"))
+    
     for (var in c("Language", "Religion")) {
       levels(data[[var]]) <- str_remove(levels(data[[var]]), "^\\d+\\. ")
     }
