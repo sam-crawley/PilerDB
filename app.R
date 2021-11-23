@@ -210,12 +210,6 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
     grp.output.header <- paste0(group, "Heading", countryTabID)
     grp.output.table <- paste0(group, "Table", countryTabID)
     
-    #warning("ShowAllData", input[[paste0("ShowAllData", countryTabID)]])
-    
-    #show.all.data <- input[[paste0("ShowAllData", countryTabID)]] 
-    #if (is.null(show.all.data))
-    #  show.all.data <- F
-    
     if (show.all.data)
       crosstab.orig <- country.data[[group]]
     else
@@ -374,6 +368,7 @@ server <- function(input, output, session) {
     
     countryTabsOpen <- session$userData$countryTabsOpen
     countryTabID <- str_remove_all(selected.row$ID, " ")
+    session$userData$currentCountryTab <- selected.row$ID
     
     if (has_name(countryTabsOpen, countryTabID)) {
       updateTabsetPanel(session, "mainPanel", selected = selected.row$ID)
@@ -386,7 +381,8 @@ server <- function(input, output, session) {
       h3(textOutput(paste0("CountryName", countryTabID))),
       
       checkboxInput(paste0("ShowAllData", countryTabID),
-                    label = "Show all country data"
+                    label = "Show all country data",
+                    value = T
       ),
       
       h4("Group basis: ", textOutput(paste0("GroupBasis", countryTabID), inline = T)),
@@ -415,6 +411,10 @@ server <- function(input, output, session) {
       h5("Original country name (from data file)"),
       textOutput(paste0("country.orig", countryTabID))
     )
+    
+    observeEvent(input[[paste0("ShowAllData", countryTabID)]], {
+      generate.country.tables(countryTabID, country.data, output, show.all.data = input[[paste0("ShowAllData", countryTabID)]])
+    }, ignoreInit = T)
     
     sample.size <- country.data$Summary$general$`Sample Size`
     
