@@ -203,6 +203,88 @@ get.country.list <- function(data.src, var.name) {
   res
 }
 
+generate.country.tables <- function(countryTabID, country.data, output, show.all.data = T) {
+  sample.size <- country.data$Summary$general$`Sample Size`
+  
+  walk (group.names, function(group) {
+    grp.output.header <- paste0(group, "Heading", countryTabID)
+    grp.output.table <- paste0(group, "Table", countryTabID)
+    
+    #warning("ShowAllData", input[[paste0("ShowAllData", countryTabID)]])
+    
+    #show.all.data <- input[[paste0("ShowAllData", countryTabID)]] 
+    #if (is.null(show.all.data))
+    #  show.all.data <- F
+    
+    if (show.all.data)
+      crosstab.orig <- country.data[[group]]
+    else
+      crosstab.orig <- country.data$nomiss[[group]]
+    
+    if (! is.null(crosstab.orig)) {
+      output[[grp.output.header]] <- renderText(group)
+      
+      group.cols <- colnames(crosstab.orig)[2:ncol(crosstab.orig)]
+      
+      crosstab <- crosstab.orig %>% 
+        adorn_percentages("row") %>% 
+        adorn_pct_formatting()
+      
+      group.cols.order <- unlist( map(group.cols, ~paste0(.x, c(".n", '.%'))))
+      
+      crosstab <- inner_join(crosstab, attr(crosstab, "core"), by = "Party", suffix = c(".%", ".n")) %>%
+        select( Party, all_of(group.cols.order) ) %>%
+        adorn_totals("col") %>%
+        mutate(pct = paste0(round(Total / sample.size, 2)*100, '%'))
+      
+      col.totals.n <- crosstab.orig %>% select(-Party) %>% summarise(across(everything(), ~sum(.x)))
+      col.totals <- crosstab.orig %>% select(-Party) %>% 
+        summarise(across(everything(), ~paste0(round(sum(.x)/sample.size*100, 1), '%'))) %>% 
+        bind_cols(col.totals.n, .name_repair = "unique") %>% 
+        set_names(c(paste0(names(col.totals.n), '.%'), paste0(names(col.totals.n), '.n'))) %>%
+        mutate(Party = "Total", Total = sample.size, pct = "") %>%
+        select( Party, all_of(group.cols.order), Total, pct )
+      
+      sketch = htmltools::withTags(table(
+        class = 'display compact',
+        style = 'white-space: nowrap',
+        thead(
+          tr(
+            th("Party", rowspan = 2),
+            lapply(group.cols, function (x) { th(colspan = 2, x) }),
+            th("Total", colspan = 2)
+          ),
+          tr(
+            lapply(rep(c('N', '%'), length(group.cols)+1), th)
+          )
+        ),
+        tfoot(
+          tr(
+            lapply(col.totals, th)
+          )
+        )
+      ))        
+      
+      output[[grp.output.table]] <- renderDT(
+        crosstab,
+        options = list(
+          lengthChange = F, 
+          paging = F, 
+          searching = F,
+          bInfo = F,
+          scrollX = T
+        ),
+        rownames = F,
+        container = sketch
+      )
+    }
+    else {
+      output[[grp.output.header]] <- renderText("")
+      output[[grp.output.table]]<- renderDT(NULL)
+    }
+  })
+}
+
 
 server <- function(input, output, session) {
   
@@ -302,6 +384,11 @@ server <- function(input, output, session) {
     
     tab <- tabPanel(country.data$Summary$general$ID,
       h3(textOutput(paste0("CountryName", countryTabID))),
+      
+      checkboxInput(paste0("ShowAllData", countryTabID),
+                    label = "Show all country data"
+      ),
+      
       h4("Group basis: ", textOutput(paste0("GroupBasis", countryTabID), inline = T)),
 
       br(),
@@ -343,72 +430,7 @@ server <- function(input, output, session) {
     output[[paste0("CorNoMissWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.nomiss.wt)
     output[[paste0("country.orig", countryTabID)]] <- renderText(country.data$Summary$country.orig)
     
-    walk (group.names, function(group) {
-      grp.output.header <- paste0(group, "Heading", countryTabID)
-      grp.output.table <- paste0(group, "Table", countryTabID)
-      
-      if (! is.null(country.data[[group]])) {
-        output[[grp.output.header]] <- renderText(group)
-        
-        group.cols <- colnames(country.data[[group]])[2:ncol(country.data[[group]])]
-        
-        crosstab <- country.data[[group]] %>% 
-          adorn_percentages("row") %>% 
-          adorn_pct_formatting()
-
-        group.cols.order <- unlist( map(group.cols, ~paste0(.x, c(".n", '.%'))))
-        
-        crosstab <- inner_join(crosstab, attr(crosstab, "core"), by = "Party", suffix = c(".%", ".n")) %>%
-          select( Party, all_of(group.cols.order) ) %>%
-          adorn_totals("col") %>%
-          mutate(pct = paste0(round(Total / sample.size, 2)*100, '%'))
-        
-        col.totals.n <- country.data[[group]] %>% select(-Party) %>% summarise(across(everything(), ~sum(.x)))
-        col.totals <- country.data[[group]] %>% select(-Party) %>% 
-          summarise(across(everything(), ~paste0(round(sum(.x)/sample.size*100, 1), '%'))) %>% 
-          bind_cols(col.totals.n, .name_repair = "unique") %>% 
-          set_names(c(paste0(names(col.totals.n), '.%'), paste0(names(col.totals.n), '.n'))) %>%
-          mutate(Party = "Total", Total = sample.size, pct = "") %>%
-          select( Party, all_of(group.cols.order), Total, pct )
-        
-        sketch = htmltools::withTags(table(
-          class = 'display compact',
-          style = 'white-space: nowrap',
-          thead(
-            tr(
-              th("Party", rowspan = 2),
-              lapply(group.cols, function (x) { th(colspan = 2, x) }),
-              th("Total", colspan = 2)
-            ),
-            tr(
-              lapply(rep(c('N', '%'), length(group.cols)+1), th)
-            )
-          ),
-          tfoot(
-            tr(
-              lapply(col.totals, th)
-            )
-          )
-        ))        
-        
-        output[[grp.output.table]] <- renderDT(
-          crosstab,
-          options = list(
-            lengthChange = F, 
-            paging = F, 
-            searching = F,
-            bInfo = F,
-            scrollX = T
-          ),
-          rownames = F,
-          container = sketch
-        )
-      }
-      else {
-        output[[grp.output.header]] <- renderText("")
-        output[[grp.output.table]]<- renderDT(NULL)
-      }
-    })
+    generate.country.tables(countryTabID, country.data, output)
     
     appendTab("mainPanel", tab, select = T)
   })

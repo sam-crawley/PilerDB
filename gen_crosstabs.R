@@ -150,6 +150,19 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   
   names(tables) <- group.names
   
+  tables$nomiss <- map(group.names, function(var) {
+    if (all( d[var] == "Missing" )) {
+      return (NULL)
+    }
+    
+    t <- d %>% 
+      drop.rows.from.country.data(var) %>%
+      tabyl(Party, .data[[var]], show_missing_levels = F)
+    t
+  })
+  
+  names(tables$nomiss) <- group.names
+  
   if (is.null(year))
     year <- max(as.numeric(d$Year), na.rm = T)
   
@@ -205,7 +218,7 @@ process.data <- function(data, cat.defs) {
 gen.category.summary <- function(data, cat.defs) {
   map(main.vars, function(var.name) {
     fct_count(data[[var.name]]) %>%
-      mutate("Collapsed To" = case_when(
+      mutate("Recoded To" = case_when(
         f %in% cat.defs[[var.name]]$Missing ~ 'Missing',
         f %in% cat.defs[[var.name]]$Other ~ 'Other',
         TRUE ~ ''
