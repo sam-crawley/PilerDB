@@ -204,16 +204,19 @@ get.country.list <- function(data.src, var.name) {
 }
 
 generate.country.tables <- function(countryTabID, country.data, output, show.all.data = T) {
-  sample.size <- country.data$Summary$general$`Sample Size`
   
   walk (group.names, function(group) {
     grp.output.header <- paste0(group, "Heading", countryTabID)
     grp.output.table <- paste0(group, "Table", countryTabID)
     
-    if (show.all.data)
+    if (show.all.data) {
       crosstab.orig <- country.data[[group]]
-    else
+      sample.size <- country.data$Summary$general$`Sample Size`
+    }
+    else {
       crosstab.orig <- country.data$nomiss[[group]]
+      sample.size <- country.data$Summary$cor.nomiss %>% filter(question == group) %>% pull(N.eff)
+    }
     
     if (! is.null(crosstab.orig)) {
       output[[grp.output.header]] <- renderText(group)
