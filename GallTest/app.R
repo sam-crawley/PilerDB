@@ -1,5 +1,7 @@
 library(shiny)
 
+source("Divided/GallTest/util.R")
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
 
@@ -63,28 +65,6 @@ server <- function(input, output) {
     
     output$gall.res <- renderText(calc.test.gall(party.by.grp.size.dat()))
 
-}
-
-calc.test.gall <- function(party.by.grp) {
-  if (nrow(party.by.grp) == 0)
-    return (0)
-  
-  total.votes <- sum(party.by.grp$val)
-  
-  if (total.votes <= 0)
-    return (0)
-  
-  party.sizes <- party.by.grp %>% group_by(Party) %>% summarise(percent = sum(val) / total.votes)
-  group.sizes <- party.by.grp %>% group_by(Group) %>% summarise(percent = sum(val) / total.votes) %>%
-    rename(group = Group)
-  
-  party.by.grp.mod <- party.by.grp %>%
-    group_by(Party) %>%
-    mutate(percent = val / sum(val)) %>% 
-    select(-val) %>% 
-    pivot_wider(names_from = Group, values_from = percent)
-  
-  gallagher.impl(party.by.grp.mod, group.sizes, party.sizes)
 }
 
 # Run the application 
