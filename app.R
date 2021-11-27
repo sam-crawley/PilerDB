@@ -326,7 +326,7 @@ server <- function(input, output, session) {
     class = 'display compact',
     thead(
       tr(
-        lapply(c("Country", "Data Source", "Year", "Correlation (missing/other removed)"), function (x) { th(rowspan = 2, x) }),
+        lapply(c("Country", "Data Source", "Year", "Group Basis"), function (x) { th(rowspan = 2, x) }),
         lapply(1:summary.group.size, function (x) { th(colspan = 2, paste("Group", x)) }),
         lapply(paste("Supporters of party", 1:max.parties), function (x) { th(colspan = summary.group.size+2, x) })
       ),

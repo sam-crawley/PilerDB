@@ -479,15 +479,13 @@ get.group.size.summary <- function(res) {
       return(NULL)
     }
     
-    main.crosstab <- country.data[[country.data$Summary$general$`Group Basis`]]
+    main.crosstab <- country.data$nomiss[[country.data$Summary$general$`Group Basis`]]
     
     gs.row <- country.data$Summary$general %>%
       select(Country, `Data Source`, Year, `Group Basis`)
     
     gs <- main.crosstab %>% 
       pivot_longer(-Party, names_to = "Group") %>% 
-      filter(! Party %in% c("Missing", "Other")) %>% 
-      filter(! Group %in% c("Missing", "Other")) %>% 
       group_by(Group) %>% 
       summarise(value = sum(value)) %>% 
       filter(value > 0) %>%
@@ -502,7 +500,6 @@ get.group.size.summary <- function(res) {
     
     party.group.sizes <- main.crosstab %>% 
       select(Party, all_of(main.groups)) %>% 
-      filter(! Party %in% c("Missing", "Other")) %>% 
       adorn_totals("col") %>% 
       arrange(desc(Total)) %>%
       select(Party, Total, everything())
@@ -543,7 +540,7 @@ get.excel.summary.sheet <- function(res) {
 }
 
 get.max.parties <- function(group.sizes) {
-  max.parties <- length(names(group.sizes)[str_detect(names(group.sizes), "^Party.Grp")])
+  length(names(group.sizes)[str_detect(names(group.sizes), "^Party.Grp")])
 }
 
 write.divided.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") {
