@@ -2,7 +2,7 @@ data.spec <- list(
   file.name = "Divided/datasets/ess/Round 1/ESS1e06_6.dta",
   file.type = 'dta',
   question.text = c(
-    "Party" = "Party voted for in last national election [Which party did you vote for in that election?]",
+    "Party" = "Which party feel closer to",
     "Religion" = "Do you consider yourself as belonging to any particular religion or denomination? [If yes] Which one?",
     "Language" = "What language or languages do you speak most often at home? [First mentioned]"
   ),  
@@ -10,7 +10,7 @@ data.spec <- list(
   skip.countries = list(),
   country.format = 'iso2c',
   field.def = c(
-    "Party" = "prtvt",
+    "Party" = "prtcl",
     "Language" = "lnghoma",
     "Religion" = "rlgdnm",
     "Ethnicity" = NA,
@@ -20,7 +20,7 @@ data.spec <- list(
   ),
   pre_fixups = function(data) {
     # Coalesce necessary vars
-    data <- coalese.vars(data, str_subset(names(data), "^prtv"), "prtvt")
+    data <- coalese.vars(data, str_subset(names(data), "^prtcl"), "prtcl")
     
     data
   },
@@ -31,9 +31,9 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Not applicable", "Refusal", "Don't know", "No answer", "None of them", "Don t know", "White Ballot", "Blank vote"),
-    "Other" = c("Other", "Independent", "Others", "Autres", "Other parties", "Altro", "Other party", "OTHER", "Autre", "Ha votato solo al maggioritario",
-                "Andere", "Andere Partei")
+    "Missing" = c("Not applicable", "Refusal", "Don't know", "No answer", "Don t know"),
+    "Other" = c("Other",  "Others", "Autres", "Other parties", "Other party", "OTHER", "Autre", "Andere", "Andere Partei",
+                "Other (nir)")
   ),
   Language = list(
     "Missing" = c("777", "888", "999")

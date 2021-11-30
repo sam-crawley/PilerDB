@@ -2,14 +2,14 @@ data.spec <- list(
   file.name = "Divided/datasets/ess/Round 9/ESS9e03_1.dta",
   file.type = 'dta',
   question.text = c(
-    "Party" = "Party voted for in last national election [Which party did you vote for in that election?]",
+    "Party" = "Which party feel closer to",
     "Religion" = "Do you consider yourself as belonging to any particular religion or denomination? [If yes] Which one?",
     "Language" = "What language or languages do you speak most often at home? [First mentioned]"
   ),  
   skip.countries = list(),
   country.format = 'iso2c',
   field.def = c(
-    "Party" = "prtvt",
+    "Party" = "prtcl",
     "Language" = "lnghom1",
     "Religion" = "rel",
     "Ethnicity" = NA,
@@ -19,7 +19,7 @@ data.spec <- list(
   ),
   pre_fixups = function(data) {
     # Coalece necessary vars
-    data <- coalese.vars(data, str_subset(names(data), "^prtv"), "prtvt")
+    data <- coalese.vars(data, str_subset(names(data), "^prtcl"), "prtcl")
     
     rl.cols <- c("rlgdnbat", "rlgdnbe",  "rlgdnach", "rlgdncy",  "rlgdnade", "rlgdnafi", "rlgdngb",  "rlgdnhu",  "rlgdnie",  "rlgdnais",
                  "rlgdnlt",  "rlgdnlv",  "rlgdme",   "rlgdnnl",  "rlgdnno",  "rlgdnapl", "rlgdnrs",  "rlgdnase", "rlgdnask", "rlgdnme")
@@ -35,11 +35,8 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Not applicable", "Refusal", "Don't know", "Invalid", "Don't know if voted for a multi-member nationwide candidate list", "No answer",
-                  "Blank vote", "Invalid vote", "Did not vote for a multi-member nationwide candidate list",
-                  "Refused to tell if voted for a multi-member nationwide candidate list", "Blanc", "Blank paper",
-                  "Votou em branco/ nulo"),
-    "Other" = c("Independent(s) (nir)", "Other (nir)", "Altro", "Independent", "Autre", "Annat parti","\u00dcksikkandidaadid v\u00f5i muud", "Ostalo")
+    "Missing" = c("Not applicable", "Refusal", "Don't know", "No answer"),
+    "Other" = c("Other (nir)", "Altro", "Independent", "Autre", "Annat parti", "Ostalo", "Other")
   ),
   Language = list(
     "Missing" = c("777", "888", "999", "ZXX")

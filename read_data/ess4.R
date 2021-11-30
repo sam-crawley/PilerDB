@@ -2,7 +2,7 @@ data.spec <- list(
   file.name = "Divided/datasets/ess/Round 4/ESS4e04_5.dta",
   file.type = 'dta',
   question.text = c(
-    "Party" = "Party voted for in last national election [Which party did you vote for in that election?]",
+    "Party" = "Which party feel closer to",
     "Religion" = "Do you consider yourself as belonging to any particular religion or denomination? [If yes] Which one?",
     "Language" = "What language or languages do you speak most often at home? [First mentioned]"
   ),  
@@ -10,7 +10,7 @@ data.spec <- list(
   skip.countries = list(),
   country.format = 'iso2c',
   field.def = c(
-    "Party" = "prtvt",
+    "Party" = "prtcl",
     "Language" = "lnghoma",
     "Religion" = "rel",
     "Ethnicity" = NA,
@@ -20,7 +20,7 @@ data.spec <- list(
   ),
   pre_fixups = function(data) {
     # Coalesce necessary vars
-    data <- coalese.vars(data, str_subset(names(data), "^prtv"), "prtvt")
+    data <- coalese.vars(data, str_subset(names(data), "^prtcl"), "prtcl")
     
     rl.cols <- str_subset(names(data), "^rlgdn") %>%
       discard(~.x == "rlgdnme")
@@ -36,10 +36,8 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Not applicable", "Refusal", "Don't know","No answer", "Nul", "Blanc", "Blank paper", "blank ballot",
-                  "Blank vote", "Spoiled vote", "Blank", "Invalid", "Cast invalid vote", "Votou em branco / nulo"),
-    "Other" = c("Autre", "Other", "Independent", "Mixed vote", "Other party", "other",
-                "Other: FDGR", "Other: PR", "Other party or independent candidate", "Andet \u0096 other")
+    "Missing" = c("Not applicable", "Refusal", "Don't know","No answer"),
+    "Other" = c("Autre", "Other", "Other party", "other", "Other: PR", "Other (specify)", "Outro")
   ),
   Language = list(
     "Missing" = c("777", "888", "999")
