@@ -307,7 +307,9 @@ calc.correlations <- function(d, drop.cats = F, use.weights = F) {
       mutate(question = var, N.eff = n.eff) %>%
       mutate(gallagher = calc.gallagher(d.g, var, drop.cats = F))
     
-    res
+    huber <- do.huber.calcs(d.g, var, drop.cats = F)
+    
+    bind_cols(res, huber)
   })
   
   tau %>% select(question, everything()) %>%
@@ -399,6 +401,71 @@ gallagher.impl <- function(party.sizes.by.grp, grp.sizes, party.sizes, loosemore
     ungroup() %>% 
     summarise(total = sum(total)) %>%
     pull(total)
+}
+
+do.huber.calcs <- function(d, group.to.use, drop.cats = F) {
+  if (is.na(group.to.use))
+    return (NA)
+  
+  # Remove Missing/Other categories from Party and Grouping vars
+  if (drop.cats)
+    d <- drop.rows.from.country.data(d, group.to.use)
+  
+  group.sizes <- tabyl(d, {{group.to.use}}, show_missing_levels = F)
+  party.sizes <- tabyl(d, Party, show_missing_levels = F)
+  group.sizes.by.pty <- d %>% group_by(.data[[group.to.use]], Party) %>% count() %>% group_by(.data[[group.to.use]]) %>% mutate(pct = n / sum(n)) %>% select(-n)
+  party.sizes.by.grp <- d %>% group_by(.data[[group.to.use]], Party) %>% count() %>% group_by(Party) %>% mutate(pct = n / sum(n)) %>% select(-n)
+  
+  # Calculate differences in party support between each pair of groups
+  rT <- expand_grid(unique(d[[group.to.use]]), unique(d[[group.to.use]]), unique(d$Party), .name_repair = "minimal") %>%
+    set_names("g1", "g2", "p") %>%
+    left_join(group.sizes.by.pty, by = c('g1' = group.to.use, 'p' = 'Party')) %>%
+    left_join(group.sizes.by.pty, by = c('g2' = group.to.use, 'p' = 'Party')) %>%
+    mutate(across(c(pct.x, pct.y), ~if_else(is.na(.x), 0, .x))) %>%
+    mutate(rT.init = pct.x - pct.y) %>%
+    mutate(rT = rT.init^2)
+
+  # Sum the differences by group dyad
+  rT.sum <- rT %>% group_by(g1, g2) %>% summarise(rT.orig = sum(rT), .groups = "drop") %>%
+    mutate(rT = sqrt(0.5*rT.orig))
+  
+  # Adjust differences by group size
+  rT.sum <- rT.sum %>%
+    inner_join(group.sizes, by = c('g1' = group.to.use)) %>%
+    rename('g1.group.sizes' = percent) %>%
+    inner_join(group.sizes, by = c('g2' = group.to.use)) %>%
+    rename('g2.group.sizes' = percent) %>%
+    mutate(VF = rT*g1.group.sizes*g2.group.sizes) %>%
+    mutate(VP = rT*g1.group.sizes*g2.group.sizes^2)
+  
+  # Calculate differences in group support between each pair of parties
+  rP <- expand_grid(unique(d$Party), unique(d$Party), unique(d[[group.to.use]]), .name_repair = "minimal") %>%
+    set_names("p1", "p2", "g") %>%
+    left_join(party.sizes.by.grp, by = c('p1' = 'Party', 'g' = group.to.use)) %>%
+    left_join(party.sizes.by.grp, by = c('p2' = 'Party', 'g' = group.to.use)) %>%
+    mutate(across(c(pct.x, pct.y), ~if_else(is.na(.x), 0, .x))) %>%
+    mutate(rP.init = pct.x - pct.y) %>%
+    mutate(rP = rP.init^2)
+  
+  rP.sum <- rP %>% group_by(p1, p2) %>% summarise(rP.orig = sum(rP), .groups = "drop") %>%
+    mutate(rP = sqrt(0.5*rP.orig))
+  
+  # Adjust differences by party size
+  rP.sum <- rP.sum %>%
+    inner_join(party.sizes, by = c('p1' = 'Party')) %>%
+    rename('p1.party.sizes' = percent) %>%
+    inner_join(party.sizes, by = c('p2' = 'Party')) %>%
+    rename('p2.party.sizes' = percent) %>%
+    mutate(PVF = rP*p1.party.sizes*p2.party.sizes) %>%
+    mutate(PVP = rP*p1.party.sizes*p2.party.sizes^2)
+  
+  list(
+    VF  = rT.sum %>% ungroup() %>% summarise(VF = sum(VF)) %>% pull(VF),
+    VP  = rT.sum %>% ungroup() %>% summarise(VP = sum(VP)*4) %>% pull(VP),
+    PVF = rP.sum %>% ungroup() %>% summarise(PVF = sum(PVF)) %>% pull(PVF),
+    PVP = rP.sum %>% ungroup() %>% summarise(PVP = sum(PVP)*4) %>% pull(PVP)
+  )
+
 }
 
 # Calculate a DF summarising all countries
