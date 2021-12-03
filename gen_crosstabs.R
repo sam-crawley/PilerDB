@@ -173,9 +173,18 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   
   group.basis <- calc.group.basis(cor.nomiss)
   
+
+  
   gallagher <- NA
-  if (! is.na(group.basis))
-    gallagher <- cor.nomiss %>% filter(question == group.basis) %>% pull(gallagher)
+  pvp <- NA
+  pvf <- NA
+  
+  if (! is.na(group.basis)) {
+    cor.vals <- cor.nomiss %>% filter(question == group.basis)
+    gallagher <- cor.vals$gallagher
+    pvp <- cor.vals$PVP
+    pvf <- cor.vals$PVF
+  }
   
   tables$Summary <- list(
     general = tibble(
@@ -187,7 +196,9 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
       'Sample Size' = nrow(d),
       'Group Basis' = group.basis,
       'Gallagher' = gallagher,
-      'Loosmore Hanby' = calc.gallagher(d, group.basis, loosemore = T)
+      'Loosmore Hanby' = calc.gallagher(d, group.basis, loosemore = T),
+      'PVP' = pvp,
+      'PVF' = pvf
     ),
     cor = cor,
     cor.wt = cor.wt,
@@ -476,10 +487,11 @@ calc.summary.data <- function(res) {
     
     sum <- orig.sum.data$general
     sum$`Data Source Orig` <- NULL
+    sum$cor.nomiss <- calc.group.basis(orig.sum.data$cor.nomiss, ret.max.val = T)
     sum$Gallagher <- round(sum$Gallagher, 2)
     sum$`Loosmore Hanby` <- round(sum$`Loosmore Hanby`, 2)
-    sum$cor <- calc.group.basis(orig.sum.data$cor, ret.max.val = T)
-    sum$cor.nomiss <- calc.group.basis(orig.sum.data$cor.nomiss, ret.max.val = T)
+    sum$PVF <- round(sum$PVF, 2)
+    sum$PVP <- round(sum$PVP, 2)
     
     # Add summary columns indicating whether the group variable is 'available'.
     #  Available is defined as the correlations were able to be calculated
@@ -623,16 +635,16 @@ write.divided.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xls
   
   # Add summary sheet with 2 header rows
   addWorksheet(wb, "Summary")
-  outer.headers <- c("", "", "", "", "", "", "", "Highest Group Correlation", "",
+  outer.headers <- c("", "", "", "", "", "", "", "", "", "", 
                      "Included in Group", "", "Party Missing", "", "Group Missing")
   writeData(wb, "Summary", data.frame(t(outer.headers)), startRow = 1, startCol = 1, colNames = F, rowNames = F)
   addStyle(wb, sheet = "Summary", hs2, rows = 1, cols = 1:length(outer.headers))
-  mergeCells(wb, "Summary", cols = 8:9, rows = 1)
-  mergeCells(wb, "Summary", cols = 10:11, rows = 1)
-  mergeCells(wb, "Summary", cols = 12:13, rows = 1)
+  mergeCells(wb, "Summary", cols = 11:12, rows = 1)
+  mergeCells(wb, "Summary", cols = 13:14, rows = 1)
+  mergeCells(wb, "Summary", cols = 15:16, rows = 1)
   
-  summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "Gallagher", "Loosemore Hanby", "(full sample)", "(Missing/Other removed)", 
-                       "(N)", "(%)", "(N)", "(%)", "(N)", "(%)")
+  summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "Correlation", "Gallagher", "Loosemore Hanby", 
+                       "PVP", "PVF", "(N)", "(%)", "(N)", "(%)", "(N)", "(%)")
   
   writeData(wb, "Summary", data.frame(t(summary.headers)), startRow = 2, startCol = 1, colNames = F, rowNames = F)
   setColWidths(wb, sheet = "Summary", cols = 1:length(summary.headers), widths = "auto")

@@ -128,8 +128,7 @@ get.summary.table <- function(datasrc, country, incomplete.data = F, with.id = F
   tab <- summary.table  %>%
     mutate(across(ends_with('.pct'), ~round(.x, digits = 2) * 100)) %>%
     rename(
-      "Correlation (full sample)" = cor,
-      "Correlation (others / missing removed)" = cor.nomiss,
+      "Tau" = cor.nomiss,
       "Total Included (N)" = total.included,
       "Total Included (%)" = total.included.pct,
       "Party Missing / Other (N)" = party.missing,
@@ -291,7 +290,7 @@ server <- function(input, output, session) {
       lengthChange = F, 
       paging = F, 
       searching = F,
-      order = list(list(8, 'desc')),
+      order = list(list(9, 'desc')),
       columnDefs = list(list(className = 'dt-center', targets = 9:11))
     ),
     server = T, 
