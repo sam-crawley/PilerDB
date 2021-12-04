@@ -625,7 +625,8 @@ get.max.parties <- function(group.sizes) {
 write.divided.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xlsx") {
   summary.sheet <- get.excel.summary.sheet(res) %>%
     select(-ID) %>%
-    arrange(desc(cor))
+    arrange(desc(cor.nomiss)) %>%
+    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, cor.nomiss, everything())
   
   options("openxlsx.numFmt" = NULL)
   wb <- createWorkbook()
