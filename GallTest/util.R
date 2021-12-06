@@ -38,6 +38,8 @@ calc.test.gall <- function(party.by.grp) {
   if (total.votes <= 0)
     return (0)
   
+  #print(party.by.grp)
+  
   party.sizes <- party.by.grp %>% group_by(Party) %>% summarise(percent = sum(val) / total.votes)
   group.sizes <- party.by.grp %>% group_by(Group) %>% summarise(percent = sum(val) / total.votes) %>%
     rename(group = Group)

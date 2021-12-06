@@ -1,6 +1,7 @@
 library(shiny)
 
-source("Divided/GallTest/util.R")
+source("util.R")
+source("../gen_crosstabs.R")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -36,7 +37,6 @@ server <- function(input, output) {
             
             tags$tr(
                 tags$td(paste("Party", p)),
-                #party.size,
                 cells
             )
         })
