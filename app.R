@@ -202,18 +202,18 @@ get.country.list <- function(data.src, var.name) {
   res
 }
 
-generate.country.tables <- function(countryTabID, country.data, output, show.all.data = T) {
+generate.country.tables <- function(countryTabID, country.data, output, show.all.data = T, show.weighted = F) {
   
   walk (group.names, function(group) {
     grp.output.header <- paste0(group, "Heading", countryTabID)
     grp.output.table <- paste0(group, "Table", countryTabID)
     
+    crosstab <- gen.crosstab(country.data[[group]], totals = T, drop.cats = ! show.all.data, weighted = show.weighted)
+    
     if (show.all.data) {
-      crosstab <- gen.crosstab(country.data[[group]], totals = T)
       sample.size <- country.data$Summary$general$`Sample Size`
     }
     else {
-      crosstab <- gen.crosstab(country.data[[group]], drop.cats = T, totals = T)
       sample.size <- country.data$Summary$cor.nomiss %>% filter(question == group) %>% pull(N.eff)
     }
     
@@ -369,10 +369,22 @@ server <- function(input, output, session) {
     tab <- tabPanel(country.data$Summary$general$ID,
       h3(textOutput(paste0("CountryName", countryTabID))),
       
-      checkboxInput(paste0("ShowAllData", countryTabID),
-                    label = "Show all country data",
-                    value = T
+      prettySwitch(
+        inputId = paste0("ShowAllData", countryTabID),
+        label = "Show all country data",
+        fill = TRUE, 
+        status = "primary",
+        value = T
       ),
+      
+      prettySwitch(
+        inputId = paste0("ShowWeighted", countryTabID),
+        label = "Show weighted data",
+        fill = TRUE, 
+        status = "primary",
+        value = F
+      ),      
+      
       
       h4("Group basis: ", textOutput(paste0("GroupBasis", countryTabID), inline = T)),
 
@@ -402,8 +414,16 @@ server <- function(input, output, session) {
     )
     
     observeEvent(input[[paste0("ShowAllData", countryTabID)]], {
-      generate.country.tables(countryTabID, country.data, output, show.all.data = input[[paste0("ShowAllData", countryTabID)]])
+      generate.country.tables(countryTabID, country.data, output, 
+                              show.all.data = input[[paste0("ShowAllData", countryTabID)]],
+                              show.weighted = input[[paste0("ShowWeighted", countryTabID)]])
     }, ignoreInit = T)
+    
+    observeEvent(input[[paste0("ShowWeighted", countryTabID)]], {
+      generate.country.tables(countryTabID, country.data, output, 
+                              show.all.data = input[[paste0("ShowAllData", countryTabID)]],
+                              show.weighted = input[[paste0("ShowWeighted", countryTabID)]])
+    }, ignoreInit = T)    
     
     sample.size <- country.data$Summary$general$`Sample Size`
     
