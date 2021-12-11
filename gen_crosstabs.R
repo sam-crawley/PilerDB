@@ -13,6 +13,8 @@ summary.group.size <- 5
 # These "countries" should *always* be skipped
 global.country.skip <- c("Hong Kong SAR China", "Macao SAR China", "Puerto Rico")
 
+cats.to.drop <- c("Missing", "Other")
+
 # Generate crosstabs for all datasets
 gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.output = F, calc.summaries = T) {
   if (! is.null(ids.to.load) && is.null(existing.data) && save.output)
@@ -139,29 +141,10 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   country.orig <- d %>% distinct(Country.orig) %>% pull(Country.orig)
   
   tables <- map(group.names, function(var) {
-    if (all( d[var] == "Missing" )) {
-      return (NULL)
-    }
-    
-    t <- d %>% 
-      tabyl(Party, .data[[var]], show_missing_levels = F)
-    t
+    calc.summarised.group.data(d, var)
   })
   
   names(tables) <- group.names
-  
-  tables$nomiss <- map(group.names, function(var) {
-    if (all( d[var] == "Missing" )) {
-      return (NULL)
-    }
-    
-    t <- d %>% 
-      drop.rows.from.country.data(var) %>%
-      tabyl(Party, .data[[var]], show_missing_levels = F)
-    t
-  })
-  
-  names(tables$nomiss) <- group.names
   
   if (is.null(year))
     year <- max(as.numeric(d$Year), na.rm = T)
@@ -172,8 +155,6 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   cor.nomiss.wt = calc.correlations(d, drop.cats = T, use.weights = T)
   
   group.basis <- calc.group.basis(cor.nomiss)
-  
-
   
   gallagher <- NA
   pvp <- NA
@@ -209,6 +190,81 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   )
   
   tables
+}
+
+# Calc summarised group data for a single country
+#  This data is stored in the .rds file and can be converted into crosstabs
+#  for display purposes
+calc.summarised.group.data <- function(data, group.var) {
+  if (all( data[group.var] == "Missing" )) {
+    return (NULL)
+  }
+  
+  data %>%
+    group_by(Party, .data[[group.var]]) %>%
+    summarise(
+      n = n(),
+      n.weighted = round(sum(Weight), 0),
+      .groups = "drop"
+    ) %>%
+    rename(
+      Group = all_of(group.var)
+    )
+}
+
+# Helper function to find the groups / parties smaller than 0.02
+#  to drop based on group summary data
+find.groups.to.drop <- function(summary.data, group.type) {
+  summary.data %>%
+    group_by(.data[[group.type]]) %>% 
+    summarise(n = sum(n), .groups = "drop") %>% 
+    mutate(percent = n / sum(n)) %>% 
+    filter(percent <= 0.02) %>% 
+    pull(.data[[group.type]]) %>%
+    as.character()
+}
+
+# Generate a single crosstab from stored summary data
+gen.crosstab <- function(summary.data, drop.cats = F, weighted = F) {
+  if (is.null(summary.data))
+    return (NULL)
+  
+  if (weighted) {
+    summary.data <- summary.data %>% 
+      select(-n) %>%
+      rename(n = "n.weighted")
+  }  
+  else {
+    summary.data <- summary.data %>% 
+      select(-n.weighted)
+  }
+  
+  if (drop.cats) {
+    parties.to.drop <- find.groups.to.drop(summary.data, "Party")
+    groups.to.drop  <- find.groups.to.drop(summary.data, "Group")
+    
+    summary.data <- summary.data %>%
+      filter(! Party %in% c(cats.to.drop, parties.to.drop)) %>%
+      filter(! Group %in% c(cats.to.drop, groups.to.drop))
+  }
+  
+  group.list <- sort(unique(as.character(summary.data$Group)))
+  
+  crosstab <- summary.data %>%
+    group_by(Party) %>%
+    mutate(percent = round(n / sum(n) * 100, 1)) %>%
+    pivot_wider(names_from = Group, values_from = c(n, percent), values_fill = 0, names_glue = "{Group}_{.value}")
+  
+  group.cols <- sort(colnames(crosstab)[2:ncol(crosstab)])
+  
+  crosstab <- crosstab %>%
+    select(Party, all_of(group.cols))
+  
+  # Needs to be after select, because it currently strips attributes
+  #  See: https://github.com/tidyverse/dplyr/issues/5294
+  attr(crosstab, "group.list") <- group.list
+  
+  crosstab
 }
 
 # Do initial common data processing
@@ -265,11 +321,15 @@ get.data.src.info <- function(data, data.def) {
 #  at a time, since someone could be a member of a language group that is smaller
 #  than 2%, but be a member of a large religion group. We would want to keep this
 #  person in the analysis for religion, but not for language
-drop.rows.from.country.data <- function(d, group.var) {
+drop.rows.from.country.data <- function(d, group.var, weighted = F) {
   cats.to.drop <- c("Missing", "Other")
   
+  weights <- NULL
+  if (weighted)
+    weights <- d$Weight
+  
   d <- d %>% 
-    mutate(across(all_of(c("Party", group.var)), ~fct_lump_prop(.x, 0.02))) %>%
+    mutate(across(all_of(c("Party", group.var)), ~fct_lump_prop(.x, 0.02, w = weights))) %>%
     filter(
       ! .data[[group.var]] %in% cats.to.drop & ! Party %in% cats.to.drop
     )
@@ -513,38 +573,26 @@ calc.summary.data <- function(res) {
       return(sum)
     }
         
-    main.crosstab <- country.data[[sum$`Group Basis`]]
+    main.summary.data <- country.data[[sum$`Group Basis`]]
     
     sum$total.included <- orig.sum.data$cor.nomiss %>%
       filter(question == sum$`Group Basis`) %>%
       pull(N.eff)
     sum$total.included.pct <- sum$total.included / sum$`Sample Size`
     
-    if (main.crosstab %>% filter(Party %in% c("Missing", "Other")) %>% count() > 0) {
-      sum$party.missing <- main.crosstab %>% 
-        pivot_longer(-Party, names_to = "Group") %>%
-        filter(Party %in% c("Missing", "Other")) %>% 
-        summarise(v = sum(value)) %>%
-        pull(v)
-      sum$party.missing.pct <- sum$party.missing / sum$`Sample Size`
-    }
-    else {
-      sum$party.missing <- 0
-      sum$party.missing.pct <- 0
-    }
+    sum$party.missing <- main.summary.data %>% 
+      filter(Party %in% cats.to.drop) %>% 
+      summarise(n = sum(n)) %>% 
+      pull(n)
     
-    if (any(has_name(main.crosstab, c("Missing", "Other")))) {
-      sum$group.missing <- main.crosstab %>% 
-        pivot_longer(-Party, names_to = "Group") %>%
-        filter(Group %in% c("Missing", "Other")) %>% 
-        summarise(v = sum(value)) %>%
-        pull(v)
-      sum$group.missing.pct <- sum$group.missing / sum$`Sample Size`
-    }
-    else {
-      sum$group.missing <- 0
-      sum$group.missing.pct <- 0
-    }
+    sum$party.missing.pct <- sum$party.missing / sum$`Sample Size`
+    
+    sum$group.missing <- main.summary.data %>% 
+      filter(Group %in% cats.to.drop) %>% 
+      summarise(n = sum(n)) %>% 
+      pull(n)
+    
+    sum$group.missing.pct <- sum$group.missing / sum$`Sample Size`
     
     sum
   })
@@ -558,7 +606,8 @@ get.group.size.summary <- function(res) {
       return(NULL)
     }
     
-    main.crosstab <- country.data$nomiss[[country.data$Summary$general$`Group Basis`]]
+    summary.data <- country.data[[country.data$Summary$general$`Group Basis`]]
+    main.crosstab <- gen.crosstab(summary.data, drop.cats = T)
     
     gs.row <- country.data$Summary$general %>%
       select(Country, `Data Source`, Year, `Group Basis`)
