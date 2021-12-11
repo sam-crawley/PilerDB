@@ -209,7 +209,8 @@ calc.summarised.group.data <- function(data, group.var) {
     ) %>%
     rename(
       Group = all_of(group.var)
-    )
+    ) %>%
+    complete(Party, Group, fill = list(n = 0, n.weighted = 0))
 }
 
 # Helper function to find the groups / parties smaller than 0.02
