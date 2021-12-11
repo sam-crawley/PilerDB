@@ -691,14 +691,6 @@ get.group.size.summary <- function(res) {
 
 set.class <- function(class.name, i) { class(i) <- class.name; i} 
 
-reformat.table.for.excel <- function(table) {
-  table <- table %>% 
-    adorn_percentages("row") %>% 
-    mutate(across(-Party, ~set.class('percentage', .)))
-
-  inner_join(table, attr(table, "core"), by = "Party", suffix = c(".%", ".n"))
-}
-
 get.excel.summary.sheet <- function(res) {
   summary.sheet <- res$summary %>%
     mutate(across(ends_with('.pct'), ~set.class('percentage', .))) %>%
@@ -776,7 +768,9 @@ write.divided.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xls
     
     startRow <- 1
     for (table.name in group.names) {
-      table <- res$crosstabs[[country]][[table.name]]
+      table <- gen.crosstab(res$crosstabs[[country]][[table.name]])
+      
+      headers <- c("Party", attr(table, "group.list"))
       
       if (is.null(table))
         next()
@@ -784,9 +778,10 @@ write.divided.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xls
       writeData(wb, country.sht, table.name, startCol = 1, startRow = startRow, rowNames = F)
       addStyle(wb, sheet = country.sht, hs1, rows = startRow, cols = 1)
       
-      table <- reformat.table.for.excel(table)
+      table <- table %>% 
+        mutate(across(ends_with("percent"), ~.x/100)) %>%
+        mutate(across(ends_with("percent"), ~set.class('percentage', .x))) 
       
-      headers <- unique(str_remove(names(table), '\\..$'))
       headerCol <- 1
       for (header in headers) {
         writeData(wb, country.sht, header, startCol = headerCol, startRow = startRow + 1)
@@ -800,14 +795,7 @@ write.divided.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xls
         headerCol <- headerCol+1
       }
       
-      cols <- unlist(map(headers, function(h) {
-        if (h == "Party")
-          return (h)
-        
-        paste0(h, c(".%", ".n"))
-      }))
-      
-      writeData(wb, country.sht, table %>% select(all_of(cols)), startCol = 1, startRow = startRow + 2, rowNames = F, colNames = F)
+      writeData(wb, country.sht, table, startCol = 1, startRow = startRow + 2, rowNames = F, colNames = F)
       setColWidths(wb, sheet = country.sht, cols = 1, widths = "auto")
       setColWidths(wb, sheet = country.sht, cols = 2:ncol(table), widths = "10")
       
