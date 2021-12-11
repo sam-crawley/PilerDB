@@ -209,11 +209,11 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
     grp.output.table <- paste0(group, "Table", countryTabID)
     
     if (show.all.data) {
-      crosstab <- gen.crosstab(country.data[[group]])
+      crosstab <- gen.crosstab(country.data[[group]], totals = T)
       sample.size <- country.data$Summary$general$`Sample Size`
     }
     else {
-      crosstab <- gen.crosstab(country.data[[group]], drop.cats = T)
+      crosstab <- gen.crosstab(country.data[[group]], drop.cats = T, totals = T)
       sample.size <- country.data$Summary$cor.nomiss %>% filter(question == group) %>% pull(N.eff)
     }
     
@@ -221,44 +221,31 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
       output[[grp.output.header]] <- renderText(group)
       
       group.names <- attr(crosstab, "group.list")
+      
+      crosstab <- crosstab %>%
+        mutate(across(ends_with("percent"), ~paste0(format(.x, nsmall = 1), '%')))
+      
+      col.totals <- crosstab %>% filter(Party == "Total")
+      crosstab   <- crosstab %>% filter(Party != "Total")
 
-      #crosstab <- crosstab.orig %>% 
-      #  adorn_percentages("row") %>% 
-      #  adorn_pct_formatting()
-      
-      #group.cols.order <- unlist( map(group.cols, ~paste0(.x, c(".n", '.percent'))))
-      
-      #crosstab <- inner_join(crosstab, attr(crosstab, "core"), by = "Party", suffix = c(".%", ".n")) %>%
-      #  select( Party, all_of(group.cols.order) ) %>%
-      #  adorn_totals("col") %>%
-      #  mutate(pct = paste0(round(Total / sample.size, 2)*100, '%'))
-      
-      #col.totals.n <- crosstab.orig %>% select(-Party) %>% summarise(across(everything(), ~sum(.x)))
-      #col.totals <- crosstab.orig %>% select(-Party) %>% 
-      #  summarise(across(everything(), ~paste0(round(sum(.x)/sample.size*100, 1), '%'))) %>% 
-      #  bind_cols(col.totals.n, .name_repair = "unique") %>% 
-      #  set_names(c(paste0(names(col.totals.n), '.%'), paste0(names(col.totals.n), '.n'))) %>%
-      #  mutate(Party = "Total", Total = sample.size, pct = "") %>%
-      #  select( Party, all_of(group.cols.order), Total, pct )
-      
       sketch = htmltools::withTags(table(
         class = 'display compact',
         style = 'white-space: nowrap',
         thead(
           tr(
             th("Party", rowspan = 2),
-            lapply(group.names, function (x) { th(colspan = 2, x) })#,
-            #th("Total", colspan = 2)
+            lapply(group.names, function (x) { th(colspan = 2, x) }),
+            th("Total", colspan = 2)
           ),
           tr(
-            lapply(rep(c('N', '%'), length(group.names)), th)
+            lapply(rep(c('N', '%'), length(group.names)+1), th)
           )
-        )#,
-        #tfoot(
-        #  tr(
-        #    lapply(col.totals, th)
-        #  )
-        #)
+        ),
+        tfoot(
+          tr(
+            lapply(col.totals, th)
+          )
+        )
       ))        
       
       output[[grp.output.table]] <- renderDT(

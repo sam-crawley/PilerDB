@@ -225,10 +225,12 @@ find.groups.to.drop <- function(summary.data, group.type) {
 }
 
 # Generate a single crosstab from stored summary data
-gen.crosstab <- function(summary.data, drop.cats = F, weighted = F) {
+gen.crosstab <- function(summary.data, drop.cats = F, weighted = F, totals = F) {
   if (is.null(summary.data))
     return (NULL)
   
+  # Select the right n column, depending on whether we wanted weighted or
+  #  unweighted
   if (weighted) {
     summary.data <- summary.data %>% 
       select(-n) %>%
@@ -239,6 +241,14 @@ gen.crosstab <- function(summary.data, drop.cats = F, weighted = F) {
       select(-n.weighted)
   }
   
+  to.pct <- function(n, t = NULL) {
+    if (is.null(t))
+      t <- sum(n)
+    
+    round(n / t * 100, 1)
+  }
+  
+  # Drop out unwanted categories, and those < 0.02
   if (drop.cats) {
     parties.to.drop <- find.groups.to.drop(summary.data, "Party")
     groups.to.drop  <- find.groups.to.drop(summary.data, "Group")
@@ -248,11 +258,22 @@ gen.crosstab <- function(summary.data, drop.cats = F, weighted = F) {
       filter(! Group %in% c(cats.to.drop, groups.to.drop))
   }
   
-  group.list <- sort(unique(as.character(summary.data$Group)))
+  sample.size <- sum(summary.data$n)
   
+  if (totals) {
+    group.totals <- summary.data %>% 
+      group_by(Group) %>% 
+      summarise(n = sum(n), .groups = "drop") %>% 
+      mutate(percent = to.pct(n)) %>%
+      mutate(Party = "Total")
+    
+    summary.data <- bind_rows(summary.data, group.totals)
+  }
+  
+  # Create the crosstab
   crosstab <- summary.data %>%
     group_by(Party) %>%
-    mutate(percent = round(n / sum(n) * 100, 1)) %>%
+    mutate(percent = to.pct(n)) %>%
     pivot_wider(names_from = Group, values_from = c(n, percent), values_fill = 0, names_glue = "{Group}_{.value}")
   
   group.cols <- sort(colnames(crosstab)[2:ncol(crosstab)])
@@ -260,10 +281,29 @@ gen.crosstab <- function(summary.data, drop.cats = F, weighted = F) {
   crosstab <- crosstab %>%
     select(Party, all_of(group.cols))
   
-  # Needs to be after select, because it currently strips attributes
-  #  See: https://github.com/tidyverse/dplyr/issues/5294
-  attr(crosstab, "group.list") <- group.list
-  
+  if (totals) {
+    party.totals <- summary.data %>% 
+      group_by(Party) %>% 
+      filter(Party != "Total") %>%
+      summarise(n = sum(n), .groups = "drop") %>% 
+      ungroup() %>%
+      mutate(percent = to.pct(n)) %>%
+      rename(
+        Total_n = "n",
+        Total_percent = "percent"
+      )
+    
+    crosstab <- left_join(crosstab, party.totals, by = "Party") %>%
+      mutate(Total_n = if_else(Party == "Total", sample.size, Total_n)) %>%
+      mutate(Total_percent = if_else(Party == "Total", 100, Total_percent))
+  }
+
+  # Needs to be after select (and possibly immediately before return), 
+  #  because dplyr currently strips attributes
+  # See: https://github.com/tidyverse/dplyr/issues/5294
+  group.list <- sort(unique(as.character(summary.data$Group)))
+  attr(crosstab, "group.list") <- group.list  
+    
   crosstab
 }
 
