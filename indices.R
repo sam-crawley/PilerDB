@@ -2,7 +2,12 @@
 
 # This is the main entry function, which calculated all indices for a specific
 #  group/country/configuration
-calc.indices <- function(country.data, summary.data, group, drop.cats = F, weights = F) {
+calc.indices <- function(country.data, summary.data, group, drop.cats = F, weighted = F) {
+  summary.data <- config.summary.data(summary.data, drop.cats = drop.cats, weighted = weighted)
+  
+  if (drop.cats)
+    country.data <- drop.rows.from.country.data(country.data, group, weighted = weighted)
+  
   n.eff <- nrow(country.data)
   
   # Calculate some summary data used for many of the indices
@@ -28,7 +33,7 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
   
   # TODO: handle n.eff < 200
   
-  tau <- calc.tau(country.data, group, weights = weights)
+  tau <- calc.tau(country.data, group, weighted = weighted)
   
   gallager  <- calc.gallagher.new(party.support.by.group, group.sizes, party.sizes)
   loosemore <- calc.gallagher.new(party.support.by.group, group.sizes, party.sizes, loosemore = T)
@@ -43,12 +48,11 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
   )
   
   bind_cols(res, huber)
-  
 }
 
-calc.tau <- function(country.data, group, weights = F) {
+calc.tau <- function(country.data, group, weighted = F) {
   wt.var = NULL
-  if (weights)
+  if (weighted)
     wt.var = "Weight"
   
   country.data <- country.data %>% mutate(

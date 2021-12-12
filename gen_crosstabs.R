@@ -229,11 +229,9 @@ find.groups.to.drop <- function(summary.data, group.type) {
     as.character()
 }
 
-# Generate a single crosstab from stored summary data
-gen.crosstab <- function(summary.data, drop.cats = F, weighted = F, totals = F) {
-  if (is.null(summary.data))
-    return (NULL)
-  
+# "Configure" the summary.data DF, dropping categories as necessary,
+#  and selecting the 'n' column (weighted or unweighted)
+config.summary.data <- function(summary.data, drop.cats = F, weighted = F) {
   # Select the right n column, depending on whether we wanted weighted or
   #  unweighted
   if (weighted) {
@@ -244,14 +242,7 @@ gen.crosstab <- function(summary.data, drop.cats = F, weighted = F, totals = F) 
   else {
     summary.data <- summary.data %>% 
       select(-n.weighted)
-  }
-  
-  to.pct <- function(n, t = NULL) {
-    if (is.null(t))
-      t <- sum(n)
-    
-    round(n / t * 100, 1)
-  }
+  }  
   
   # Drop out unwanted categories, and those < 0.02
   if (drop.cats) {
@@ -261,6 +252,24 @@ gen.crosstab <- function(summary.data, drop.cats = F, weighted = F, totals = F) 
     summary.data <- summary.data %>%
       filter(! Party %in% c(cats.to.drop, parties.to.drop)) %>%
       filter(! Group %in% c(cats.to.drop, groups.to.drop))
+  }
+  
+  summary.data
+  
+}
+
+# Generate a single crosstab from stored summary data
+gen.crosstab <- function(summary.data, drop.cats = F, weighted = F, totals = F) {
+  if (is.null(summary.data))
+    return (NULL)
+  
+  summary.data <- config.summary.data(summary.data, drop.cats = drop.cats, weighted = weighted)
+  
+  to.pct <- function(n, t = NULL) {
+    if (is.null(t))
+      t <- sum(n)
+    
+    round(n / t * 100, 1)
   }
   
   sample.size <- sum(summary.data$n)
@@ -367,14 +376,12 @@ get.data.src.info <- function(data, data.def) {
 #  than 2%, but be a member of a large religion group. We would want to keep this
 #  person in the analysis for religion, but not for language
 drop.rows.from.country.data <- function(d, group.var, weighted = F) {
-  cats.to.drop <- c("Missing", "Other")
-  
   weights <- NULL
   if (weighted)
     weights <- d$Weight
   
   d <- d %>% 
-    mutate(across(all_of(c("Party", group.var)), ~fct_lump_prop(.x, 0.02, w = weights))) %>%
+    mutate(across(all_of(c("Party", group.var)), ~fct_lump_prop(fct_drop(.x), 0.02, w = weights))) %>%
     filter(
       ! .data[[group.var]] %in% cats.to.drop & ! Party %in% cats.to.drop
     )
