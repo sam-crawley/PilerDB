@@ -6,28 +6,34 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
   n.eff <- nrow(country.data)
   
   # Calculate some summary data used for many of the indices
-  # TODO: this is not working right
-  group.sizes <- summary.data %>% count(Group) %>% 
-    ungroup %>%
-    mutate(percent = n / sum(n) * 100)
-  party.sizes <- summary.data %>% count(Party) %>% 
-    mutate(percent = n / sum(n) * 100)
+  group.sizes <- summary.data %>% 
+    group_by(Group) %>% 
+    tally(n) %>%
+    mutate(percent = n / sum(n))
+  
+  party.sizes <- summary.data %>% 
+    group_by(Party) %>% 
+    tally(n) %>%
+    mutate(percent = n / sum(n))
   
   party.support.by.group <- summary.data %>%
-    mutate(percent = n / sum(n) * 100)
+    group_by(Party) %>%
+    mutate(Party_Total = sum(n)) %>%
+    mutate(percent = n / Party_Total)
   
   # TODO: handle n.eff < 200
   
   tau <- calc.tau(country.data, group, weights = weights)
   
-  gallager <- calc.gallagher.new(party.support.by.group, group.sizes, party.sizes)
-  
+  gallager  <- calc.gallagher.new(party.support.by.group, group.sizes, party.sizes)
+  loosemore <- calc.gallagher.new(party.support.by.group, group.sizes, party.sizes, loosemore = T)
   
   return (tibble(
     group = group,
     n.eff = n.eff,
     tau = tau,
-    gallager = gallager
+    gallager = gallager,
+    loosemore = loosemore
   ))
   
 }
@@ -77,5 +83,5 @@ calc.gallagher.new <- function(party.sizes.by.grp, grp.sizes, party.sizes, loose
   res.wt %>% 
     ungroup() %>% 
     summarise(total = sum(total)) %>%
-    pull(total)
+    pull(total) * 100
 }

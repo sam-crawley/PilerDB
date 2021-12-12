@@ -210,6 +210,10 @@ calc.summarised.group.data <- function(data, group.var) {
     rename(
       Group = all_of(group.var)
     ) %>%
+    mutate(
+      Party = fct_drop(Party),
+      Group = fct_drop(Group)
+    ) %>%
     complete(Party, Group, fill = list(n = 0, n.weighted = 0))
 }
 
