@@ -7,6 +7,7 @@ library(rlist)
 library(stringi)
 
 source(here("Divided/read_data.R"))
+source(here("Divided/indices.R"))
 
 summary.group.size <- 5
 
@@ -149,20 +150,22 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   if (is.null(year))
     year <- max(as.numeric(d$Year), na.rm = T)
   
-  cor = calc.correlations(d)
-  cor.wt = calc.correlations(d, use.weights = T)
-  cor.nomiss = calc.correlations(d, drop.cats = T)
-  cor.nomiss.wt = calc.correlations(d, drop.cats = T, use.weights = T)
+  cor = calc.all.indices(d, tables)
+  cor.wt = calc.all.indices(d, tables, weighted = T)
+  cor.nomiss = calc.all.indices(d, tables, drop.cats = T)
+  cor.nomiss.wt = calc.all.indices(d, tables, drop.cats = T, weighted = T)
   
   group.basis <- calc.group.basis(cor.nomiss)
   
   gallagher <- NA
+  loosemore <- NA
   pvp <- NA
   pvf <- NA
   
   if (! is.na(group.basis)) {
-    cor.vals <- cor.nomiss %>% filter(question == group.basis)
+    cor.vals <- cor.nomiss %>% filter(group == group.basis)
     gallagher <- cor.vals$gallagher
+    loosemore <- cor.vals$loosemore
     pvp <- cor.vals$PVP
     pvf <- cor.vals$PVF
   }
@@ -177,7 +180,7 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
       'Sample Size' = nrow(d),
       'Group Basis' = group.basis,
       'Gallagher' = gallagher,
-      'Loosmore Hanby' = calc.gallagher(d, group.basis, loosemore = T),
+      'Loosmore Hanby' =loosemore,
       'PVP' = pvp,
       'PVF' = pvf
     ),
@@ -197,7 +200,7 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
 #  for display purposes
 calc.summarised.group.data <- function(data, group.var) {
   if (all( data[group.var] == "Missing" )) {
-    return (NULL)
+    return (NA)
   }
   
   data %>%
@@ -232,6 +235,9 @@ find.groups.to.drop <- function(summary.data, group.type) {
 # "Configure" the summary.data DF, dropping categories as necessary,
 #  and selecting the 'n' column (weighted or unweighted)
 config.summary.data <- function(summary.data, drop.cats = F, weighted = F) {
+  if (! is.data.frame(summary.data))
+    return (NA)
+  
   # Select the right n column, depending on whether we wanted weighted or
   #  unweighted
   if (weighted) {
@@ -389,54 +395,19 @@ drop.rows.from.country.data <- function(d, group.var, weighted = F) {
   d
 }
 
-calc.correlations <- function(d, drop.cats = F, use.weights = F) {
-  country <- unique(d$Country)
-  #cat("Calc correlations for", country, "\n")
-
-  tau <- map_dfr(group.names, function(var) {
-    d.g <- d 
-    
-    if (drop.cats)
-      d.g <- drop.rows.from.country.data(d.g, var)
-    
-    n.eff <- nrow(d.g)
-    
-    empty.res <- tibble(question = var, tau = NA, N.eff = n.eff, gallagher = NA)
-    
-    if (n.eff <= 200 || length(unique(d.g[[var]])) <= 1) {
-      return(empty.res)
-    }
-    
-    d.g <- d.g %>% mutate(
-      Party = fct_drop(Party),
-      "{var}" = fct_drop(.data[[var]])
-    )
-    
-    wt.var = NULL
-    if (use.weights)
-      wt.var = "Weight"
-    
-    assoc <- NULL
-    try({
-      assoc <- suppressWarnings(pw.assoc(as.formula(paste(var, "~ Party")), d.g, out.df = T, weights = wt.var))
-    })
-    
-    if (is.null(assoc))
-      return(empty.res)
-    
-    res <- assoc %>%
-      select(tau) %>%
-      mutate(across(everything(), ~round(.x, digits = 3))) %>%
-      mutate(question = var, N.eff = n.eff) %>%
-      mutate(gallagher = calc.gallagher(d.g, var, drop.cats = F))
-    
-    huber <- do.huber.calcs(d.g, var, drop.cats = F)
-    
-    bind_cols(res, huber)
-  })
+calc.all.indices <- function(country.data, sum.dfs, drop.cats = F, weighted = F) {
+  #country <- unique(country.data$Country)
+  #cat("Calc indices for ", country, "\n")
   
-  tau %>% select(question, everything()) %>%
+  indices <- map_dfr(group.names, function(group) {
+    summary.data <- sum.dfs[[group]]
+    
+    calc.indices(country.data, summary.data, group, drop.cats = drop.cats, weighted = weighted)
+  })
+
+  indices %>%
     mutate(across(tau, ~ifelse(is.nan(.x) | .x == -Inf, NA, .x))) %>%
+    mutate(across(-group, ~round(.x, digits = 3))) %>%
     remove_rownames()
 }
 
@@ -454,141 +425,7 @@ calc.group.basis <- function(cor, ret.max.val = F) {
   
   cor %>% filter(tau == max.val) %>% 
     slice_head() %>%
-    pull(question)
-}
-
-calc.gallagher <- function(d, group.to.use, max.groups = NULL, drop.cats = T, loosemore = F) {
-  if (is.na(group.to.use))
-    return (NA)
-  
-  # Remove Missing/Other categories from Party and Grouping vars
-  if (drop.cats)
-    d <- drop.rows.from.country.data(d, group.to.use)
-  
-  grp.sizes <- tabyl(d, {{group.to.use}}, show_missing_levels = F)
-  
-  # If max.groups is set, find the top n groups, and remove all but these from the data
-  if (! is.null(max.groups)) {
-    grp.sizes <- grp.sizes %>%
-      slice_max(n, n=max.groups, with_ties = F)
-    
-    d <- d %>% filter(.data[[group.to.use]] %in% grp.sizes[[group.to.use]])
-    
-    # Recalculate grp.sizes table so that percentages are right
-    grp.sizes <- tabyl(d, {{group.to.use}}, show_missing_levels = F)
-  }
-  
-  grp.sizes <- grp.sizes %>%
-    rename(group = group.to.use)
-
-  party.sizes.by.grp <- tabyl(d, Party, .data[[group.to.use]], show_missing_levels = F) %>% adorn_percentages()
-  
-  party.sizes <- tabyl(d, Party, show_missing_levels = F)
-  
-  gallagher.impl(party.sizes.by.grp, grp.sizes, party.sizes, loosemore = loosemore)
-  
-}
-
-gallagher.impl <- function(party.sizes.by.grp, grp.sizes, party.sizes, loosemore = F) {
-  grp.sizes <- grp.sizes %>%
-    mutate(percent = percent*100)
-  
-  # Create lookup of group sizes
-  grp.size.list <- map(grp.sizes$group, ~grp.sizes %>% filter(group == .x) %>% pull(percent)) %>%
-    set_names(grp.sizes$group)
-  
-  # Calculate unweighted values for each party
-  res <- party.sizes.by.grp %>% 
-    pivot_longer(-Party) %>%
-    mutate(value = as.numeric(value)*100 - unlist(grp.size.list[name]))
-  
-  if (loosemore) {
-    res <- res %>% 
-      mutate(value = abs(value)) %>% 
-      group_by(Party) %>% 
-      summarise(total = sum(value)/2)
-  }
-  else {
-    res <- res %>% 
-      mutate(value = value*value) %>% 
-      group_by(Party) %>% 
-      summarise(total = sqrt(sum(value)/2))
-  }
-  
-  # Apply weights
-  res.wt <- party.sizes %>%
-    inner_join(res, by = "Party") %>%
-    mutate(total = total * percent)
-  
-  res.wt %>% 
-    ungroup() %>% 
-    summarise(total = sum(total)) %>%
-    pull(total)
-}
-
-do.huber.calcs <- function(d, group.to.use, drop.cats = F) {
-  if (is.na(group.to.use))
-    return (NA)
-  
-  # Remove Missing/Other categories from Party and Grouping vars
-  if (drop.cats)
-    d <- drop.rows.from.country.data(d, group.to.use)
-  
-  group.sizes <- tabyl(d, {{group.to.use}}, show_missing_levels = F)
-  party.sizes <- tabyl(d, Party, show_missing_levels = F)
-  group.sizes.by.pty <- d %>% group_by(.data[[group.to.use]], Party) %>% count() %>% group_by(.data[[group.to.use]]) %>% mutate(pct = n / sum(n)) %>% select(-n)
-  party.sizes.by.grp <- d %>% group_by(.data[[group.to.use]], Party) %>% count() %>% group_by(Party) %>% mutate(pct = n / sum(n)) %>% select(-n)
-  
-  # Calculate differences in party support between each pair of groups
-  rT <- expand_grid(unique(d[[group.to.use]]), unique(d[[group.to.use]]), unique(d$Party), .name_repair = "minimal") %>%
-    set_names("g1", "g2", "p") %>%
-    left_join(group.sizes.by.pty, by = c('g1' = group.to.use, 'p' = 'Party')) %>%
-    left_join(group.sizes.by.pty, by = c('g2' = group.to.use, 'p' = 'Party')) %>%
-    mutate(across(c(pct.x, pct.y), ~if_else(is.na(.x), 0, .x))) %>%
-    mutate(rT.init = pct.x - pct.y) %>%
-    mutate(rT = rT.init^2)
-
-  # Sum the differences by group dyad
-  rT.sum <- rT %>% group_by(g1, g2) %>% summarise(rT.orig = sum(rT), .groups = "drop") %>%
-    mutate(rT = sqrt(0.5*rT.orig))
-  
-  # Adjust differences by group size
-  rT.sum <- rT.sum %>%
-    inner_join(group.sizes, by = c('g1' = group.to.use)) %>%
-    rename('g1.group.sizes' = percent) %>%
-    inner_join(group.sizes, by = c('g2' = group.to.use)) %>%
-    rename('g2.group.sizes' = percent) %>%
-    mutate(VF = rT*g1.group.sizes*g2.group.sizes) %>%
-    mutate(VP = rT*g1.group.sizes*g2.group.sizes^2)
-  
-  # Calculate differences in group support between each pair of parties
-  rP <- expand_grid(unique(d$Party), unique(d$Party), unique(d[[group.to.use]]), .name_repair = "minimal") %>%
-    set_names("p1", "p2", "g") %>%
-    left_join(party.sizes.by.grp, by = c('p1' = 'Party', 'g' = group.to.use)) %>%
-    left_join(party.sizes.by.grp, by = c('p2' = 'Party', 'g' = group.to.use)) %>%
-    mutate(across(c(pct.x, pct.y), ~if_else(is.na(.x), 0, .x))) %>%
-    mutate(rP.init = pct.x - pct.y) %>%
-    mutate(rP = rP.init^2)
-  
-  rP.sum <- rP %>% group_by(p1, p2) %>% summarise(rP.orig = sum(rP), .groups = "drop") %>%
-    mutate(rP = sqrt(0.5*rP.orig))
-  
-  # Adjust differences by party size
-  rP.sum <- rP.sum %>%
-    inner_join(party.sizes, by = c('p1' = 'Party')) %>%
-    rename('p1.party.sizes' = percent) %>%
-    inner_join(party.sizes, by = c('p2' = 'Party')) %>%
-    rename('p2.party.sizes' = percent) %>%
-    mutate(PVF = rP*p1.party.sizes*p2.party.sizes) %>%
-    mutate(PVP = rP*p1.party.sizes*p2.party.sizes^2)
-  
-  list(
-    VF  = rT.sum %>% ungroup() %>% summarise(VF = sum(VF)) %>% pull(VF),
-    VP  = rT.sum %>% ungroup() %>% summarise(VP = sum(VP)*4) %>% pull(VP),
-    PVF = rP.sum %>% ungroup() %>% summarise(PVF = sum(PVF)) %>% pull(PVF),
-    PVP = rP.sum %>% ungroup() %>% summarise(PVP = sum(PVP)*4) %>% pull(PVP)
-  )
-
+    pull(group)
 }
 
 # Calculate a DF summarising all countries
@@ -610,8 +447,8 @@ calc.summary.data <- function(res) {
     #  (so includes, eg., cases where there was only one group)
     available <- country.data$Summary$cor.nomiss %>% 
       mutate(available = !is.na(tau)) %>% 
-      select(question, available) %>% 
-      pivot_wider(names_from = question, values_from = available)
+      select(group, available) %>% 
+      pivot_wider(names_from = group, values_from = available)
     sum <- bind_cols(sum, available)
 
     if (is.na(sum$cor.nomiss)) {
@@ -628,8 +465,8 @@ calc.summary.data <- function(res) {
     main.summary.data <- country.data[[sum$`Group Basis`]]
     
     sum$total.included <- orig.sum.data$cor.nomiss %>%
-      filter(question == sum$`Group Basis`) %>%
-      pull(N.eff)
+      filter(group == sum$`Group Basis`) %>%
+      pull(n.eff)
     sum$total.included.pct <- sum$total.included / sum$`Sample Size`
     
     sum$party.missing <- main.summary.data %>% 

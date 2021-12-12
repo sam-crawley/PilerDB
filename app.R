@@ -214,7 +214,7 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
       sample.size <- country.data$Summary$general$`Sample Size`
     }
     else {
-      sample.size <- country.data$Summary$cor.nomiss %>% filter(question == group) %>% pull(N.eff)
+      sample.size <- country.data$Summary$cor.nomiss %>% filter(group == group) %>% pull(n.eff)
     }
     
     if (! is.null(crosstab)) {

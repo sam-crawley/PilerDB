@@ -7,8 +7,17 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
   
   if (drop.cats)
     country.data <- drop.rows.from.country.data(country.data, group, weighted = weighted)
-  
+
   n.eff <- nrow(country.data)
+  
+  if (! is.data.frame(summary.data) || n.eff <= 200)
+    return(
+      tibble(
+        group = group,
+        n.eff = n.eff,
+        tau = NA
+      )
+    )  
   
   # Calculate some summary data used for many of the indices
   group.sizes <- summary.data %>% 
@@ -31,19 +40,17 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
     mutate(Group_Total = sum(n)) %>%
     mutate(percent = n / Group_Total)
   
-  # TODO: handle n.eff < 200
-  
   tau <- calc.tau(country.data, group, weighted = weighted)
   
-  gallager  <- calc.gallagher.new(party.support.by.group, group.sizes, party.sizes)
-  loosemore <- calc.gallagher.new(party.support.by.group, group.sizes, party.sizes, loosemore = T)
+  gallagher <- calc.gallagher(party.support.by.group, group.sizes, party.sizes)
+  loosemore <- calc.gallagher(party.support.by.group, group.sizes, party.sizes, loosemore = T)
   huber <- calc.huber.indices(summary.data, group.sizes, party.sizes, group.size.by.party, party.support.by.group)
   
   res <- tibble(
     group = group,
     n.eff = n.eff,
     tau = tau,
-    gallager = gallager,
+    gallagher = gallagher,
     loosemore = loosemore
   )
   
@@ -68,7 +75,7 @@ calc.tau <- function(country.data, group, weighted = F) {
   assoc$tau
 }
 
-calc.gallagher.new <- function(party.sizes.by.grp, grp.sizes, party.sizes, loosemore = F) {
+calc.gallagher <- function(party.sizes.by.grp, grp.sizes, party.sizes, loosemore = F) {
   # Calculate unweighted values for each party
   res <- party.sizes.by.grp %>% 
     inner_join(grp.sizes, by = "Group") %>%
