@@ -494,18 +494,16 @@ get.group.size.summary <- function(res) {
       return(NULL)
     }
     
-    summary.data <- country.data[[country.data$Summary$general$`Group Basis`]]
-    main.crosstab <- gen.crosstab(summary.data, drop.cats = T)
-    
+    summary.data <- config.summary.data(country.data[[country.data$Summary$general$`Group Basis`]], drop.cats = T)
+
     gs.row <- country.data$Summary$general %>%
       select(Country, `Data Source`, Year, `Group Basis`)
     
-    gs <- main.crosstab %>% 
-      pivot_longer(-Party, names_to = "Group") %>% 
+    gs <- summary.data %>% 
       group_by(Group) %>% 
-      summarise(value = sum(value)) %>% 
-      filter(value > 0) %>%
-      slice_max(value, n=5, with_ties = F)      
+      summarise(n = sum(n)) %>% 
+      filter(n > 0) %>%
+      slice_max(n, n=5, with_ties = F)      
 
     main.groups <- gs$Group
 
@@ -514,10 +512,11 @@ get.group.size.summary <- function(res) {
       gs.row <- suppressMessages(bind_cols(gs.row, sum.row))
     }
     
-    party.group.sizes <- main.crosstab %>% 
-      select(Party, all_of(main.groups)) %>% 
-      adorn_totals("col") %>% 
-      arrange(desc(Total)) %>%
+    party.group.sizes <- summary.data %>% 
+      filter(Group %in% main.groups) %>% 
+      pivot_wider(names_from = Group, values_from = n) %>%
+      rowwise() %>% 
+      mutate(Total = sum(c_across(-Party))) %>%
       select(Party, Total, everything())
     
     names(party.group.sizes) <- c("Party.Grp", "Total", paste("Group", 1:length(main.groups)))
