@@ -22,6 +22,11 @@ data.spec <- list(
       levels(data[[var]]) <- str_remove(levels(data[[var]]), "^\\s*\\w+:\\s*")
     }
     
+    # Make missing weights == 1
+    data <- data %>% 
+      mutate(Weight = as.numeric(Weight)) %>%
+      mutate(Weight = if_else(Weight == -4, 1, Weight))
+    
     data
   }
 )

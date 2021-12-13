@@ -1,5 +1,4 @@
 library(tidyverse)
-library(janitor)
 library(openxlsx)
 library(here)
 library(StatMatch)
@@ -406,7 +405,7 @@ calc.all.indices <- function(country.data, sum.dfs, drop.cats = F, weighted = F)
   })
 
   indices %>%
-    mutate(across(tau, ~ifelse(is.nan(.x) | .x == -Inf, NA, .x))) %>%
+    mutate(across(tau, ~ifelse(is.nan(.x) | is.infinite(.x), NA, .x))) %>%
     mutate(across(-group, ~round(.x, digits = 3))) %>%
     remove_rownames()
 }

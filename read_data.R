@@ -85,6 +85,7 @@ read.div.data <- function(data.spec, raw = F, ignore.skip.countries = F) {
   data <- data %>%
     mutate(across(all_of(available.vars), haven::as_factor)) %>%
     mutate(across(all_of(available.vars), ~fct_explicit_na(.x, na_level = "Missing"))) %>%
+    mutate(Weight = as.numeric(Weight)) %>%
     arrange(Country)
   
   fixup.func <- data.spec$fixups

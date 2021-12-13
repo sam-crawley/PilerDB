@@ -208,16 +208,17 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
     grp.output.header <- paste0(group, "Heading", countryTabID)
     grp.output.table <- paste0(group, "Table", countryTabID)
     
-    crosstab <- gen.crosstab(country.data[[group]], totals = T, drop.cats = ! show.all.data, weighted = show.weighted)
+    if (is.data.frame(country.data[[group]])) {
     
-    if (show.all.data) {
-      sample.size <- country.data$Summary$general$`Sample Size`
-    }
-    else {
-      sample.size <- country.data$Summary$cor.nomiss %>% filter(group == group) %>% pull(n.eff)
-    }
-    
-    if (! is.null(crosstab)) {
+      crosstab <- gen.crosstab(country.data[[group]], totals = T, drop.cats = ! show.all.data, weighted = show.weighted)
+      
+      if (show.all.data) {
+        sample.size <- country.data$Summary$general$`Sample Size`
+      }
+      else {
+        sample.size <- country.data$Summary$cor.nomiss %>% filter(group == group) %>% pull(n.eff)
+      }
+
       output[[grp.output.header]] <- renderText(group)
       
       group.names <- attr(crosstab, "group.list")

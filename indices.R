@@ -5,6 +5,11 @@
 calc.indices <- function(country.data, summary.data, group, drop.cats = F, weighted = F) {
   summary.data <- config.summary.data(summary.data, drop.cats = drop.cats, weighted = weighted)
   
+  if (weighted) {
+    # Make sure weights are valid - drop any rows out if they are missing weights
+    country.data <- country.data %>% filter(! is.na(Weight))
+  }
+  
   if (drop.cats)
     country.data <- drop.rows.from.country.data(country.data, group, weighted = weighted)
 
