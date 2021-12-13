@@ -616,13 +616,15 @@ write.divided.xlsx <- function(res, file = "Divided/output/divided_crosstabs.xls
     
     startRow <- 1
     for (table.name in group.names) {
-      table <- gen.crosstab(res$crosstabs[[country]][[table.name]])
+      table <- res$crosstabs[[country]][[table.name]]
       
-      headers <- c("Party", attr(table, "group.list"))
-      
-      if (is.null(table))
+      if (! is.data.frame(table))
         next()
       
+      table <- gen.crosstab(table)
+      
+      headers <- c("Party", attr(table, "group.list"))
+
       writeData(wb, country.sht, table.name, startCol = 1, startRow = startRow, rowNames = F)
       addStyle(wb, sheet = country.sht, hs1, rows = startRow, cols = 1)
       
