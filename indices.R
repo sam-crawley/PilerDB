@@ -70,7 +70,11 @@ calc.tau <- function(country.data, group, weighted = F) {
   country.data <- country.data %>% mutate(
     Party = fct_drop(Party),
     "{group}" = fct_drop(.data[[group]])
-  )  
+  )
+  
+  if (length(unique(country.data$Party)) <= 1 | length(unique(country.data[[group]])) <= 1) {
+    return (NA)
+  }
   
   assoc <- NULL
   try({
