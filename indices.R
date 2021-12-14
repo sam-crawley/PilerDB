@@ -114,6 +114,23 @@ calc.gallagher <- function(party.sizes.by.grp, grp.sizes, party.sizes, loosemore
     pull(total) * 100
 }
 
+calc.gatev <- function(party.support.by.group, group.sizes, party.sizes) {
+  res <- party.support.by.group %>% 
+    inner_join(group.sizes, by = "Group") %>%
+    mutate(nom = (percent.y - percent.x)^2) %>%
+    mutate(denom = (percent.y^2 + percent.x^2))
+  
+  # Unclear if this step is needed
+  res <- party.sizes %>%
+    inner_join(res, by = "Party") %>%
+    mutate(nom.wt = nom * percent, denom.wt = denom * percent)
+  
+  res %>% 
+    ungroup() %>% 
+    summarise(gatev = sqrt(sum(nom) / sum(denom.wt))) %>%
+    pull(gatev)
+}
+
 calc.huber.indices <- function(summary.data, group.sizes, party.sizes, group.sizes.by.pty, party.sizes.by.grp) {
   # Calculate differences in party support between each pair of groups
   rT <- expand_grid(unique(summary.data$Group), unique(summary.data$Group), unique(summary.data$Party), .name_repair = "minimal") %>%
