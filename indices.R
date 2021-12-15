@@ -24,7 +24,28 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
       )
     )  
   
-  # Calculate some summary data used for many of the indices
+  index.summaries <- build.index.summary.data(summary.data)
+  
+  tau <- calc.tau(country.data, group, weighted = weighted)
+  
+  gallagher <- calc.gallagher(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes)
+  loosemore <- calc.gallagher(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, loosemore = T)
+  huber <- calc.huber.indices(summary.data, 
+    index.summaries$group.sizes, index.summaries$party.sizes, index.summaries$group.size.by.party, index.summaries$party.support.by.group)
+  
+  res <- tibble(
+    group = group,
+    n.eff = n.eff,
+    tau = tau,
+    gallagher = gallagher,
+    loosemore = loosemore
+  )
+  
+  bind_cols(res, huber)
+}
+
+# Calculate some summary data used for many of the indices
+build.index.summary.data <- function(summary.data) {
   group.sizes <- summary.data %>% 
     group_by(Group) %>% 
     tally(n) %>%
@@ -45,21 +66,12 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
     mutate(Group_Total = sum(n)) %>%
     mutate(percent = n / Group_Total)
   
-  tau <- calc.tau(country.data, group, weighted = weighted)
-  
-  gallagher <- calc.gallagher(party.support.by.group, group.sizes, party.sizes)
-  loosemore <- calc.gallagher(party.support.by.group, group.sizes, party.sizes, loosemore = T)
-  huber <- calc.huber.indices(summary.data, group.sizes, party.sizes, group.size.by.party, party.support.by.group)
-  
-  res <- tibble(
-    group = group,
-    n.eff = n.eff,
-    tau = tau,
-    gallagher = gallagher,
-    loosemore = loosemore
-  )
-  
-  bind_cols(res, huber)
+  return (list(
+    group.sizes = group.sizes,
+    party.sizes = party.sizes,
+    party.support.by.group = party.support.by.group,
+    group.size.by.party = group.size.by.party
+  ))
 }
 
 calc.tau <- function(country.data, group, weighted = F) {
