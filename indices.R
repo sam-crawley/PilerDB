@@ -84,7 +84,7 @@ calc.tau <- function(country.data, group, weighted = F) {
     "{group}" = fct_drop(.data[[group]])
   )
   
-  if (length(unique(country.data$Party)) <= 1 | length(unique(country.data[[group]])) <= 1) {
+  if (length(unique(country.data[[group]])) <= 1) {
     return (NA)
   }
   

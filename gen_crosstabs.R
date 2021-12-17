@@ -531,6 +531,29 @@ get.group.size.summary <- function(res) {
     for (row in 1:nrow(party.group.sizes)) {
       gs.row <- suppressMessages(bind_cols(gs.row, party.group.sizes[row, ]))
     }
+    
+    # Workaround for only 1 party - columns need to be renamed
+    # XXX: this assumes there are 5 groups...
+    #  Probably need to re-write all this code to rely on pivot_wider
+    if (nrow(party.group.sizes) == 1) {
+      gs.row <- gs.row %>% rename(
+        "Party.Grp...15" = "Party.Grp",
+        "Total...16" = "Total",
+        "Group 1...17" = "Group 1",
+        "Group 2...18" = "Group 2",
+        "Group 3...19" = "Group 3",
+        "Group 4...20" = "Group 4",
+        "Group 5...21" = 'Group 5'
+      ) %>% mutate(
+        "Party.Grp...22" = NA,
+        "Total...23" = NA,
+        "Group 1...24" = NA,
+        "Group 2...25" = NA,
+        "Group 3...26" = NA,
+        "Group 4...27" = NA,
+        "Group 5...28" = NA
+      )
+    }
 
     gs.row
   })
