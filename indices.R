@@ -36,6 +36,8 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
   res <- tibble(
     group = group,
     n.eff = n.eff,
+    parties = length(unique(summary.data$Party)),
+    groups = length(unique(summary.data$Group)),
     tau = tau,
     gallagher = gallagher,
     loosemore = loosemore
