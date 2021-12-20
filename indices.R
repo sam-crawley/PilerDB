@@ -175,7 +175,14 @@ calc.gatev <- function(party.support.by.group, group.sizes, party.sizes, wt.by.p
   if (wt.by.party) {
     res <- party.sizes %>%
       inner_join(res, by = "Party") %>%
-      mutate(nom = nom * percent, denom = denom * percent)
+      group_by(Party) %>%
+      mutate(gatev = sqrt(sum(nom) / sum(denom))) %>%
+      distinct(Party, percent, gatev) %>%
+      mutate(gatev = gatev * percent) %>%
+      ungroup() %>%
+      summarise(gatev = sum(gatev))
+    
+    return(res$gatev)
   }
       
   res %>% 
