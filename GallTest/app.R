@@ -21,8 +21,7 @@ ui <- fluidPage(
         mainPanel(
             htmlOutput("gallTable"),
             h3("Gallagher: "),
-            textOutput("gall.res"),
-            tableOutput("test")
+            tableOutput("gall.res")
         )
     )
 )
@@ -56,14 +55,14 @@ server <- function(input, output) {
                 tibble(
                     Party = paste("Party", p),
                     Group = paste("Group", g),
-                    val = as.numeric(input[[paste0("p", p, "g", g)]])
+                    n = as.numeric(input[[paste0("p", p, "g", g)]])
                 )
             })
         })
     })
 
     
-    output$gall.res <- renderText(calc.test.gall(party.by.grp.size.dat()))
+    output$gall.res <- renderTable(calc.summary.indices(party.by.grp.size.dat(), include.extra = T))
 
 }
 

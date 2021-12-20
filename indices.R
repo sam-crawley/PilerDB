@@ -41,7 +41,7 @@ calc.indices <- function(country.data = NULL, summary.data, group, drop.cats = F
   
 }
 
-calc.summary.indices <- function(summary.data) {
+calc.summary.indices <- function(summary.data, include.extra = T) {
   index.summaries <- build.index.summary.data(summary.data)
 
   gallagher <- calc.gallagher(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes)
@@ -53,6 +53,9 @@ calc.summary.indices <- function(summary.data) {
     gallagher = gallagher,
     loosemore = loosemore
   )
+  
+  if (include.extra)
+    res$gatev <- calc.gatev(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes)
   
   bind_cols(res, huber)
 }
