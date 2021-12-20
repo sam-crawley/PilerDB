@@ -219,6 +219,45 @@ calc.summarised.group.data <- function(data, group.var) {
     complete(Party, Group, fill = list(n = 0, n.weighted = 0))
 }
 
+# Regenerate the indices data for all countries, without re-generating the crosstabs, etc.
+#  This is much quicker than generating everything from scratch
+regen.all.indicies <- function(tabs) {
+  map(tabs$crosstabs, function(country.data) {
+    #cat("Regen", country.data$Summary$general$ID, "\n")
+    
+    summary.data.list <- country.data[group.names]
+    
+    country.data$Summary$cor = update.summary.indices(country.data$Summary$cor, summary.data.list)
+    country.data$Summary$cor.wt = update.summary.indices(country.data$Summary$cor.wt, summary.data.list, weighted = T)
+    country.data$Summary$cor.nomiss = update.summary.indices(country.data$Summary$cor.nomiss, summary.data.list, drop.cats = T)
+    country.data$Summary$cor.nomiss.wt = update.summary.indices(country.data$Summary$cor.nomiss.wt, summary.data.list, drop.cats = T, weighted = T)
+    
+    group.basis <- calc.group.basis(country.data$Summary$cor.nomiss)
+    
+    gallagher <- NA
+    loosemore <- NA
+    pvp <- NA
+    pvf <- NA
+    
+    if (! is.na(group.basis)) {
+      cor.vals <- country.data$Summary$cor.nomiss %>% filter(group == group.basis)
+      gallagher <- cor.vals$gallagher
+      loosemore <- cor.vals$loosemore
+      pvp <- cor.vals$PVP
+      pvf <- cor.vals$PVF
+    }
+    
+    country.data$Summary$general$`Group Basis` = group.basis
+    country.data$Summary$general$`Gallagher` = gallagher
+    country.data$Summary$general$`Loosmore Hanby` = loosemore
+    country.data$Summary$general$`PVP` = pvp
+    country.data$Summary$general$`PVF` = pvf
+    
+    country.data
+  })
+}
+
+
 # Helper function to find the groups / parties smaller than 0.02
 #  to drop based on group summary data
 find.groups.to.drop <- function(summary.data, group.type) {

@@ -2,7 +2,7 @@
 
 # This is the main entry function, which calculated all indices for a specific
 #  group/country/configuration
-calc.indices <- function(country.data, summary.data, group, drop.cats = F, weighted = F) {
+calc.indices <- function(country.data = NULL, summary.data, group, drop.cats = F, weighted = F) {
   summary.data <- config.summary.data(summary.data, drop.cats = drop.cats, weighted = weighted)
   
   if (weighted) {
@@ -10,7 +10,7 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
     country.data <- country.data %>% filter(! is.na(Weight))
   }
   
-  if (drop.cats)
+  if (drop.cats & ! is.null(country.data))
     country.data <- drop.rows.from.country.data(country.data, group, weighted = weighted)
 
   n.eff <- nrow(country.data)
@@ -24,26 +24,58 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
       )
     )  
   
-  index.summaries <- build.index.summary.data(summary.data)
-  
   tau <- calc.tau(country.data, group, weighted = weighted)
   
-  gallagher <- calc.gallagher(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes)
-  loosemore <- calc.gallagher(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, loosemore = T)
-  huber <- calc.huber.indices(summary.data, 
-    index.summaries$group.sizes, index.summaries$party.sizes, index.summaries$group.size.by.party, index.summaries$party.support.by.group)
+  summary.indices <- calc.summary.indices(summary.data)
   
   res <- tibble(
     group = group,
     n.eff = n.eff,
     parties = length(unique(summary.data$Party)),
     groups = length(unique(summary.data$Group)),
-    tau = tau,
+    tau = tau
+  )
+  
+  bind_cols(res, summary.indices)
+  
+  
+}
+
+calc.summary.indices <- function(summary.data) {
+  index.summaries <- build.index.summary.data(summary.data)
+
+  gallagher <- calc.gallagher(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes)
+  loosemore <- calc.gallagher(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, loosemore = T)
+  huber <- calc.huber.indices(summary.data, 
+                              index.summaries$group.sizes, index.summaries$party.sizes, index.summaries$group.size.by.party, index.summaries$party.support.by.group)
+  
+  res <- tibble(
     gallagher = gallagher,
     loosemore = loosemore
   )
   
   bind_cols(res, huber)
+}
+
+# Update the summary indices (i.e. not tau, since it requires the full data) for a 
+#  given configuration
+update.summary.indices <- function(orig.indices, summary.data.list, drop.cats = F, weighted = F) {
+  orig.indices <- orig.indices %>% select(any_of(c("group", "n.eff", "parties", "groups", "tau")))
+  
+  new.indices <- map_dfr(names(summary.data.list), function(group) {
+    summary.data <- config.summary.data(summary.data.list[[group]], drop.cats = drop.cats, weighted = weighted)
+    
+    res <- tibble(
+      group = group
+    )
+    
+    if (! is.data.frame(summary.data))
+      return (res)
+  
+    bind_cols(res, calc.summary.indices(summary.data))
+  })
+  
+  left_join(orig.indices, new.indices, by = "group")
 }
 
 # Calculate some summary data used for many of the indices
