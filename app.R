@@ -115,9 +115,10 @@ ui <- navbarPage(title = "Divided Society Data",
      fluidPage(
        headerPanel('Download Data'),
        mainPanel(
-         use_busy_spinner(spin = "fading-circle", position = 'full-page'),
-         p("Download data as an Excel file."),
-         downloadBttn("downloadData", label = "Download"),
+         p("Download summary data as Excel file."),
+         downloadBttn("downloadSummaryData", label = "Download"),
+         p("Download crosstab data as Excel file."),
+         downloadBttn("downloadCrosstabData", label = "Download"),         
          width = 10
        )
      )          
@@ -334,8 +335,19 @@ server <- function(input, output, session) {
     container = sketch,
     rownames = F
   )
+
+  output$downloadSummaryData <- downloadHandler(
+    filename <- function() {
+      "divided_summary.xlsx"
+    },
+    
+    content <- function(file) {
+      file.copy('output/divided_summary.xlsx', file)
+    }
+  )
   
-  output$downloadData <- downloadHandler(
+    
+  output$downloadCrosstabData <- downloadHandler(
     filename <- function() {
       "divided_crosstabs.xlsx"
     },
