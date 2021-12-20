@@ -35,3 +35,23 @@ gen.group.num.plot <- function() {
     theme_minimal() + 
     ylim(0, 1)
 }
+
+gen.party.num.plot <- function() {
+  party.count <- c(1:8)*2
+  
+  data <- map_dfr(party.count, function(p.count) {
+    data <- expand.grid(Party = 1:p.count, Group = 1:2) %>%
+      mutate(n = if_else(Party %% 2 == Group-1, 100, 0))
+    
+    calc.summary.indices(data) %>%
+      mutate(party.count = p.count) %>%
+      mutate(across(c(gallagher, loosemore), ~.x/100)) %>%
+      select(party.count, gallagher, loosemore, PVP)
+  })
+  
+  data %>% pivot_longer(-party.count) %>%
+    ggplot(aes(x = party.count, y = value, color = name)) +
+    geom_line(size = 1.1, position = position_dodge(width = 1.5)) + 
+    theme_minimal() + 
+    ylim(0, 1)  
+}
