@@ -370,7 +370,6 @@ server <- function(input, output, session) {
     
     countryTabsOpen <- session$userData$countryTabsOpen
     countryTabID <- str_remove_all(selected.row$ID, " ")
-    session$userData$currentCountryTab <- selected.row$ID
     
     if (has_name(countryTabsOpen, countryTabID)) {
       updateTabsetPanel(session, "mainPanel", selected = selected.row$ID)
@@ -387,7 +386,8 @@ server <- function(input, output, session) {
         label = "Show all country data",
         fill = TRUE, 
         status = "primary",
-        value = T
+        value = T,
+        inline = T
       ),
       
       prettySwitch(
@@ -395,8 +395,18 @@ server <- function(input, output, session) {
         label = "Show weighted data",
         fill = TRUE, 
         status = "primary",
-        value = F
-      ),      
+        value = F,
+        inline = T
+      ),
+      
+      actionBttn(
+        inputId = paste0("Close", countryTabID),
+        label = "Close",
+        icon = icon("window-close"),
+        size = "md",
+        block = FALSE,
+        no_outline = TRUE
+      ),
       
       
       h4("Group basis: ", textOutput(paste0("GroupBasis", countryTabID), inline = T)),
@@ -451,6 +461,11 @@ server <- function(input, output, session) {
     output[[paste0("CorNoMissTable", countryTabID)]] <- renderTable(country.data$Summary$cor.nomiss)
     output[[paste0("CorNoMissWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.nomiss.wt)
     output[[paste0("country.orig", countryTabID)]] <- renderText(country.data$Summary$country.orig)
+    
+    observeEvent(input[[paste0("Close", countryTabID)]], {
+      removeTab("mainPanel", country.data$Summary$general$ID)
+      session$userData$countryTabsOpen[[countryTabID]] <- NULL
+    }, ignoreInit = T)
     
     generate.country.tables(countryTabID, country.data, output)
     
