@@ -2,7 +2,7 @@
 
 # This is the main entry function, which calculated all indices for a specific
 #  group/country/configuration
-calc.indices <- function(country.data = NULL, summary.data, group, drop.cats = F, weighted = F) {
+calc.indices <- function(country.data, summary.data, group, drop.cats = F, weighted = F) {
   summary.data <- config.summary.data(summary.data, drop.cats = drop.cats, weighted = weighted)
   
   if (weighted) {
@@ -30,9 +30,9 @@ calc.indices <- function(country.data = NULL, summary.data, group, drop.cats = F
   
   res <- tibble(
     group = group,
-    n.eff = n.eff,
-    parties = length(unique(summary.data$Party)),
-    groups = length(unique(summary.data$Group)),
+    n.eff = as.integer(n.eff),
+    parties = as.integer(length(unique(summary.data$Party))),
+    groups = as.integer(length(unique(summary.data$Group))),
     tau = tau
   )
   
