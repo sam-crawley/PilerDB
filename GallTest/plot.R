@@ -6,12 +6,12 @@ gen.simple.index.plot <- function() {
     calc.summary.indices(d) %>%
       mutate(step = s) %>%
       mutate(across(c(gallagher, loosemore), ~.x/100)) %>%
-      select(step, gallagher, loosemore, PVP)
+      select(step, gallagher, loosemore, PVP, gatev)
   })
   
   data %>% pivot_longer(-step) %>%
     ggplot(aes(x = step, y = value, color = name)) +
-    geom_line(size = 1.1, position = position_dodge(width = 1.5)) + 
+    geom_line(size = 1.1, position = position_dodge(width = 1)) + 
     theme_minimal() + 
     ylim(0, 1)
 }
@@ -26,7 +26,7 @@ gen.group.num.plot <- function() {
     calc.summary.indices(data) %>%
       mutate(group.count = g.count) %>%
       mutate(across(c(gallagher, loosemore), ~.x/100)) %>%
-      select(group.count, gallagher, loosemore, PVP)
+      select(group.count, gallagher, loosemore, PVP, gatev)
   })
   
   data %>% pivot_longer(-group.count) %>%
@@ -46,7 +46,7 @@ gen.party.num.plot <- function() {
     calc.summary.indices(data) %>%
       mutate(party.count = p.count) %>%
       mutate(across(c(gallagher, loosemore), ~.x/100)) %>%
-      select(party.count, gallagher, loosemore, PVP)
+      select(party.count, gallagher, loosemore, PVP, gatev)
   })
   
   data %>% pivot_longer(-party.count) %>%

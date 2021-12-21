@@ -55,8 +55,8 @@ calc.summary.indices <- function(summary.data, include.extra = T) {
   )
   
   if (include.extra) {
-    res$gatev <- calc.gatev(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes)
-    res$gatev.wt <- calc.gatev(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, wt.by.party = T)
+    res$gatev <- calc.gatev(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, wt.by.party = T)
+    res$gatev.no.wt <- calc.gatev(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, wt.by.party = F)
   }
   
   bind_cols(res, huber)
