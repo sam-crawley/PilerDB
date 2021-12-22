@@ -74,6 +74,7 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
   
   if (calc.summaries) {
     res$summary <- calc.summary.data(res$crosstabs)
+    res$summary.by.group <- map(c(group.names), ~ calc.summary.data(tabs$crosstabs, group.to.use = .x)) %>% set_names(group.names)
     res$group.sizes <- get.group.size.summary(res$crosstabs)
     res$max.parties <- get.max.parties(res$group.sizes)
   }
@@ -467,18 +468,33 @@ calc.group.basis <- function(cor, ret.max.val = F) {
 }
 
 # Calculate a DF summarising all countries
-calc.summary.data <- function(res) {
+calc.summary.data <- function(res, group.to.use = NULL) {
   map_dfr(res, function(country.data) {
     orig.sum.data <- country.data$Summary
     #cat(orig.sum.data$general$ID, "\n")
     
     sum <- orig.sum.data$general
     sum$`Data Source Orig` <- NULL
-    sum$cor.nomiss <- calc.group.basis(orig.sum.data$cor.nomiss, ret.max.val = T)
-    sum$Gallagher <- round(sum$Gallagher, 2)
-    sum$`Loosmore Hanby` <- round(sum$`Loosmore Hanby`, 2)
-    sum$PVF <- round(sum$PVF, 2)
-    sum$PVP <- round(sum$PVP, 2)
+    
+    if (is.null(group.to.use)) {
+      group.to.use <- sum$`Group Basis`
+      sum$cor.nomiss <- calc.group.basis(orig.sum.data$cor.nomiss, ret.max.val = T)
+    }
+    else{
+      stats <- orig.sum.data$cor.nomiss %>%
+        filter(group == group.to.use)
+      sum$cor.nomiss <- stats$tau
+      sum$`Group Basis` <- group.to.use
+      
+      if (has_name(stats, 'gallagher')) {
+        sum$Gallagher <- stats$gallagher
+        sum$`Loosmore Hanby` <- stats$loosemore
+        sum$PVF <- stats$PVF
+        sum$PVP <- stats$PVP
+      }
+    }
+    
+    sum <- sum %>% mutate(across(c(cor.nomiss, Gallagher, `Loosmore Hanby`, PVF, PVP), ~round(.x, 2)))
     
     # Add summary columns indicating whether the group variable is 'available'.
     #  Available is defined as the correlations were able to be calculated
@@ -500,10 +516,10 @@ calc.summary.data <- function(res) {
       return(sum)
     }
         
-    main.summary.data <- country.data[[sum$`Group Basis`]]
+    main.summary.data <- country.data[[group.to.use]]
     
     sum$total.included <- orig.sum.data$cor.nomiss %>%
-      filter(group == sum$`Group Basis`) %>%
+      filter(group == group.to.use) %>%
       pull(n.eff)
     sum$total.included.pct <- sum$total.included / sum$`Sample Size`
     

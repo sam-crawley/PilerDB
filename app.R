@@ -37,6 +37,11 @@ ui <- navbarPage(title = "Divided Society Data",
                         options = list(
                           `none-selected-text` = "All"
                         )),
+            pickerInput("group.basis", 
+                        label = "Group Basis", 
+                        sort(c('(Highest Tau)', group.names)), 
+                        multiple = F
+                        ),            
             checkboxInput("incomplete.data",
                           label = "Show countries with incomplete data"
             ),
@@ -125,8 +130,12 @@ ui <- navbarPage(title = "Divided Society Data",
   )
 )
 
-get.summary.table <- function(datasrc, country, incomplete.data = F, with.id = F) {
-  tab <- summary.table  %>%
+get.summary.table <- function(datasrc, group.basis, country, incomplete.data = F, with.id = F) {
+  table.to.use <- summary.table
+  if (group.basis != "(Highest Tau)")
+    table.to.use <- res$summary.by.group[[group.basis]]
+  
+  tab <- table.to.use  %>%
     mutate(across(ends_with('.pct'), ~round(.x, digits = 2) * 100)) %>%
     rename(
       "Tau" = cor.nomiss,
@@ -274,7 +283,7 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
 server <- function(input, output, session) {
   
   output$tableOutput = renderDT(
-    get.summary.table(input$datasrc, input$country, input$incomplete.data),
+    get.summary.table(input$datasrc, input$group.basis, input$country, input$incomplete.data),
     options = list(
       lengthChange = F, 
       paging = F, 
@@ -360,7 +369,7 @@ server <- function(input, output, session) {
   observeEvent(input$tableOutput_rows_selected, {
     row <- input$tableOutput_rows_selected
     
-    displayed.sum.table <- get.summary.table(input$datasrc, input$country, input$incomplete.data, with.id = T)
+    displayed.sum.table <- get.summary.table(input$datasrc, input$group.basis, input$country, input$incomplete.data, with.id = T)
     selected.row <- displayed.sum.table[row,]
     
     country.data <- crosstabs[[selected.row$ID]]
