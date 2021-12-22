@@ -12,3 +12,7 @@ tmp <- map_dfr(names(tabs$crosstabs), function (country) {
     gall.wt = gall.wt
   )
 })
+
+tmp <- inner_join(tabs$summary, tmp, by = "ID") %>%
+  mutate(gall.diff = abs(Gallagher - gall.wt)) %>%
+  select(ID, Gallagher, gall.wt, gall.diff)
