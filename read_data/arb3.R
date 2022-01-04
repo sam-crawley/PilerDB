@@ -20,7 +20,7 @@ data.spec <- list(
     "Year" = NA
   ),
   fixups = function(data) {
-    data %>% mutate(Year = format(date, format = "%Y"))
+    data %>% mutate(Year = if_else(is.na(date), "2014", format(date, format = "%Y")))
   }
 )
 
