@@ -12,7 +12,7 @@ data.spec <- list(
     "Language" = "Language usually spoken at home",
     "Religion" = "Religious denomination",
     "Ethnicity" = "Race of respondent"
-  ),  
+  ),
   field.def = c(
     "Party" = "IMD3005_3",
     "Language" = "IMD2013",
@@ -36,6 +36,10 @@ data.spec <- list(
       IMD1008_MOD_3 == 1 ~ 3,
       IMD1008_MOD_4 == 1 ~ 4
     ))
+    
+    # Fix CSES coding error - Thailand respondents coded as "ESAN" rather than "ISAN"
+    data <- data %>%
+      mutate(Language = replace(Language, Country == "Thailand" & Language == "ESAN (NIGERIA)", "ISAN THAI"))
 
     data
   }  
