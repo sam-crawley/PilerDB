@@ -515,7 +515,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
       
       return(sum)
     }
-        
+    
     main.summary.data <- country.data[[group.to.use]]
     
     sum$total.included <- orig.sum.data$cor.nomiss %>%
@@ -523,15 +523,19 @@ calc.summary.data <- function(res, group.to.use = NULL) {
       pull(n.eff)
     sum$total.included.pct <- sum$total.included / sum$`Sample Size`
     
+    parties.to.drop <- find.groups.to.drop(main.summary.data, "Party")
+    
     sum$party.missing <- main.summary.data %>% 
-      filter(Party %in% cats.to.drop) %>% 
+      filter(! Party %in% c(cats.to.drop, parties.to.drop)) %>%
       summarise(n = sum(n)) %>% 
       pull(n)
     
     sum$party.missing.pct <- sum$party.missing / sum$`Sample Size`
     
+    groups.to.drop <- find.groups.to.drop(main.summary.data, "Group")
+    
     sum$group.missing <- main.summary.data %>% 
-      filter(Group %in% cats.to.drop) %>% 
+      filter(! Group %in% c(cats.to.drop, groups.to.drop)) %>%
       summarise(n = sum(n)) %>% 
       pull(n)
     
