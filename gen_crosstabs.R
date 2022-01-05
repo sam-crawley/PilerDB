@@ -673,7 +673,7 @@ write.divided.xlsx <- function(res, include.summary = T, include.group.sizes = T
       select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, cor.nomiss, everything())
     
     addWorksheet(wb, "Summary")
-    outer.headers <- c("", "", "", "", "", "", "", "", "", "", 
+    outer.headers <- c("", "", "", "", "", "", "", "", "", "", "",
                        "Included in Group", "", "Party Missing", "", "Group Missing")
     writeData(wb, "Summary", data.frame(t(outer.headers)), startRow = 1, startCol = 1, colNames = F, rowNames = F)
     addStyle(wb, sheet = "Summary", hs2, rows = 1, cols = 1:length(outer.headers))
@@ -682,7 +682,7 @@ write.divided.xlsx <- function(res, include.summary = T, include.group.sizes = T
     mergeCells(wb, "Summary", cols = 15:16, rows = 1)
     
     summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "Correlation", "Gallagher", "Loosemore Hanby", 
-                         "PVP", "PVF", "(N)", "(%)", "(N)", "(%)", "(N)", "(%)")
+                         "PVP", "PVF", "Exclusion Reason", "(N)", "(%)", "(N)", "(%)", "(N)", "(%)")
     
     writeData(wb, "Summary", data.frame(t(summary.headers)), startRow = 2, startCol = 1, colNames = F, rowNames = F)
     setColWidths(wb, sheet = "Summary", cols = 1:length(summary.headers), widths = "auto")
