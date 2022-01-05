@@ -28,7 +28,7 @@ group.names <- c("Language", "Religion", "Ethnicity")
 main.vars <- c("Party", group.names)
 allowed.field.names <- c(main.vars, "Country", "Year", "Weight")
 
-read.div.data <- function(data.spec, raw = F, ignore.skip.countries = F) {
+read.div.data <- function(data.spec, raw = F, ignore.skip.countries = T) {
   if (! all(names(data.spec$field.def) %in% allowed.field.names))
     stop("field.def contains invalid field names")
   
