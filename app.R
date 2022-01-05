@@ -37,11 +37,11 @@ ui <- navbarPage(title = "Divided Society Data",
                         options = list(
                           `none-selected-text` = "All"
                         )),
-            pickerInput("group.basis", 
-                        label = "Group Basis", 
-                        sort(c('(Highest Tau)', group.names)), 
-                        multiple = F
-                        ),            
+            #pickerInput("group.basis", 
+            #            label = "Group Basis", 
+            #            sort(c('(Highest Tau)', group.names)), 
+            #            multiple = F
+            #            ),            
             checkboxInput("incomplete.data",
                           label = "Show countries with incomplete data"
             ),
@@ -130,8 +130,8 @@ ui <- navbarPage(title = "Divided Society Data",
 
 get.summary.table <- function(datasrc, group.basis, country, incomplete.data = F, with.id = F) {
   table.to.use <- summary.table
-  if (group.basis != "(Highest Tau)")
-    table.to.use <- res$summary.by.group[[group.basis]]
+  #if (group.basis != "(Highest Tau)")
+  #  table.to.use <- res$summary.by.group[[group.basis]]
   
   tab <- table.to.use  %>%
     mutate(across(ends_with('.pct'), ~round(.x, digits = 2) * 100)) %>%
