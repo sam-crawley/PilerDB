@@ -147,6 +147,17 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   
   names(tables) <- group.names
   
+  # Calculate the counts of available parties/groups
+  avail.counts <- map(main.vars, function(var.name) {
+    avail <- d %>%
+      group_by(.data[[var.name]]) %>% 
+      summarise(n = n(), .groups = "drop") %>% 
+      mutate(p = n / n()) %>%
+      filter(p >= 0.02 & ! .data[[var.name]] %in% cats.to.drop)  
+    
+    nrow(avail)
+  }) %>% set_names(main.vars)
+  
   if (is.null(year))
     year <- max(as.numeric(d$Year), na.rm = T)
   
@@ -180,7 +191,7 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
       'Sample Size' = nrow(d),
       'Group Basis' = group.basis,
       'Gallagher' = gallagher,
-      'Loosmore Hanby' =loosemore,
+      'Loosmore Hanby' = loosemore,
       'PVP' = pvp,
       'PVF' = pvf
     ),
@@ -188,7 +199,8 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
     cor.wt = cor.wt,
     cor.nomiss = cor.nomiss,
     cor.nomiss.wt = cor.nomiss.wt,
-    country.orig = country.orig
+    country.orig = country.orig,
+    avail.counts = avail.counts
     
   )
   
@@ -504,6 +516,8 @@ calc.summary.data <- function(res, group.to.use = NULL) {
       select(group, available) %>% 
       pivot_wider(names_from = group, values_from = available)
     sum <- bind_cols(sum, available)
+    
+    sum$excluded <- NA
 
     if (is.na(sum$cor.nomiss)) {
       sum$total.included <- NA
@@ -512,6 +526,17 @@ calc.summary.data <- function(res, group.to.use = NULL) {
       sum$party.missing.pct <- NA
       sum$group.missing <- NA
       sum$group.missing.pct <- NA
+      
+      suppressWarnings({
+        if (orig.sum.data$avail.counts$Party == 0)
+          sum$excluded <- "No parties after removals"
+        else if (all(orig.sum.data$avail.counts[group.names] == 0))
+          sum$excluded <- "No groups after removals"
+        else if (max(orig.sum.data$cor.nomiss$n.eff, na.rm = T) <= 200)
+          sum$excluded <- "N <= 200 after removals"
+        else if (max(orig.sum.data$cor.nomiss$groups, na.rm = T) == 1)
+          sum$excluded <- "Only 1 group after removals"
+      })
       
       return(sum)
     }
