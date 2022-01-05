@@ -69,12 +69,10 @@ ui <- navbarPage(title = "Divided Society Data",
          width = 2
        ),
        mainPanel(
-         h3("Countries"),
+         h3("Countries included"),
          textOutput("info.cntry.included"),
-         h4("Countries excluded due to no (usable) party data"),
-         textOutput("info.cntry.excluded.no_party"),
-         h4("Countries excluded due to no (usable) group data"),
-         textOutput("info.cntry.excluded.no_group"),
+         h3("Countries excluded"),
+         textOutput("info.cntry.excluded"),
          h3("Questions"),
          h4("Party"),
          textOutput("info.var.party"),
@@ -147,7 +145,8 @@ get.summary.table <- function(datasrc, group.basis, country, incomplete.data = F
       "Group Missing / Other (%)" = group.missing.pct,
       "Lng" = Language,
       "Rel" = Religion,
-      "Eth" = Ethnicity
+      "Eth" = Ethnicity,
+      "Excluded Reason" = excluded
     ) %>%
     mutate(across(c(Lng, Rel, Eth), ~if_else(.x, "\u{2713}", "\u{2716}")))
   
@@ -164,7 +163,8 @@ get.summary.table <- function(datasrc, group.basis, country, incomplete.data = F
   
   if (! incomplete.data)
     tab <- tab %>%
-      filter(! is.na(`Group Basis`))
+      filter(! is.na(`Group Basis`)) %>%
+      select(-`Excluded Reason`)
   
   tab
 }
@@ -203,8 +203,15 @@ get.cat.sum.table <- function(category.sum, data.src, variable) {
   res
 }
 
-get.country.list <- function(data.src, var.name) {
-  res <- paste(data.src.info[[data.src]]$countries[[var.name]], collapse = ", ")
+get.country.list <- function(data.src, included = T) {
+  if (included)
+    res <- summary.table %>% 
+      filter(`Data Source` == data.src & ! is.na(cor.nomiss))
+  else
+    res <- summary.table %>% 
+      filter(`Data Source` == data.src & is.na(cor.nomiss))
+  
+  res <- paste(unique(res$Country), collapse = ", ")
   
   if (str_length(res) == 0)
     return ("None")
@@ -309,10 +316,8 @@ server <- function(input, output, session) {
     extensions = 'Buttons'
   )
   
-  output$info.cntry.included <- renderText(get.country.list(input$info.datasrc, "included"))
-  output$info.cntry.excluded.no_party <- renderText(get.country.list(input$info.datasrc, "no_party"))
-  output$info.cntry.excluded.no_group <- renderText(get.country.list(input$info.datasrc, "no_group"))
-  output$info.cntry.excluded.low_n <- renderText(get.country.list(input$info.datasrc, "low_n"))
+  output$info.cntry.included <- renderText(get.country.list(input$info.datasrc, included = T))
+  output$info.cntry.excluded <- renderText(get.country.list(input$info.datasrc, included = F))
   
   output$info.var.party <- renderText(get.data.src.question(input$info.datasrc, "Party"))
   output$info.var.religion <- renderText(get.data.src.question(input$info.datasrc, "Religion"))

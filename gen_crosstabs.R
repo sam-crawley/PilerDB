@@ -409,9 +409,6 @@ gen.category.summary <- function(data, cat.defs) {
 }
 
 get.data.src.info <- function(data, data.def) {
-  countries <- data.def$skip.countries
-  countries$included <- data %>% filter(! Country %in% global.country.skip) %>% distinct(Country) %>% pull(Country)
-  
   questions <- map(main.vars, function(v) {
     if (has_name(data.def, 'question.text') && has_name(data.def$question.text, v))
       return(data.def$question.text[[v]])
@@ -420,8 +417,7 @@ get.data.src.info <- function(data, data.def) {
   }) %>% set_names(main.vars)
   
   list(
-    questions = questions,
-    countries = countries
+    questions = questions
   )
 }
 
