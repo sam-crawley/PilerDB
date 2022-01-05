@@ -74,7 +74,7 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
   
   if (calc.summaries) {
     res$summary <- calc.summary.data(res$crosstabs)
-    res$summary.by.group <- map(c(group.names), ~ calc.summary.data(tabs$crosstabs, group.to.use = .x)) %>% set_names(group.names)
+    res$summary.by.group <- map(c(group.names), ~ calc.summary.data(res$crosstabs, group.to.use = .x)) %>% set_names(group.names)
     res$group.sizes <- get.group.size.summary(res$crosstabs)
     res$max.parties <- get.max.parties(res$group.sizes)
   }
