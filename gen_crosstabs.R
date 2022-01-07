@@ -152,8 +152,8 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
     avail <- d %>%
       group_by(.data[[var.name]]) %>% 
       summarise(n = n(), .groups = "drop") %>% 
-      mutate(p = n / n()) %>%
-      filter(p >= 0.02 & ! .data[[var.name]] %in% cats.to.drop)  
+      mutate(p = n / sum(n)) %>%
+      filter(p >= 0.02 & ! .data[[var.name]] %in% cats.to.drop)
     
     nrow(avail)
   }) %>% set_names(main.vars)
