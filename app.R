@@ -422,11 +422,12 @@ server <- function(input, output, session) {
         no_outline = TRUE
       ),
       
-      
       h4("Group basis: ", textOutput(paste0("GroupBasis", countryTabID), inline = T)),
 
       br(),
-    
+      
+      h5("Available groups (after removals)", tableOutput(paste0("AvailCounts", countryTabID))),
+      
       h4(textOutput(paste0("LanguageHeading", countryTabID))),
       DTOutput(paste0("LanguageTable", countryTabID)),
       
@@ -466,6 +467,7 @@ server <- function(input, output, session) {
     
     output[[paste0("CountryName", countryTabID)]] <- renderText(country.data$Summary$general$Country)
     output[[paste0("GroupBasis", countryTabID)]] <- renderText(country.data$Summary$general$`Group Basis`)
+    output[[paste0("AvailCounts", countryTabID)]] <- renderTable(country.data$Summary$avail.counts %>% as_tibble())
     
     output[[paste0("SampleSize", countryTabID)]] <- renderText({
       paste("Sample Size:", sample.size)
