@@ -426,7 +426,7 @@ server <- function(input, output, session) {
 
       br(),
       
-      h5("Available groups (after removals)", tableOutput(paste0("AvailCounts", countryTabID))),
+      #h5("Available groups (after removals)", tableOutput(paste0("AvailCounts", countryTabID))),
       
       h4(textOutput(paste0("LanguageHeading", countryTabID))),
       DTOutput(paste0("LanguageTable", countryTabID)),
