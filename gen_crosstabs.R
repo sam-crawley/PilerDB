@@ -481,6 +481,8 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     orig.sum.data <- country.data$Summary
     #cat(orig.sum.data$general$ID, "\n")
     
+    group.basis.selected <- F
+    
     sum <- orig.sum.data$general
     sum$`Data Source Orig` <- NULL
     
@@ -489,6 +491,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
       sum$cor.nomiss <- calc.group.basis(orig.sum.data$cor.nomiss, ret.max.val = T)
     }
     else{
+      group.basis.selected <- T
       stats <- orig.sum.data$cor.nomiss %>%
         filter(group == group.to.use)
       sum$cor.nomiss <- stats$tau
@@ -528,6 +531,16 @@ calc.summary.data <- function(res, group.to.use = NULL) {
           sum$excluded <- "No parties after removals"
         else if (all(orig.sum.data$avail.counts[group.names] == 0))
           sum$excluded <- "No groups after removals"
+        else if (group.basis.selected) {
+          stats <- orig.sum.data$cor.nomiss %>% filter(group == all_of(group.to.use))
+          
+          if (orig.sum.data$avail.counts[[group.to.use]] == 0 | ! has_name(stats, 'group'))
+            sum$excluded <- paste(group.to.use, "not available")
+          else if (stats$n.eff <= 200)
+            sum$excluded <- "N <= 200 after removals"
+          else if (stats$groups == 1)
+            sum$excluded <- paste("Only 1", group.to.use, "group after removals")
+        }
         else if (max(orig.sum.data$cor.nomiss$n.eff, na.rm = T) <= 200)
           sum$excluded <- "N <= 200 after removals"
         else if (max(orig.sum.data$cor.nomiss$groups, na.rm = T) == 1)
@@ -655,40 +668,25 @@ get.max.parties <- function(group.sizes) {
 
 gen.spreadsheets <- function(tabs) {
   write.divided.xlsx(tabs, include.crosstabs = F, file = "Divided/output/divided_summary.xlsx")
-  write.divided.xlsx(tabs, include.summary = F, include.group.sizes = F)
+  write.divided.xlsx(tabs, include.summary = F, include.group.sizes = F, include.summary.by.group = F)
 }
 
-write.divided.xlsx <- function(res, include.summary = T, include.group.sizes = T, include.crosstabs = T, file = "Divided/output/divided_crosstabs.xlsx") {
+write.divided.xlsx <- function(res, include.summary = T, include.summary.by.group = T, include.group.sizes = T, include.crosstabs = T, file = "Divided/output/divided_crosstabs.xlsx") {
   options("openxlsx.numFmt" = NULL)
   wb <- createWorkbook()
   
   hs1 <- createStyle(textDecoration = "bold", fontSize = 14)
   hs2 <- createStyle(textDecoration = "bold")
   
-  # Add summary sheet with 2 header rows
+  # Add summary sheet
   if (include.summary) {
-    summary.sheet <- get.excel.summary.sheet(res) %>%
-      select(-ID) %>%
-      arrange(desc(cor.nomiss)) %>%
-      select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, cor.nomiss, everything())
-    
-    addWorksheet(wb, "Summary")
-    outer.headers <- c("", "", "", "", "", "", "", "", "", "", "",
-                       "Included in Group", "", "Party Missing", "", "Group Missing")
-    writeData(wb, "Summary", data.frame(t(outer.headers)), startRow = 1, startCol = 1, colNames = F, rowNames = F)
-    addStyle(wb, sheet = "Summary", hs2, rows = 1, cols = 1:length(outer.headers))
-    mergeCells(wb, "Summary", cols = 11:12, rows = 1)
-    mergeCells(wb, "Summary", cols = 13:14, rows = 1)
-    mergeCells(wb, "Summary", cols = 15:16, rows = 1)
-    
-    summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "Correlation", "Gallagher", "Loosemore Hanby", 
-                         "PVP", "PVF", "Exclusion Reason", "(N)", "(%)", "(N)", "(%)", "(N)", "(%)")
-    
-    writeData(wb, "Summary", data.frame(t(summary.headers)), startRow = 2, startCol = 1, colNames = F, rowNames = F)
-    setColWidths(wb, sheet = "Summary", cols = 1:length(summary.headers), widths = "auto")
-    addStyle(wb, sheet = "Summary", hs2, rows = 2, cols = 1:length(summary.headers))
-    
-    writeData(wb, "Summary", summary.sheet, startRow = 3, colNames = F, rowNames = F)
+    write.excel.summary.tab(wb, res$summary)
+  }
+  
+  if (include.summary.by.group) {
+    for (group in group.names) {
+      write.excel.summary.tab(wb, res$summary.by.group[[group]], tab.name = paste(group, "Group Basis"))
+    }
   }
   
   # Add group sizes sheet
@@ -782,4 +780,33 @@ write.divided.xlsx <- function(res, include.summary = T, include.group.sizes = T
   }
   
   saveWorkbook(wb, file, overwrite = T)
+}
+
+write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", included.excluded.col = T) {
+  summary.sheet <- summary.data %>%
+    mutate(across(ends_with('.pct'), ~set.class('percentage', .))) %>%
+    select(-Religion, -Ethnicity, -Language) %>%
+    select(-ID) %>%
+    arrange(desc(cor.nomiss)) %>%
+    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, cor.nomiss, everything())
+  
+  hs2 <- createStyle(textDecoration = "bold")
+  
+  addWorksheet(wb, tab.name)
+  outer.headers <- c("", "", "", "", "", "", "", "", "", "", "",
+                     "Included in Group", "", "Party Missing", "", "Group Missing")
+  writeData(wb, tab.name, data.frame(t(outer.headers)), startRow = 1, startCol = 1, colNames = F, rowNames = F)
+  addStyle(wb, sheet = tab.name, hs2, rows = 1, cols = 1:length(outer.headers))
+  mergeCells(wb, tab.name, cols = 11:12, rows = 1)
+  mergeCells(wb, tab.name, cols = 13:14, rows = 1)
+  mergeCells(wb, tab.name, cols = 15:16, rows = 1)
+  
+  summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "Correlation", "Gallagher", "Loosemore Hanby", 
+                       "PVP", "PVF", "Exclusion Reason", "(N)", "(%)", "(N)", "(%)", "(N)", "(%)")
+  
+  writeData(wb, tab.name, data.frame(t(summary.headers)), startRow = 2, startCol = 1, colNames = F, rowNames = F)
+  setColWidths(wb, sheet = tab.name, cols = 1:length(summary.headers), widths = "auto")
+  addStyle(wb, sheet = tab.name, hs2, rows = 2, cols = 1:length(summary.headers))
+  
+  writeData(wb, tab.name, summary.sheet, startRow = 3, colNames = F, rowNames = F)
 }

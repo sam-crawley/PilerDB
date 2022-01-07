@@ -163,10 +163,8 @@ get.summary.table <- function(datasrc, group.basis, country, incomplete.data = F
   
   if (! incomplete.data)
     tab <- tab %>%
-      filter(! is.na(`Group Basis`) & ! is.na(`Tau`))
-  
-  if (! incomplete.data | group.basis != "(Highest Tau)")
-    tab <- tab %>% select(-`Excluded Reason`)
+      filter(! is.na(`Group Basis`) & ! is.na(`Tau`)) %>% 
+    select(-`Excluded Reason`)
   
   tab
 }
