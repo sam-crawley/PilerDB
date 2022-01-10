@@ -53,9 +53,10 @@ cat.defs <- list(
                 "Independent candidate/Azaad Umeedwaar", "Other party")
   ),
   Religion = list(
-    "Missing" = c("Don't know", "Nothing in particular", "Refused", "None", "Don\u2019t know"),
-    "Other" = c("Atheist (do not believe in God)", "Other", "No religion", "No religion/not a believer/atheist/agnostic", "Other religion", "Other (SPECIFY)",
-                "Any other", "Agnostic (not sure if there is a God)", "Atheist/No religion")
+    "Missing" = c("Don't know", "Refused",  "Don\u2019t know"),
+    "Other" = c("Other religion", "Other (SPECIFY)", "Any other"),
+    "No Religion" = c("Atheist (do not believe in God)", "Other", "No religion", "No religion/not a believer/atheist/agnostic", 
+                      "Agnostic (not sure if there is a God)", "Atheist/No religion", "None", "Nothing in particular")
   ),
   Ethnicity = list(
     "Missing" = c("Refused", "Don\u2019t know"),

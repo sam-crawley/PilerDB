@@ -29,6 +29,11 @@ data.spec <- list(
       levels(data[[var]]) <- str_remove(levels(data[[var]]), "^\\s*[\\w-]+:\\s*")
     }
     
+    # Incorporate response from Q332A to indicate if they have no religion
+    data <- data %>% mutate(q332a = haven::as_factor(q332a)) %>%
+      mutate(Religion = fct_expand(Religion, "No Religion")) %>% 
+      mutate(Religion = replace(Religion, q332a == "No", "No Religion"))
+    
     data
   }
 )

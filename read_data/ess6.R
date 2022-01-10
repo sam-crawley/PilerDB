@@ -31,7 +31,12 @@ data.spec <- list(
     data
   },
   fixups = function(data) {
-    data %>% mutate(Year = 2012)
+    data %>% mutate(Year = 2012) %>%
+      
+      # Incorporate response from rlgblg to indicate if they have no religion
+      mutate(rlgblg = haven::as_factor(rlgblg)) %>%
+      mutate(Religion = fct_expand(Religion, "No Religion")) %>% 
+      mutate(Religion = replace(Religion, rlgblg == "No", "No Religion"))
   }  
 )
 

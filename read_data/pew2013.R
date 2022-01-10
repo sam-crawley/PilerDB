@@ -56,14 +56,14 @@ cat.defs <- list(
                 "Independent candidate/Azaad Umeedwaar", "Other party")
   ),
   Religion = list(
-    "Missing" = c("Don't know", "Nothing in particular", "Refused", "Belongs to a religion, but does not want to say which one (Volunteered)",
-                  "No religion (Volunteered)", "None"),
-    "Other" = c("Something else", "Agnostic (not sure if there is a God)", "Atheist (do not believe in God)", "Other religion (Volunteered)",
-                "No religion/not a believer/Atheist/Agnostic (Volunteered)", "No believer / atheist / agnostic (Volunteered)",
-                "No religion/not a believer/atheist/agnostic (Volunteered)", "Other (Volunteered)", "Atheist/No religion (Volunteered)",
-                "Other", "Other religion", "None/Atheist", "Atheist/Agnostic", "No religion/not a believer/atheist/agnostic", "Agnostic",
-                "Atheist / not believer", "Atheist", "No religion", "A believer of no religion in particular", "Yes, Other",
-                "No, do not belong to a religion", "Yes", "No", "Without religion")
+    "Missing" = c("Don't know", "Refused", "Belongs to a religion, but does not want to say which one (Volunteered)"),
+    "Other" = c("Something else", "Other religion (Volunteered)", "Other (Volunteered)", "Other", "Other religion",  "Yes, Other", "Yes"),
+    "No Religion" = c("Nothing in particular", "No religion (Volunteered)", "None", "Agnostic (not sure if there is a God)", "Atheist (do not believe in God)",
+                      "No religion/not a believer/Atheist/Agnostic (Volunteered)", "No believer / atheist / agnostic (Volunteered)",
+                      "No religion/not a believer/atheist/agnostic (Volunteered)", "Atheist/No religion (Volunteered)",
+                      "None/Atheist", "Atheist/Agnostic", "No religion/not a believer/atheist/agnostic", "Agnostic",
+                      "Atheist / not believer", "Atheist", "No religion", "A believer of no religion in particular", "No, do not belong to a religion", 
+                      "No", "Without religion")
   ),
   Ethnicity = list(
     "Missing" = c("Refused", "Don't know", "Refused (e.g., non-race answers like American, Human, purple)"),

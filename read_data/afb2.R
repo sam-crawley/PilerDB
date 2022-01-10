@@ -34,6 +34,7 @@ cat.defs <- list(
   ),
   Religion = list(
     "Missing" = c("Missing", "Don't know", "Refused"),
-    "Other" = c("Other", "None", "Agnostic (Do not know if there is a God)", "Atheist (Do not believe in a God)")
+    "Other" = c("Other"),
+    "No Religion" = c("None", "Agnostic (Do not know if there is a God)", "Atheist (Do not believe in a God)")
   )
 )

@@ -40,6 +40,7 @@ cat.defs <- list(
   ),
   Religion = list(
     "Missing" = c("Missing"),
-    "Other" = c("OTHER", "NONE")
+    "Other" = c("OTHER"),
+    "No Religion" = c("NONE")
   )
 )

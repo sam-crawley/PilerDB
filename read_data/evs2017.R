@@ -27,6 +27,11 @@ data.spec <- list(
       mutate(Weight = as.numeric(Weight)) %>%
       mutate(Weight = if_else(Weight == -4, 1, Weight))
     
+    # Incorporate response from v51 to indicate if they have no religion
+    data <- data %>% mutate(v51 = haven::as_factor(v51)) %>%
+      mutate(Religion = fct_expand(Religion, "No Religion")) %>% 
+      mutate(Religion = replace(Religion, v51 == "no", "No Religion"))
+    
     data
   }
 )
