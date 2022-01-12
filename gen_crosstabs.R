@@ -394,13 +394,29 @@ process.data <- function(data, cat.defs) {
 }
 
 gen.category.summary <- function(data, cat.defs) {
+  # Internal function to find which variables the 
+  #  categories have been recoded to
+  find.recodes <- function(var.name, cats) {
+    map_chr(cats, function(cat) {
+      ret <- map(names(cat.defs[[var.name]]), function(recode_cat) {
+        if (cat %in% cat.defs[[var.name]][[recode_cat]])
+          return (recode_cat)
+        
+        return (NULL)
+      })
+      
+      ret <- compact(ret)
+      
+      if (is_empty(ret))
+        return ('')
+      
+      as.character(ret)
+    })
+  }
+  
   map(main.vars, function(var.name) {
     fct_count(data[[var.name]]) %>%
-      mutate("Recoded To" = case_when(
-        f %in% cat.defs[[var.name]]$Missing ~ 'Missing',
-        f %in% cat.defs[[var.name]]$Other ~ 'Other',
-        TRUE ~ ''
-      )) %>%
+      mutate("Recoded To" = find.recodes(var.name, f)) %>%
       rename(
         "Category" = f,
         "N" = n
