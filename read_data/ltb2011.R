@@ -1,6 +1,7 @@
 data.spec <- list(
-  file.name = "Divided/datasets/latino/2013/Latinobarometro2013Eng.dta",
+  file.name = "Divided/datasets/latino/2011/Latinobarometro_2011_eng.dta",
   file.type = 'dta',
+  file.encoding = "latin1",  
   question.text = c(
     "Party" = "If elections were held this Sunday, which party would you vote for?",
     "Religion" = "What is your religion?",
@@ -10,16 +11,16 @@ data.spec <- list(
   skip.countries = list(),
   country.format = 'country.name',
   field.def = c(
-    "Party" = "P22TGBSM",
-    "Religion" = "S14",
-    "Language" = "S7_A",
-    "Ethnicity" = "S21",
+    "Party" = "P38ST",
+    "Religion" = "S18",
+    "Language" = "S11_A",
+    "Ethnicity" = "S27",
     "Country" = "idenpa",
     "Year" = NA,
     "Weight" = "wt"
   ),
   fixups = function(data) {
-    data %>% mutate(Year = 2013)
+    data %>% mutate(Year = 2011)
   }
 )
 
@@ -29,16 +30,15 @@ cat.defs <- list(
     "Other" = c("Otros (partidos nacionales y provinciales)")
   ),
   Language = list(
-    "Missing" = c("Not asked"),
     "Other" = c("Other")
   ),
   Religion = list(
-    "Missing" = c("No answer", "Don't know"),
-    "Other" = c("Others", "Believer"),
+    "Missing" = c("No answer", "Don\u{00B4}t know"),
+    "Other" = c("Others"),
     "No Religion" = c("Believer, not belonging to any church", "Agnostic", "Atheist", "None")
   ),
   Ethnicity = list(
-    "Missing" = c("No answer/No data", "Don\u{00B4}t know", "Not applicable", "Not asked"),
+    "Missing" = c("No answer", "Don\u{00B4}t know"),
     "Other" = c("Other race")
   )
 )
