@@ -166,7 +166,7 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   cor.nomiss = calc.all.indices(d, tables, drop.cats = T)
   cor.nomiss.wt = calc.all.indices(d, tables, drop.cats = T, weighted = T)
   
-  group.basis <- calc.group.basis(cor.nomiss)
+  group.basis <- calc.group.basis(cor.nomiss.wt)
   
   gallagher <- NA
   loosemore <- NA
@@ -174,7 +174,7 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   pvf <- NA
   
   if (! is.na(group.basis)) {
-    cor.vals <- cor.nomiss %>% filter(group == group.basis)
+    cor.vals <- cor.nomiss.wt %>% filter(group == group.basis)
     gallagher <- cor.vals$gallagher
     loosemore <- cor.vals$loosemore
     pvp <- cor.vals$PVP
@@ -245,7 +245,7 @@ regen.all.indicies <- function(tabs) {
     country.data$Summary$cor.nomiss = update.summary.indices(country.data$Summary$cor.nomiss, summary.data.list, drop.cats = T)
     country.data$Summary$cor.nomiss.wt = update.summary.indices(country.data$Summary$cor.nomiss.wt, summary.data.list, drop.cats = T, weighted = T)
     
-    group.basis <- calc.group.basis(country.data$Summary$cor.nomiss)
+    group.basis <- calc.group.basis(country.data$Summary$cor.nomiss.wt)
     
     gallagher <- NA
     loosemore <- NA
@@ -253,7 +253,7 @@ regen.all.indicies <- function(tabs) {
     pvf <- NA
     
     if (! is.na(group.basis)) {
-      cor.vals <- country.data$Summary$cor.nomiss %>% filter(group == group.basis)
+      cor.vals <- country.data$Summary$cor.nomiss.wt %>% filter(group == group.basis)
       gallagher <- cor.vals$gallagher
       loosemore <- cor.vals$loosemore
       pvp <- cor.vals$PVP
@@ -509,11 +509,11 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     
     if (is.null(group.to.use)) {
       group.to.use <- sum$`Group Basis`
-      sum$cor.nomiss <- calc.group.basis(orig.sum.data$cor.nomiss, ret.max.val = T)
+      sum$cor.nomiss <- calc.group.basis(orig.sum.data$cor.nomiss.wt, ret.max.val = T)
     }
     else{
       group.basis.selected <- T
-      stats <- orig.sum.data$cor.nomiss %>%
+      stats <- orig.sum.data$cor.nomiss.wt %>%
         filter(group == group.to.use)
       sum$cor.nomiss <- stats$tau
       sum$`Group Basis` <- group.to.use
@@ -531,7 +531,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     # Add summary columns indicating whether the group variable is 'available'.
     #  Available is defined as the correlations were able to be calculated
     #  (so includes, eg., cases where there was only one group)
-    available <- country.data$Summary$cor.nomiss %>% 
+    available <- country.data$Summary$cor.nomiss.wt %>% 
       mutate(available = !is.na(tau)) %>% 
       select(group, available) %>% 
       pivot_wider(names_from = group, values_from = available)
@@ -553,7 +553,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
         else if (all(orig.sum.data$avail.counts[group.names] == 0))
           sum$excluded <- "No groups after removals"
         else if (group.basis.selected) {
-          stats <- orig.sum.data$cor.nomiss %>% filter(group == all_of(group.to.use))
+          stats <- orig.sum.data$cor.nomiss.wt %>% filter(group == all_of(group.to.use))
           
           if (orig.sum.data$avail.counts[[group.to.use]] == 0 | ! has_name(stats, 'group'))
             sum$excluded <- paste(group.to.use, "not available")
@@ -562,9 +562,9 @@ calc.summary.data <- function(res, group.to.use = NULL) {
           else if (stats$groups == 1)
             sum$excluded <- paste("Only 1", group.to.use, "group after removals")
         }
-        else if (max(orig.sum.data$cor.nomiss$n.eff, na.rm = T) <= 200)
+        else if (max(orig.sum.data$cor.nomiss.wt$n.eff, na.rm = T) <= 200)
           sum$excluded <- "N <= 200 after removals"
-        else if (max(orig.sum.data$cor.nomiss$groups, na.rm = T) == 1)
+        else if (max(orig.sum.data$cor.nomiss.wt$groups, na.rm = T) == 1)
           sum$excluded <- "Only 1 group after removals"
       })
       
@@ -573,7 +573,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     
     main.summary.data <- country.data[[group.to.use]]
     
-    sum$total.included <- orig.sum.data$cor.nomiss %>%
+    sum$total.included <- orig.sum.data$cor.nomiss.wt %>%
       filter(group == group.to.use) %>%
       pull(n.eff)
     sum$total.included.pct <- sum$total.included / sum$`Sample Size`
