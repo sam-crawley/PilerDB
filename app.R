@@ -14,6 +14,8 @@ summary.table <- res$summary
 group.sizes <- res$group.sizes
 max.parties <- res$max.parties
 
+data.src.list <- sort(unique(summary.table$`Data Source`))
+
 ui <- navbarPage(title = "Divided Society Data",
   tabPanel("Crosstabs",
     add_busy_spinner(spin = "cube-grid"),
@@ -25,7 +27,7 @@ ui <- navbarPage(title = "Divided Society Data",
             h3("Filters"),
             pickerInput("datasrc", 
                         label = "Data source", 
-                        sort(unique(summary.table$`Data Source`)), 
+                        data.src.list, 
                         multiple = T,
                         options = list(
                           `none-selected-text` = "All"
@@ -64,7 +66,7 @@ ui <- navbarPage(title = "Divided Society Data",
        sidebarPanel(
          pickerInput("info.datasrc", 
                      label = "Data source", 
-                     sort(names(data.src.info))
+                     data.src.list
          ),
          width = 2
        ),
@@ -177,7 +179,15 @@ gen.group.size.names <- function(max.parties) {
 }
 
 get.data.src.question <- function(data.src, var.name) {
-  q <- data.src.info[[data.src]][['questions']][[var.name]]
+  info <- data.src.info[[data.src]]
+  
+  if (is.null(info)) {
+    # If we didn't find data source info, this must be a multiwave data set,
+    #  so strip of trailing digits and try again
+    info <- data.src.info[[ str_remove("CSES_IMD1", "\\d+$") ]]
+  }
+  
+  q <- info[['questions']][[var.name]]
   
   if (is.null(q))
     return("N/A")

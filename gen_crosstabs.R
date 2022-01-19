@@ -432,8 +432,13 @@ get.data.src.info <- function(data, data.def) {
       attr(data[[v]], "label")
   }) %>% set_names(main.vars)
   
+  modules <- NA
+  if (has_name(data.def, "wave_var"))
+    modules <- sort(unique(data[[data.def$wave_var]]))
+  
   list(
-    questions = questions
+    questions = questions,
+    modules = modules
   )
 }
 
