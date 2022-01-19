@@ -1,7 +1,6 @@
 data.spec <- list(
   file.name = "Divided/datasets/cses/Module 5/cses5.dta",
   file.type = 'dta',
-  skip.countries = list(),
   split.by.year = T,
   country.format = 'country.name',
   question.text = c(

@@ -7,7 +7,6 @@ data.spec <- list(
     "Language" = "What is your mother tongue?",
     "Ethnicity" = "What race do you consider yourself to belong to?"
   ),
-  skip.countries = list(),
   country.format = 'country.name',
   field.def = c(
     "Party" = "P15STGBS",

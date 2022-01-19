@@ -10,9 +10,6 @@ data.spec <- list(
     "Party" = "Which parties (or candidates for president if it was presidential race) did you vote for?",
     "Religion" = "What is your religion?",
     "Ethnicity" = "What's your racial (ethnic) background?"
-  ),  
-  skip.countries = list(
-    no_party = c("China", "Vietnam")
   ),
   country.format = 'country.name',
   field.def = c(

@@ -7,9 +7,6 @@ data.spec <- list(
     "Ethnicity" = "Ethnic group [exact question wording not supplied]",
     "Language" = "What language do you normally speak at home?"
   ),
-  skip.countries = list(
-    no_party = c('China', 'Nigeria', 'Pakistan', 'South Korea')
-  ),
   country.format = 'country.name',
   country.custom = c("SrpSka Republic" = "SrpSka Republic"),
   field.def = c(

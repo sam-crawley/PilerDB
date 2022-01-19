@@ -6,9 +6,6 @@ data.spec <- list(
     "Language" = "Which [ENTER NATIONALITY] language is your mother tongue or language of origin?",
     "Religion" = "What is your religion, if any?",
     "Ethnicity" = "What is your ethnic community, cultural group or tribe?"
-  ),    
-  skip.countries = list(
-    no_party = c("Eswatini")
   ),
   country.format = 'country.name',
   field.def = c(

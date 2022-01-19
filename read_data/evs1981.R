@@ -5,9 +5,6 @@ data.spec <- list(
   question.text = c(
     "Party" = "Do you consider yourself to be close or not to any particular party? [If yes] To which party?",
     "Religion" = "Do you belong to a religious denomination? [If yes] Which one?"
-  ),  
-  skip.countries = list(
-    no_party = c("Netherlands", "Norway", "Sweden")
   ),
   country.format = 'iso2c',
   country.custom = c(

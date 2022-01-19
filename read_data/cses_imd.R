@@ -1,9 +1,6 @@
 data.spec <- list(
   file.name = "Divided/datasets/cses/IMD/cses_imd.dta",
   file.type = 'dta',
-  skip.countries = list(
-    no_group = c("Denmark", "Lithuania", "Italy")
-  ),
   wave_var = "module",
   split.by.year = T,
   country.format = 'country.name',

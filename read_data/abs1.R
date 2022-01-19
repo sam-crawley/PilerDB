@@ -5,9 +5,6 @@ data.spec <- list(
   question.text = c(
     "Religion" = "What is your religion? [Exact question wording not supplied]"
   ),
-  skip.countries = list(
-    no_party = c('China', 'Philippines')
-  ),
   country.format = 'country.name',
   field.def = c(
     "Party" = "q028",

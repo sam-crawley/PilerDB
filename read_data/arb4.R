@@ -5,9 +5,6 @@ data.spec <- list(
     "Party" = "Which of the existing parties is closest to representing your political, social and economic aspirations?",
     "Religion" = "What is your religious denomination?",
     "Language" = "What is your first language?"
-  ),  
-  skip.countries = list(
-    no_group = c("Egypt", "Jordan", "Palestinian Territories")
   ),
   country.format = 'country.name',
   field.def = c(

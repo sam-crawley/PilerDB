@@ -5,8 +5,7 @@ data.spec <- list(
     "Party" = "Which party feel closer to",
     "Religion" = "Do you consider yourself as belonging to any particular religion or denomination? [If yes] Which one?",
     "Language" = "What language or languages do you speak most often at home? [First mentioned]"
-  ),  
-  skip.countries = list(),
+  ),
   country.format = 'iso2c',
   field.def = c(
     "Party" = "prtcl",

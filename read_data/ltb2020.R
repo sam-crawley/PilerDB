@@ -7,7 +7,6 @@ data.spec <- list(
     "Language" = "What is your native language?",
     "Ethnicity" = "What ethnicity or race you identify best with?"
   ),
-  skip.countries = list(),
   country.format = 'spanish',
   country.dict = country.dict.es,
   field.def = c(

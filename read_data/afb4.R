@@ -7,8 +7,7 @@ data.spec <- list(
     "Language" = "Which [Ghanaian/Kenyan/etc.] language is your home language?",
     "Religion" = "What is your religion, if any?",
     "Ethnicity" = "What is your tribe? You know, your ethnic or cultural group."
-  ),  
-  skip.countries = c(),
+  ),
   country.format = 'country.name',
   field.def = c(
     "Party" = "Q97",

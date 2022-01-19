@@ -4,9 +4,6 @@ data.spec <- list(
   question.text = c(
     "Party" = "Which party if any do you feel closest to?",
     "Religion" = "What is your religious denomination?"
-  ),  
-  skip.countries = list(
-    no_party = c("Kuwait", "Lebanon")
   ),
   country.format = 'country.name',
   field.def = c(

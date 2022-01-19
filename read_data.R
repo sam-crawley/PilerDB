@@ -20,7 +20,6 @@ library(here)
 # * country.format = the original format of the country (see countrycode::codelist)
 # * country.dict = country dict (passed to custom_dict) to use
 # * country.custom = names vector to be passed to custom_match parameter of countrycode()
-# * skip.countries = list of countries to skip completely (using full country.name text)
 # * fixups = a function to apply some custom fixups to the data before returning it
 # * pre_fixups = a function to apply custom fixups to the data *before* other processing is done
 
@@ -28,7 +27,7 @@ group.names <- c("Language", "Religion", "Ethnicity")
 main.vars <- c("Party", group.names)
 allowed.field.names <- c(main.vars, "Country", "Year", "Weight")
 
-read.div.data <- function(data.spec, raw = F, ignore.skip.countries = T) {
+read.div.data <- function(data.spec, raw = F) {
   if (! all(names(data.spec$field.def) %in% allowed.field.names))
     stop("field.def contains invalid field names")
   
@@ -69,10 +68,6 @@ read.div.data <- function(data.spec, raw = F, ignore.skip.countries = T) {
       )
     )
   
-  if (! ignore.skip.countries)
-    data <- data %>%
-      filter(! Country %in% unlist(data.spec$skip.countries))
-  
   main.var.def <- data.spec$field.def[main.vars]
   
   available.vars <- names(main.var.def[! is.na(main.var.def)])
@@ -96,7 +91,7 @@ read.div.data <- function(data.spec, raw = F, ignore.skip.countries = T) {
   return(data)
 }
 
-load.data.by.id <- function(id, process = T, ignore.skip.countries = F) {
+load.data.by.id <- function(id, process = T) {
   file <- paste0(here("Divided/read_data"), "/", tolower(id), ".R")
   
   if (! file.exists(file))
@@ -106,24 +101,12 @@ load.data.by.id <- function(id, process = T, ignore.skip.countries = F) {
   
   source(file, local = e, encoding = "UTF-8")
   
-  data <- read.div.data(e$data.spec, ignore.skip.countries = ignore.skip.countries)
+  data <- read.div.data(e$data.spec)
   
   if (process)
     data <- process.data(data, e$cat.defs)
   
   data
-}
-
-check.data.by.id <- function(id) {
-  data <- load.data.by.id(id, ignore.skip.countries = T)
-  
-  file <- paste0(here("Divided/read_data/"), "/", tolower(id), ".R")
-  
-  e <- new.env()
-  
-  source(file, local = e, encoding = "UTF-8")  
-  
-  check.data(data, e$data.spec$skip.countries)
 }
 
 get.data.def.list <- function() {
@@ -134,70 +117,6 @@ get.data.def.id <- function(filename) {
   toupper( str_match(filename, "/(\\w+?).R$")[,2] )
 }
 
-# Check the skip.countries list to see if it contains the correct list of countries
-# Note, we assume countries should only be excluded if they have no (non-missing) parties and/or groups
-#  (This doesn't necessarily mean we can calculate Gallagher, etc)
-# TODO: check low_n skipped countries
-check.data <- function(data, skip.countries) {
-  # Check for countries without Party data
-  res <- data %>% 
-    group_by(Country) %>% 
-    summarise(party.resp.count = sum(! Party %in% c("Missing", "Other"))) %>%
-    filter(party.resp.count == 0)
-  
-  no_party_list = res %>% pull(Country)
-  
-  diff.list <- function(a, b) {
-    setdiff(a, b) %>% discard(~ .x %in% global.country.skip)
-  }
-  
-  no_country_additional <- diff.list(skip.countries[['no_party']], no_party_list)
-  no_country_missing <- diff.list(no_party_list, skip.countries[['no_party']])
-  if (length(no_country_additional > 0)) {
-    cat("The following countries are on skip.countries no_party list, but should not be: ", paste(no_country_additional, collapse = ", "), "\n")
-  }
-  if (length(no_country_missing > 0)) {
-    cat("The following countries are missing from skip.countries no_party list: ", paste(no_country_missing, collapse = ", "), "\n")
-  }      
-  
-  no_group_list <- keep(unique(data$Country) %>% discard(~ .x %in% no_party_list), function(c) {
-    d <- data %>% filter(Country == c) 
-    
-    groups <- map(group.names, function(g) {
-      res <- fct_count(d[[g]]) %>%
-        filter(! f %in% c("Missing", "Other") & n != 0)
-      
-      if (nrow(res) <= 1)
-        return (NULL)
-      else
-        return (g)
-    })
-    
-    length(unlist(groups)) == 0
-  })
-  
-  no_group_additional <- diff.list(skip.countries[['no_group']], no_group_list)
-  no_group_missing <- diff.list(no_group_list, skip.countries[['no_group']])
-  if (length(no_group_additional > 0)) {
-    cat("The following countries are on skip.countries no_group list, but should not be: ", paste(no_group_additional, collapse = ", "), "\n")
-  }
-  if (length(no_group_missing > 0)) {
-    cat("The following countries are missing from skip.countries no_group list: ", paste(no_group_missing, collapse = ", "), "\n")
-  }
-}
-
-# Check all datasets to see if the list of skip countries matches what we think should be skipped
-check.all.datasets <- function() {
-  data.defs <- get.data.def.list()
-  
-  for (data.def in data.defs) {
-    id <- get.data.def.id(data.def)
-    
-    cat("Checking", id, "\n")
-    
-    check.data.by.id(id)
-  }
-}
 
 ### Util functions that can be called when loading data (i.e. as part of 'fixups')
 

@@ -7,9 +7,6 @@ data.spec <- list(
     "Religion" = "What is your current/present religion, if any? [Question wording varies by country]",
     "Ethnicity" = "Which ethnic/racial/tribal group do you belong to? [Question wording varies by country]"
   ),
-  skip.countries = list(
-    no_party = c("Ethiopia", "Vietnam", "China", "Mexico")
-  ),
   country.format = 'country.name',
   field.def = c(
     "Party" = "prty",

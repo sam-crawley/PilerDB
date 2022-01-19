@@ -3,9 +3,6 @@ data.spec <- list(
   file.type = 'sav',
   question.text = c(
     "Religion" = "What is your religion?"
-  ),  
-  skip.countries = list(
-    no_party = c("China", "Singapore", "Vietnam")
   ),
   country.format = 'country.name',
   field.def = c(

@@ -5,9 +5,6 @@ data.spec <- list(
   question.text = c(
     "Party" = "Which party would you vote for?",
     "Religion" = "Do you belong to a religious denomination? [If yes] Which one?"
-  ),  
-  skip.countries = list(
-    no_group = c("Cyprus", "Moldova", "Turkey")
   ),
   country.format = 'iso2c',
   country.custom = c(

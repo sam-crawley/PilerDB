@@ -7,7 +7,6 @@ data.spec <- list(
     "Religion" = "What is your religion?",
     "Language" = "What is your native language?"
   ),
-  skip.countries = list(),
   country.format = 'country.name',
   country.custom = c(
     "RepÃºblica Dominicana" = "Dominican Republic"
