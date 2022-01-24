@@ -480,19 +480,18 @@ calc.all.indices <- function(country.data, sum.dfs, drop.cats = F, weighted = F)
 }
 
 # Calculate the 'group basis' (i.e. group with highest GK Tau correlation)
-calc.group.basis <- function(cor, ret.max.val = F) {
-  if (all(is.na(cor$tau)))
-    return (NA)
+calc.group.basis <- function(cor) {
+  if (all(is.na(cor$tau))) {
+    # If all tau's are NA, go by Gallagher instead (if available)
+    if (has_name(cor, 'gallagher'))
+      return (cor %>% slice_max(gallagher, with_ties = F) %>% pull(group))
+    else
+      # Gallagher wasn't calculated, so no way of determining group basis
+      return (NA)
+  }
   
-  max.val <- cor %>% 
-    summarise(max.tau = max(tau, na.rm = T)) %>%
-    pull(max.tau)
-  
-  if (ret.max.val)
-    return (max.val)
-  
-  cor %>% filter(tau == max.val) %>% 
-    slice_head() %>%
+  cor %>% 
+    slice_max(tau, with_ties = F) %>% 
     pull(group)
 }
 
@@ -509,37 +508,50 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     
     if (is.null(group.to.use)) {
       group.to.use <- sum$`Group Basis`
-      sum$cor.nomiss <- calc.group.basis(orig.sum.data$cor.nomiss.wt, ret.max.val = T)
     }
-    else{
+    else {
       group.basis.selected <- T
-      stats <- orig.sum.data$cor.nomiss.wt %>%
-        filter(group == group.to.use)
-      sum$cor.nomiss <- stats$tau
       sum$`Group Basis` <- group.to.use
+    }
       
+    stats <- orig.sum.data$cor.nomiss.wt %>%
+        filter(group == group.to.use)
+    
+    sum$cor.nomiss <- NA
+    if (nrow(stats) > 0) {
+      sum$cor.nomiss <- round(stats$tau, 2)
+        
       if (has_name(stats, 'gallagher')) {
         sum$Gallagher <- stats$gallagher
         sum$`Loosmore Hanby` <- stats$loosemore
         sum$PVF <- stats$PVF
         sum$PVP <- stats$PVP
+        
+        sum <- sum %>% mutate(across(c(Gallagher, `Loosmore Hanby`, PVF, PVP), ~ round(.x, 2)))
       }
     }
-    
-    sum <- sum %>% mutate(across(c(cor.nomiss, Gallagher, `Loosmore Hanby`, PVF, PVP), ~round(.x, 2)))
     
     # Add summary columns indicating whether the group variable is 'available'.
     #  Available is defined as the correlations were able to be calculated
     #  (so includes, eg., cases where there was only one group)
     available <- country.data$Summary$cor.nomiss.wt %>% 
-      mutate(available = !is.na(tau)) %>% 
+      mutate(available = {if ("gallagher" %in% names(.)) ! is.na(gallagher) else F}) %>%
       select(group, available) %>% 
       pivot_wider(names_from = group, values_from = available)
     sum <- bind_cols(sum, available)
     
     sum$excluded <- NA
+    
+    # Decide if this country is considered "excluded" or "included".
+    #  The logic is slightly different, depending on whether the group basis
+    #  was passed to this function
+    is.excluded = F
+    if (group.basis.selected)
+      is.excluded <- is.na(sum$Gallagher)
+    else
+      is.excluded <- is.na(sum$`Group Basis`)
 
-    if (is.na(sum$cor.nomiss)) {
+    if (is.excluded) {
       sum$total.included <- NA
       sum$total.included.pct <- NA
       sum$party.missing <- NA
@@ -559,13 +571,9 @@ calc.summary.data <- function(res, group.to.use = NULL) {
             sum$excluded <- paste(group.to.use, "not available")
           else if (stats$n.eff <= 200)
             sum$excluded <- "N <= 200 after removals"
-          else if (stats$groups == 1)
-            sum$excluded <- paste("Only 1", group.to.use, "group after removals")
         }
         else if (max(orig.sum.data$cor.nomiss.wt$n.eff, na.rm = T) <= 200)
           sum$excluded <- "N <= 200 after removals"
-        else if (max(orig.sum.data$cor.nomiss.wt$groups, na.rm = T) == 1)
-          sum$excluded <- "Only 1 group after removals"
       })
       
       return(sum)
