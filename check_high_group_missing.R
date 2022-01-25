@@ -18,13 +18,15 @@ get.high.group.missing <- function(tabs) {
         filter(! Group %in% cats.to.drop) %>%
         group_by(Group) %>% 
         mutate(missing.percent = n / sum(n), total.percent = sum(n) / tabs$crosstabs[[country]]$Summary$general$`Sample Size`) %>% 
-        filter(Party == "Missing" & total.percent >= 0.02 & missing.percent >= 0.9)
+        filter(Party == "Missing" & total.percent >= 0.02 & missing.percent >= 0.8)
       
       if (nrow(high.missing) > 0) {
         return (tibble(
           datasource = country,
           group = group,
-          group.name = high.missing$Group
+          group.name = high.missing$Group,
+          group.size = high.missing$total.percent,
+          missing = high.missing$missing.percent
         ))
       }
       
