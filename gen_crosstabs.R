@@ -148,15 +148,8 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   names(tables) <- group.names
   
   # Calculate the counts of available parties/groups
-  avail.counts <- map(main.vars, function(var.name) {
-    avail <- d %>%
-      group_by(.data[[var.name]]) %>% 
-      summarise(n = n(), .groups = "drop") %>% 
-      mutate(p = n / sum(n)) %>%
-      filter(p >= 0.02 & ! .data[[var.name]] %in% cats.to.drop)
-    
-    nrow(avail)
-  }) %>% set_names(main.vars)
+  avail.counts <- calc.avail.counts(d, with.removals = T)
+  avail.counts.orig <- calc.avail.counts(d, with.removals = F)
   
   if (is.null(year))
     year <- max(as.numeric(d$Year), na.rm = T)
@@ -200,7 +193,8 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
     cor.nomiss = cor.nomiss,
     cor.nomiss.wt = cor.nomiss.wt,
     country.orig = country.orig,
-    avail.counts = avail.counts
+    avail.counts = avail.counts,
+    avail.counts.orig = avail.counts.orig
     
   )
   
@@ -211,7 +205,7 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
 #  This data is stored in the .rds file and can be converted into crosstabs
 #  for display purposes
 calc.summarised.group.data <- function(data, group.var) {
-  if (all( data[group.var] == "Missing" )) {
+  if (all( data[group.var] == "Missing" ) || all( data$Party == "Missing" )) {
     return (NA)
   }
   
@@ -393,6 +387,29 @@ process.data <- function(data, cat.defs) {
   
 }
 
+# Calculate the counts of groups/parties available in a country survey
+calc.avail.counts <- function(d, with.removals = F) {
+  map(main.vars, function(var.name) {
+    avail <- d %>%
+      group_by(.data[[var.name]]) %>% 
+      summarise(n = n(), .groups = "drop") %>% 
+      mutate(p = n / sum(n))
+    
+    if (with.removals) {
+      avail <- avail %>%
+        filter(p >= 0.02 & ! .data[[var.name]] %in% cats.to.drop)
+    }
+    else {
+      # Treat 'Missing' as a "special case", i.e. we don't count it as
+      #  an available group even *before* removals
+      avail <- avail %>%
+        filter(.data[[var.name]] != "Missing")
+    }
+    
+    nrow(avail)
+  }) %>% set_names(main.vars)
+}
+
 gen.category.summary <- function(data, cat.defs) {
   # Internal function to find which variables the 
   #  categories have been recoded to
@@ -560,8 +577,12 @@ calc.summary.data <- function(res, group.to.use = NULL) {
       sum$group.missing.pct <- NA
       
       suppressWarnings({
-        if (orig.sum.data$avail.counts$Party == 0)
+        if (orig.sum.data$avail.counts.orig$Party == 0)
+          sum$excluded <- "No party data"
+        else if (orig.sum.data$avail.counts$Party == 0)
           sum$excluded <- "No parties after removals"
+        else if (all(orig.sum.data$avail.counts.orig[group.names] == 0))
+          sum$excluded <- "No group data"
         else if (all(orig.sum.data$avail.counts[group.names] == 0))
           sum$excluded <- "No groups after removals"
         else if (group.basis.selected) {
