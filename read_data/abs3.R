@@ -25,6 +25,9 @@ data.spec <- list(
       Country == "Japan" ~ 2011,
       Country == "South Korea" ~ 2011,
       Country == "Cambodia" ~ 2012,
+      Country == "China" ~ 2011,
+      Country == "Singapore" ~ 2010,
+      Country == "Vietnam" ~ 2010,
       TRUE ~ 0
     ))
   }
