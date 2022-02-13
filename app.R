@@ -56,6 +56,11 @@ ui <- navbarPage(title = "Divided Society Data",
         )
       ),
       tabPanel("Group Sizes",
+         pickerInput("group.basis.gs", 
+                     label = "Group Basis", 
+                     sort(c('(Highest Tau)', group.names)), 
+                     multiple = F
+         ),                
         DTOutput("tableGroupSizes")
       )
     )
@@ -176,6 +181,14 @@ gen.group.size.names <- function(max.parties) {
     rep(c("Name", "N"), summary.group.size),
     rep(c("Party", "Total N", paste("Group", 1:summary.group.size)), max.parties)
   )
+}
+
+get.group.sizes <- function(group.basis) {
+  table.to.use <- group.sizes
+  if (group.basis != "(Highest Tau)")
+    table.to.use <- res$group.sizes.by.group[[group.basis]]
+  
+  table.to.use
 }
 
 get.data.src.question <- function(data.src, var.name) {
@@ -349,7 +362,7 @@ server <- function(input, output, session) {
   ))
   
   output$tableGroupSizes <- renderDT(
-    group.sizes,
+    get.group.sizes(input$group.basis.gs),
     options = list(
       lengthChange = F, 
       paging = F, 

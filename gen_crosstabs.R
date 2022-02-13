@@ -76,6 +76,7 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
     res$summary <- calc.summary.data(res$crosstabs)
     res$summary.by.group <- map(c(group.names), ~ calc.summary.data(res$crosstabs, group.to.use = .x)) %>% set_names(group.names)
     res$group.sizes <- get.group.size.summary(res$crosstabs)
+    res$group.sizes.by.group <- map(c(group.names), ~ get.group.size.summary(res$crosstabs, group.to.use = .x)) %>% set_names(group.names)
     res$max.parties <- get.max.parties(res$group.sizes)
   }
   
@@ -629,18 +630,26 @@ calc.summary.data <- function(res, group.to.use = NULL) {
   })
 }
 
-get.group.size.summary <- function(res) {
+get.group.size.summary <- function(res, group.to.use = NULL) {
   # Add in group sizes for 3 largest groups for each country,
   #  as well as breakdowns for each Party/Main Group combo
   map_dfr(res, function(country.data) {
-    if (is.na(country.data$Summary$general$`Group Basis`)) {
-      return(NULL)
-    }
+    if (is.null(group.to.use))
+      group.basis <- country.data$Summary$general$`Group Basis`
+    else
+      group.basis <- group.to.use
     
-    summary.data <- config.summary.data(country.data[[country.data$Summary$general$`Group Basis`]], drop.cats = T)
+    if (is.na(group.basis) || is.null(group.basis))
+      return(NULL)
+    
+    summary.data <- config.summary.data(country.data[[group.basis]], drop.cats = T)
+    
+    if (! is.data.frame(summary.data))
+      return(NULL)
 
     gs.row <- country.data$Summary$general %>%
-      select(Country, `Data Source`, Year, `Group Basis`)
+      select(Country, `Data Source`, Year) %>%
+      mutate(`Group Basis` = group.basis)
     
     gs <- summary.data %>% 
       group_by(Group) %>% 
@@ -721,7 +730,8 @@ gen.spreadsheets <- function(tabs) {
   write.divided.xlsx(tabs, include.summary = F, include.group.sizes = F, include.summary.by.group = F)
 }
 
-write.divided.xlsx <- function(res, include.summary = T, include.summary.by.group = T, include.group.sizes = T, include.crosstabs = T, file = "Divided/output/divided_crosstabs.xlsx") {
+write.divided.xlsx <- function(res, include.summary = T, include.summary.by.group = T, include.group.sizes = T, include.crosstabs = T, include.group.sizes.by.group = T,
+                               file = "Divided/output/divided_crosstabs.xlsx") {
   options("openxlsx.numFmt" = NULL)
   wb <- createWorkbook()
   
@@ -735,36 +745,19 @@ write.divided.xlsx <- function(res, include.summary = T, include.summary.by.grou
   
   if (include.summary.by.group) {
     for (group in group.names) {
-      write.excel.summary.tab(wb, res$summary.by.group[[group]], tab.name = paste(group, "Group Basis"))
+      write.excel.summary.tab(wb, res$summary.by.group[[group]], tab.name = paste("Summary -", group))
     }
   }
   
   # Add group sizes sheet
   if (include.group.sizes) {
-    addWorksheet(wb, "Group Sizes")
-    group.sizes <- res$group.sizes
-    max.parties <- get.max.parties(group.sizes)
+    write.excel.group.sizes.tab(wb, res$group.sizes)
     
-    writeData(wb, "Group Sizes", "Largest Groups", startRow = 1, startCol = 5)
-    
-    for (party.num in 1:max.parties) {
-      col <- 4 + (summary.group.size * 2) + ( (party.num-1) * (2 + summary.group.size) ) + 1
-      writeData(wb, "Group Sizes", paste("Supporters of Party", party.num), startRow = 1, startCol = col)
-    }
-    
-    group.size.names <- c(
-      "Country", "Data Source", "Year", "Group Basis",
-      rep(c("Name", "N"), summary.group.size),
-      rep(c("Party", "Total N", paste("Group", 1:summary.group.size)), max.parties)
-    )
-    
-    writeData(wb, "Group Sizes", data.frame(t(group.size.names)), startRow = 2, startCol = 1, colNames = F, rowNames = F)
-    writeData(wb, "Group Sizes", group.sizes, startRow = 3, startCol = 1, colNames = F, rowNames = F)
-    
-    header.cols <- 4 + (summary.group.size * 2) + ( (max.parties) * (2 + summary.group.size) )
-    setColWidths(wb, sheet = "Group Sizes", cols = 1:header.cols, widths = "auto")
-    addStyle(wb, sheet = "Group Sizes", hs2, rows = 1, cols = 1:header.cols)
-    addStyle(wb, sheet = "Group Sizes", hs2, rows = 2, cols = 1:header.cols)  
+    if (include.group.sizes.by.group) {
+      for (group in group.names) {
+        write.excel.group.sizes.tab(wb, res$group.sizes.by.group[[group]], tab.name = paste("Group Sizes -", group))
+      }
+    }    
   }
   
   if (include.crosstabs) {
@@ -860,3 +853,33 @@ write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", incl
   
   writeData(wb, tab.name, summary.sheet, startRow = 3, colNames = F, rowNames = F)
 }
+
+write.excel.group.sizes.tab <- function(wb, group.sizes.data, tab.name = "Group Sizes") {
+  addWorksheet(wb, tab.name)
+  max.parties <- get.max.parties(group.sizes.data)
+  
+  hs2 <- createStyle(textDecoration = "bold")
+  
+  writeData(wb, tab.name, "Largest Groups", startRow = 1, startCol = 5)
+  
+  for (party.num in 1:max.parties) {
+    col <- 4 + (summary.group.size * 2) + ( (party.num-1) * (2 + summary.group.size) ) + 1
+    writeData(wb, tab.name, paste("Supporters of Party", party.num), startRow = 1, startCol = col)
+  }
+  
+  group.size.names <- c(
+    "Country", "Data Source", "Year", "Group Basis",
+    rep(c("Name", "N"), summary.group.size),
+    rep(c("Party", "Total N", paste("Group", 1:summary.group.size)), max.parties)
+  )
+  
+  writeData(wb, tab.name, data.frame(t(group.size.names)), startRow = 2, startCol = 1, colNames = F, rowNames = F)
+  writeData(wb, tab.name, group.sizes.data, startRow = 3, startCol = 1, colNames = F, rowNames = F)
+  
+  header.cols <- 4 + (summary.group.size * 2) + ( (max.parties) * (2 + summary.group.size) )
+  setColWidths(wb, sheet = tab.name, cols = 1:header.cols, widths = "auto")
+  addStyle(wb, sheet = tab.name, hs2, rows = 1, cols = 1:header.cols)
+  addStyle(wb, sheet = tab.name, hs2, rows = 2, cols = 1:header.cols)  
+}
+  
+  
