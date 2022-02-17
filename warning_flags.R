@@ -1,14 +1,46 @@
+# This adds "warning flags" to individual surveys if we suspect
+#  there are problems with the data
 
-get.high.group.missing <- function(tabs) {
-  res <- map_dfr(names(tabs$crosstabs), function (country) {
-    sum.line = tabs$summary %>% filter(ID == country)
+add.warning.flags <- function(crosstabs) {
+  # Add "high group missing" flag
+  hgm <- get.high.group.missing(crosstabs) %>%
+    select(datasource, flag) %>% 
+    distinct()
+  
+  map(names(crosstabs), function (country) {
+    crosstabs[[country]]$Summary$general$warning.flags <- NA
     
-    if (is.na(sum.line$`Group Basis`))
+    hgm.country <- hgm %>% filter(datasource == country)
+    
+    if (nrow(hgm.country) == 1 && hgm.country$flag)
+      crosstabs[[country]]$Summary$general$warning.flags <- "high_group_missing"
+    
+    crosstabs[[country]]
+  }) %>% set_names(names(crosstabs))
+  
+}
+
+
+# Find cases where a group has a particularly high number of missing
+#  responses for the party variable.
+# We determine this by:
+# 1. Look only at the 'Group Basis' (i.e. highest tau) group
+# 2. Calculate the % size of the group, and % of missing on party
+# 3. For each group, compare their missing % to
+#     the missing % of the largest group, or if it is the
+#     largest, the 2nd largest group. If missing % difference is
+#     is larger than 20%, the survey is "flagged"
+# 4. Remove groups smaller than 10% or less than 5% missing
+get.high.group.missing <- function(crosstabs, flagged.only = T) {
+  res <- map_dfr(names(crosstabs), function (country) {
+    summary = crosstabs[[country]]$Summary$general
+    
+    if (is.na(summary$`Group Basis`))
       return (NULL)
     
-    group <- sum.line$`Group Basis`
+    group <- summary$`Group Basis`
     
-    summary.data <- tabs$crosstabs[[country]][[group]]
+    summary.data <- crosstabs[[country]][[group]]
     
     summary.data <- config.summary.data(summary.data, drop.cats = F, weighted = T)
     
@@ -36,6 +68,9 @@ get.high.group.missing <- function(tabs) {
             mutate(missing.diff = missing.percent - max.percent) %>%
             mutate(flag = if_else(missing.diff >= 0.20, T, F)) %>%
             filter(total.percent >= 0.10 & missing.percent >= 0.5)
+    
+    if (flagged.only)
+      high.missing <- high.missing %>% filter(flag == T)
     
     if (nrow(high.missing) > 0) {
       return(

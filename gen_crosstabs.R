@@ -7,6 +7,7 @@ library(stringi)
 
 source(here("Divided/read_data.R"))
 source(here("Divided/indices.R"))
+source(here("Divided/warning_flags.R"))
 
 summary.group.size <- 5
 
@@ -65,6 +66,8 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
     
     tabs <- append(tabs, src.tabs)
   }
+  
+  tabs <- add.warning.flags(tabs)
   
   res <- list(
     crosstabs = tabs,
