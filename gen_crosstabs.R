@@ -524,8 +524,8 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     
     group.basis.selected <- F
     
-    sum <- orig.sum.data$general
-    sum$`Data Source Orig` <- NULL
+    sum <- orig.sum.data$general %>%
+      select(-`Data Source Orig`, -warning.flags.details)
     
     if (is.null(group.to.use)) {
       group.to.use <- sum$`Group Basis`

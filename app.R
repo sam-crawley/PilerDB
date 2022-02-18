@@ -153,9 +153,14 @@ get.summary.table <- function(datasrc, group.basis, country, incomplete.data = F
       "Lng" = Language,
       "Rel" = Religion,
       "Eth" = Ethnicity,
-      "Excluded Reason" = excluded
+      "Excluded Reason" = excluded,
+      "Flagged" = warning.flags,
+      "ATT-Pol" = Gallagher 
     ) %>%
-    mutate(across(c(Lng, Rel, Eth), ~if_else(.x, "\u{2713}", "\u{2716}")))
+    mutate(across(c(Lng, Rel, Eth), ~if_else(.x, "\u{2713}", "\u{2716}"))) %>%
+    mutate(Flagged = if_else(is.na(Flagged), "", "\u{D83D}\u{DEA9}")) %>%
+    select(-`Loosmore Hanby`) %>%
+    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, Tau, `ATT-Pol`, PVF, PVP, Lng, Rel, Eth, Flagged, everything())
   
   if (! with.id)
     tab <- tab %>% select(-ID)
@@ -171,7 +176,7 @@ get.summary.table <- function(datasrc, group.basis, country, incomplete.data = F
   if (! incomplete.data)
     tab <- tab %>%
       filter(! is.na(`Group Basis`)) %>% 
-    select(-`Excluded Reason`)
+      select(-`Excluded Reason`)
   
   tab
 }
@@ -309,6 +314,19 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
   })
 }
 
+get.country.warnings <- function(country.data) {
+  warnings <- list(has.warning = F)
+  
+  if (! is.na(country.data$Summary$general$warning.flags)) {
+    warnings$has.warning <- T
+    warnings$type <- country.data$Summary$general$warning.flags
+    warnings$message <- gen.warning.message(country.data$Summary$general$warning.flags, country.data$Summary$general$warning.flags.details)
+  }
+  
+  return (warnings)
+  
+}
+
 
 server <- function(input, output, session) {
   
@@ -318,7 +336,7 @@ server <- function(input, output, session) {
       lengthChange = F, 
       paging = F, 
       searching = F,
-      order = list(list(9, 'desc')),
+      order = list(list(5, 'desc')),
       columnDefs = list(list(className = 'dt-center', targets = 9:11))
     ),
     server = T, 
@@ -414,7 +432,7 @@ server <- function(input, output, session) {
     }
     
     session$userData$countryTabsOpen[[countryTabID]] <- 1
-    
+
     tab <- tabPanel(country.data$Summary$general$ID,
       h3(textOutput(paste0("CountryName", countryTabID))),
       
@@ -449,6 +467,9 @@ server <- function(input, output, session) {
 
       br(),
       
+      h4(textOutput(paste0("WarningHeader", countryTabID))),
+      textOutput(paste0("WarningMsg", countryTabID)),
+
       #h5("Available groups (after removals)", tableOutput(paste0("AvailCounts", countryTabID))),
       
       h4(textOutput(paste0("LanguageHeading", countryTabID))),
@@ -473,6 +494,12 @@ server <- function(input, output, session) {
       h5("Original country name (from data file)"),
       textOutput(paste0("country.orig", countryTabID))
     )
+    
+    country.warnings <- get.country.warnings(country.data)
+    if (country.warnings$has.warning) {
+      output[[paste0("WarningHeader", countryTabID)]] <- renderText("Warnings")
+      output[[paste0("WarningMsg", countryTabID)]] <- renderText(country.warnings$message)
+    }
     
     observeEvent(input[[paste0("ShowAllData", countryTabID)]], {
       generate.country.tables(countryTabID, country.data, output, 

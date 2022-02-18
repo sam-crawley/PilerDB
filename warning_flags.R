@@ -1,23 +1,35 @@
 # This adds "warning flags" to individual surveys if we suspect
 #  there are problems with the data
 
+# Add the warning flags to the main crosstabs structure
 add.warning.flags <- function(crosstabs) {
   # Add "high group missing" flag
-  hgm <- get.high.group.missing(crosstabs) %>%
-    select(datasource, flag) %>% 
-    distinct()
+  hgm <- get.high.group.missing(crosstabs)
   
   map(names(crosstabs), function (country) {
     crosstabs[[country]]$Summary$general$warning.flags <- NA
+    crosstabs[[country]]$Summary$general$warning.flags.details <- NA
     
     hgm.country <- hgm %>% filter(datasource == country)
     
-    if (nrow(hgm.country) == 1 && hgm.country$flag)
+    if (nrow(hgm.country) >= 1) {
       crosstabs[[country]]$Summary$general$warning.flags <- "high_group_missing"
+      crosstabs[[country]]$Summary$general$warning.flags.details <- list(hgm.country)
+    }
     
     crosstabs[[country]]
   }) %>% set_names(names(crosstabs))
-  
+}
+
+# Generate a text version of the warning message
+gen.warning.message <- function(warning.type, warning.details) {
+  if (warning.type == "high_group_missing") {
+    det <- warning.details[[1]][1,]
+    
+    return (str_glue("High % of missing party responses for group: {det$group.name} [{det$group}]. ",
+      "Missing: {det$missing * 100}%; Comparison group: {det$comp.group}; Comparison group missing: {det$comp.missing * 100}%; Missing diff: {det$missing.diff*100}"
+    ))
+  }
 }
 
 
