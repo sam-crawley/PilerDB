@@ -27,15 +27,3 @@ check.cases <- function(summary) {
     
 }
 
-check.cases.by.hampel <- function(summary) {
-  ranges <- summary %>% 
-    group_by(Country) %>% 
-    summarise(median = median(cor.nomiss, na.rm = T), mad = mad(cor.nomiss, constant = 1, na.rm = T)) %>% 
-    mutate(min = median - 3 * mad, max = median + 3 * mad)
-  
-  problems <- inner_join(sum, ranges, by = "Country") %>% 
-    mutate(outside.range = cor.nomiss < min | cor.nomiss > max) %>%
-    filter(outside.range)
-  
-  problems
-}

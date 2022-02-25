@@ -3,19 +3,30 @@
 
 # Add the warning flags to the main crosstabs structure
 add.warning.flags <- function(crosstabs) {
-  # Add "high group missing" flag
   hgm <- get.high.group.missing(crosstabs)
+  outliers <- get.outlier.cases(crosstabs)
   
   map(names(crosstabs), function (country) {
-    crosstabs[[country]]$Summary$general$warning.flags <- NA
-    crosstabs[[country]]$Summary$general$warning.flags.details <- NA
-    
+    warning.flags <- c()
+    warning.flags.details <- NA
+
+    # Add "high group missing" flag    
     hgm.country <- hgm %>% filter(datasource == country)
     
     if (nrow(hgm.country) >= 1) {
-      crosstabs[[country]]$Summary$general$warning.flags <- "high_group_missing"
-      crosstabs[[country]]$Summary$general$warning.flags.details <- list(hgm.country)
+      warning.flags <- append(warning.flags, "high_group_missing")
+      warning.flags.details <- list(hgm.country)
     }
+    
+    # Add "outlier" flag
+    outlier.country <- outliers %>% filter(ID == country)
+    
+    if (nrow(outlier.country) >= 1) {
+      warning.flags <- append(warning.flags, "outlier")
+    }
+    
+    crosstabs[[country]]$Summary$general$warning.flags <- if_else(is_empty(warning.flags), NA_character_, paste(warning.flags, collapse = "|"))
+    crosstabs[[country]]$Summary$general$warning.flags.details <- warning.flags.details
     
     crosstabs[[country]]
   }) %>% set_names(names(crosstabs))
@@ -23,13 +34,22 @@ add.warning.flags <- function(crosstabs) {
 
 # Generate a text version of the warning message
 gen.warning.message <- function(warning.type, warning.details) {
-  if (warning.type == "high_group_missing") {
+  flags <- str_split(warning.type, "\\|")
+  warnings <- c()
+  
+  if ("high_group_missing" %in% flags) {
     det <- warning.details[[1]][1,]
     
-    return (str_glue("High % of missing party responses for group: {det$group.name} [{det$group}]. ",
+    warnings <- append(warnings, str_glue("High % of missing party responses for group: {det$group.name} [{det$group}]. ",
       "Missing: {det$missing * 100}%; Comparison group: {det$comp.group}; Comparison group missing: {det$comp.missing * 100}%; Missing diff: {det$missing.diff*100}"
     ))
   }
+  
+  if ("outlier" %in% flags) {
+    warnings <- append(warnings, "The Gallagher score for this survey is a statistical outlier for this country.")
+  }
+  
+  return (paste(warnings, collapse = "\n\n"))
 }
 
 
@@ -113,4 +133,27 @@ get.high.group.missing <- function(crosstabs, flagged.only = T) {
   
   res %>% mutate(across(c(group.size, missing, comp.missing, missing.diff), ~round(.x, 3))) %>%
     arrange(desc(missing))
+}
+
+# Find surveys which are statistical outliers, using a hampel filter
+#  Calculations are based on our Gallagher measure for each country.
+#  Any surveys for a country that are outside the hampel filter range
+#   are considered outliers. However, we only check countries where
+#   the Gallagher std deviation is >= 9 (by default), to avoid
+#   removing cases when there is not much variation in the Gallagher
+#   scores for the country.
+get.outlier.cases <- function(crosstabs, sd.threshold = 9) {
+  gal.df <- map_df(names(crosstabs), ~crosstabs[[.x]]$Summary$general %>% select(ID, Country, Gallagher))
+  
+  ranges <- gal.df %>% 
+    group_by(Country) %>% 
+    summarise(median = median(Gallagher, na.rm = T), mad = mad(Gallagher, constant = 1, na.rm = T), sd = sd(Gallagher, na.rm = T)) %>% 
+    filter(sd >= sd.threshold) %>%
+    mutate(min = median - 3 * mad, max = median + 3 * mad)
+  
+  flagged <- inner_join(gal.df, ranges, by = "Country") %>% 
+    mutate(outside.range = Gallagher < min | Gallagher > max)
+  
+  return (flagged %>% filter(outside.range))
+  
 }
