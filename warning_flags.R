@@ -34,7 +34,7 @@ add.warning.flags <- function(crosstabs) {
 
 # Generate a text version of the warning message
 gen.warning.message <- function(warning.type, warning.details) {
-  flags <- str_split(warning.type, "\\|")
+  flags <- str_split(warning.type, "\\|", simplify = T)
   warnings <- c()
   
   if ("high_group_missing" %in% flags) {
@@ -49,7 +49,7 @@ gen.warning.message <- function(warning.type, warning.details) {
     warnings <- append(warnings, "The Gallagher score for this survey is a statistical outlier for this country.")
   }
   
-  return (paste(warnings, collapse = "\n\n"))
+  return (warnings)
 }
 
 
