@@ -831,10 +831,10 @@ write.divided.xlsx <- function(res, include.summary = T, include.summary.by.grou
 write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", included.excluded.col = T) {
   summary.sheet <- summary.data %>%
     mutate(across(ends_with('.pct'), ~set.class('percentage', .))) %>%
-    select(-Religion, -Ethnicity, -Language) %>%
-    select(-ID) %>%
+    select(-Religion, -Ethnicity, -Language, -ID) %>%
     arrange(desc(cor.nomiss)) %>%
-    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, cor.nomiss, everything())
+    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, cor.nomiss, everything()) %>%
+    relocate(warning.flags, .after = everything())
   
   hs2 <- createStyle(textDecoration = "bold")
   
@@ -843,12 +843,12 @@ write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", incl
                      "Included in Group", "", "Party Missing", "", "Group Missing")
   writeData(wb, tab.name, data.frame(t(outer.headers)), startRow = 1, startCol = 1, colNames = F, rowNames = F)
   addStyle(wb, sheet = tab.name, hs2, rows = 1, cols = 1:length(outer.headers))
-  mergeCells(wb, tab.name, cols = 11:12, rows = 1)
-  mergeCells(wb, tab.name, cols = 13:14, rows = 1)
-  mergeCells(wb, tab.name, cols = 15:16, rows = 1)
+  mergeCells(wb, tab.name, cols = 12:13, rows = 1)
+  mergeCells(wb, tab.name, cols = 14:15, rows = 1)
+  mergeCells(wb, tab.name, cols = 16:17, rows = 1)
   
   summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "Correlation", "Gallagher", "Loosemore Hanby", 
-                       "PVP", "PVF", "Exclusion Reason", "(N)", "(%)", "(N)", "(%)", "(N)", "(%)")
+                       "PVP", "PVF", "Exclusion Reason", "(N)", "(%)", "(N)", "(%)", "(N)", "(%)", "Warning Flags")
   
   writeData(wb, tab.name, data.frame(t(summary.headers)), startRow = 2, startCol = 1, colNames = F, rowNames = F)
   setColWidths(wb, sheet = tab.name, cols = 1:length(summary.headers), widths = "auto")
