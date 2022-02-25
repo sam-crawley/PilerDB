@@ -468,7 +468,7 @@ server <- function(input, output, session) {
       br(),
       
       h4(textOutput(paste0("WarningHeader", countryTabID))),
-      textOutput(paste0("WarningMsg", countryTabID)),
+      htmlOutput(paste0("WarningMsg", countryTabID)),
 
       #h5("Available groups (after removals)", tableOutput(paste0("AvailCounts", countryTabID))),
       
@@ -498,7 +498,7 @@ server <- function(input, output, session) {
     country.warnings <- get.country.warnings(country.data)
     if (country.warnings$has.warning) {
       output[[paste0("WarningHeader", countryTabID)]] <- renderText("Warnings")
-      output[[paste0("WarningMsg", countryTabID)]] <- renderText(country.warnings$message)
+      output[[paste0("WarningMsg", countryTabID)]] <- renderUI(HTML(paste(country.warnings$message, collapse = "<br/><br/>")))
     }
     
     observeEvent(input[[paste0("ShowAllData", countryTabID)]], {
