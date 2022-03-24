@@ -5,9 +5,9 @@ library(StatMatch)
 library(rlist)
 library(stringi)
 
-source(here("Divided/read_data.R"))
-source(here("Divided/indices.R"))
-source(here("Divided/warning_flags.R"))
+source(here("read_data.R"))
+source(here("indices.R"))
+source(here("warning_flags.R"))
 
 summary.group.size <- 5
 
@@ -17,7 +17,7 @@ global.country.skip <- c("Hong Kong SAR China", "Macao SAR China", "Puerto Rico"
 cats.to.drop <- c("Missing", "Other")
 
 # Generate crosstabs for all datasets
-gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.output = F, calc.summaries = T) {
+gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.output = F, calc.summaries = T, full.version = F) {
   if (! is.null(ids.to.load) && is.null(existing.data) && save.output)
     stop("Can't save output if ids.to.load provided, but existing.data *not* provided")
   
@@ -84,7 +84,7 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
   }
   
   if (save.output) {
-    write_rds(res, "Divided/output/divided.rds")
+    write_rds(res, "output/divided.rds")
   }
   
   res
@@ -729,12 +729,12 @@ get.max.parties <- function(group.sizes) {
 }
 
 gen.spreadsheets <- function(tabs) {
-  write.divided.xlsx(tabs, include.crosstabs = F, file = "Divided/output/divided_summary.xlsx")
+  write.divided.xlsx(tabs, include.crosstabs = F, file = "output/divided_summary.xlsx")
   write.divided.xlsx(tabs, include.summary = F, include.group.sizes = F, include.summary.by.group = F)
 }
 
 write.divided.xlsx <- function(res, include.summary = T, include.summary.by.group = T, include.group.sizes = T, include.crosstabs = T, include.group.sizes.by.group = T,
-                               file = "Divided/output/divided_crosstabs.xlsx") {
+                               file = "output/divided_crosstabs.xlsx") {
   options("openxlsx.numFmt" = NULL)
   wb <- createWorkbook()
   
@@ -847,7 +847,7 @@ write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", incl
   mergeCells(wb, tab.name, cols = 14:15, rows = 1)
   mergeCells(wb, tab.name, cols = 16:17, rows = 1)
   
-  summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "Correlation", "Gallagher", "Loosemore Hanby", 
+  summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "Correlation", "Gallagher", "Loosmore Hanby", 
                        "PVP", "PVF", "Exclusion Reason", "(N)", "(%)", "(N)", "(%)", "(N)", "(%)", "Warning Flags")
   
   writeData(wb, tab.name, data.frame(t(summary.headers)), startRow = 2, startCol = 1, colNames = F, rowNames = F)

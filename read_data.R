@@ -27,9 +27,15 @@ group.names <- c("Language", "Religion", "Ethnicity")
 main.vars <- c("Party", group.names)
 allowed.field.names <- c(main.vars, "Country", "Year", "Weight")
 
+# Directory where the definition R files can be found
+data.def.dir <- "data_defs"
+
 read.div.data <- function(data.spec, raw = F) {
   if (! all(names(data.spec$field.def) %in% allowed.field.names))
     stop("field.def contains invalid field names")
+  
+  if (! file.exists(data.spec$file.name))
+    stop("Cannot find file ", data.spec$file.name)
   
   rename.spec <- data.spec$field.def[! is.na(data.spec$field.def)]
   
@@ -110,7 +116,10 @@ load.data.by.id <- function(id, process = T) {
 }
 
 get.data.def.list <- function() {
-  list.files(here("Divided/read_data"), pattern="*.R$", full.names=T)
+  if (! dir.exists(data.def.dir))
+    stop("Cannot find data def dir ", data.def.dir)
+  
+  list.files(here(data.def.dir), pattern="*.R$", full.names=T)
 }
 
 get.data.def.id <- function(filename) {
