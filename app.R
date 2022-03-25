@@ -16,7 +16,7 @@ max.parties <- res$max.parties
 
 data.src.list <- sort(unique(summary.table$`Data Source`))
 
-ui <- navbarPage(title = "Divided Society Data",
+ui <- navbarPage(title = "Divided Society Data", header = tags$div(style="float: right; margin-right: 10px", tags$b("DB Version:"), res$version),
   tabPanel("Crosstabs",
     add_busy_spinner(spin = "cube-grid"),
     tabsetPanel(id = "mainPanel", 
