@@ -751,6 +751,19 @@ write.divided.xlsx <- function(res, include.summary = T, include.summary.by.grou
   hs1 <- createStyle(textDecoration = "bold", fontSize = 14)
   hs2 <- createStyle(textDecoration = "bold")
   
+  addWorksheet(wb, "About")
+  
+  spreadsheet.contents <- c("Summaries", "Summaries by group", "Group Sizes", "Group sizes by group", "Country Crosstabs")
+  contents.included <- c(include.summary, include.summary.by.group, include.group.sizes, include.group.sizes.by.group, include.crosstabs)
+  
+  about.data <- c(
+    paste0("Divided Societies DB v", tabs$version), 
+    paste("Generated", Sys.time()),
+    paste("This spreadsheet includes: ", paste0(spreadsheet.contents[contents.included], collapse = ", "))
+  )
+  
+  writeData(wb, "About", about.data, startRow = 1, startCol = 1)
+  
   # Add summary sheet
   if (include.summary) {
     write.excel.summary.tab(wb, res$summary)
@@ -841,7 +854,7 @@ write.divided.xlsx <- function(res, include.summary = T, include.summary.by.grou
 write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", included.excluded.col = T) {
   summary.sheet <- summary.data %>%
     mutate(across(ends_with('.pct'), ~set.class('percentage', .))) %>%
-    select(-Religion, -Ethnicity, -Language, -ID) %>%
+    select(-Religion, -Ethnicity, -Language, -ID, -`Loosmore Hanby`) %>%
     arrange(desc(cor.nomiss)) %>%
     select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, cor.nomiss, everything()) %>%
     relocate(warning.flags, .after = everything())
@@ -857,7 +870,7 @@ write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", incl
   mergeCells(wb, tab.name, cols = 14:15, rows = 1)
   mergeCells(wb, tab.name, cols = 16:17, rows = 1)
   
-  summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "Correlation", "Gallagher", "Loosmore Hanby", 
+  summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "Correlation", "ATT-Pol",
                        "PVP", "PVF", "Exclusion Reason", "(N)", "(%)", "(N)", "(%)", "(N)", "(%)", "Warning Flags")
   
   writeData(wb, tab.name, data.frame(t(summary.headers)), startRow = 2, startCol = 1, colNames = F, rowNames = F)
