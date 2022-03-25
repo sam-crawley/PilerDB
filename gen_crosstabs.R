@@ -16,8 +16,8 @@ global.country.skip <- c("Hong Kong SAR China", "Macao SAR China", "Puerto Rico"
 
 cats.to.drop <- c("Missing", "Other")
 
-version.maj = 0
-version.min = 9
+version.maj = 1
+version.min = 0
 
 # Generate crosstabs for all datasets
 gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.output = F, calc.summaries = T, full.version = F) {
