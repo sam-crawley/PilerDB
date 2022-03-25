@@ -45,13 +45,13 @@ calc.summary.indices <- function(summary.data, include.extra = T) {
   index.summaries <- build.index.summary.data(summary.data)
 
   gallagher <- calc.gallagher(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes)
-  loosemore <- calc.gallagher(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, loosemore = T)
+  loosmore <- calc.gallagher(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, loosmore = T)
   huber <- calc.huber.indices(summary.data, 
                               index.summaries$group.sizes, index.summaries$party.sizes, index.summaries$group.size.by.party, index.summaries$party.support.by.group)
   
   res <- tibble(
     gallagher = gallagher,
-    loosemore = loosemore
+    loosmore = loosmore
   )
   
   if (include.extra) {
@@ -135,13 +135,13 @@ calc.tau <- function(country.data, group, weighted = F) {
   assoc$tau
 }
 
-calc.gallagher <- function(party.sizes.by.grp, grp.sizes, party.sizes, loosemore = F) {
+calc.gallagher <- function(party.sizes.by.grp, grp.sizes, party.sizes, loosmore = F) {
   # Calculate unweighted values for each party
   res <- party.sizes.by.grp %>% 
     inner_join(grp.sizes, by = "Group") %>%
     mutate(value = percent.x - percent.y)
   
-  if (loosemore) {
+  if (loosmore) {
     res <- res %>% 
       mutate(value = abs(value)) %>% 
       group_by(Party) %>% 

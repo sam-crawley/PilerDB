@@ -176,14 +176,14 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   group.basis <- calc.group.basis(cor.nomiss.wt)
   
   gallagher <- NA
-  loosemore <- NA
+  loosmore <- NA
   pvp <- NA
   pvf <- NA
   
   if (! is.na(group.basis)) {
     cor.vals <- cor.nomiss.wt %>% filter(group == group.basis)
     gallagher <- cor.vals$gallagher
-    loosemore <- cor.vals$loosemore
+    loosmore <- cor.vals$loosmore
     pvp <- cor.vals$PVP
     pvf <- cor.vals$PVF
   }
@@ -198,7 +198,7 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
       'Sample Size' = nrow(d),
       'Group Basis' = group.basis,
       'Gallagher' = gallagher,
-      'Loosmore Hanby' = loosemore,
+      'Loosmore Hanby' = loosmore,
       'PVP' = pvp,
       'PVF' = pvf
     ),
@@ -256,21 +256,21 @@ regen.all.indicies <- function(tabs) {
     group.basis <- calc.group.basis(country.data$Summary$cor.nomiss.wt)
     
     gallagher <- NA
-    loosemore <- NA
+    loosmore <- NA
     pvp <- NA
     pvf <- NA
     
     if (! is.na(group.basis)) {
       cor.vals <- country.data$Summary$cor.nomiss.wt %>% filter(group == group.basis)
       gallagher <- cor.vals$gallagher
-      loosemore <- cor.vals$loosemore
+      loosmore <- cor.vals$loosmore
       pvp <- cor.vals$PVP
       pvf <- cor.vals$PVF
     }
     
     country.data$Summary$general$`Group Basis` = group.basis
     country.data$Summary$general$`Gallagher` = gallagher
-    country.data$Summary$general$`Loosmore Hanby` = loosemore
+    country.data$Summary$general$`Loosmore Hanby` = loosmore
     country.data$Summary$general$`PVP` = pvp
     country.data$Summary$general$`PVF` = pvf
     
@@ -554,7 +554,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
         
       if (has_name(stats, 'gallagher')) {
         sum$Gallagher <- stats$gallagher
-        sum$`Loosmore Hanby` <- stats$loosemore
+        sum$`Loosmore Hanby` <- stats$loosmore
         sum$PVF <- stats$PVF
         sum$PVP <- stats$PVP
         
