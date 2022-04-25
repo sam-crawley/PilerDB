@@ -1,7 +1,6 @@
-#library(tidyverse)
 library(haven)
 library(countrycode)
-#library(here)
+
 
 # Data Spec fields
 # * file.name = file name to load
@@ -28,7 +27,7 @@ main.vars <- c("Party", group.names)
 allowed.field.names <- c(main.vars, "Country", "Year", "Weight")
 
 # Directory where the definition R files can be found
-data.def.dir <- "data_defs"
+data.def.dir <- "R/data_defs"
 
 read.div.data <- function(data.spec, raw = F) {
   if (! all(names(data.spec$field.def) %in% allowed.field.names))
@@ -98,7 +97,7 @@ read.div.data <- function(data.spec, raw = F) {
 }
 
 load.data.by.id <- function(id, process = T) {
-  file <- paste0(here("Divided/read_data"), "/", tolower(id), ".R")
+  file <- paste0(data.def.dir, "/", tolower(id), ".R")
   
   if (! file.exists(file))
     stop("Cannot find data.def file: ", file)
@@ -119,7 +118,7 @@ get.data.def.list <- function() {
   if (! dir.exists(data.def.dir))
     stop("Cannot find data def dir ", data.def.dir)
   
-  list.files(here(data.def.dir), pattern="*.R$", full.names=T)
+  list.files(data.def.dir, pattern="*.R$", full.names=T)
 }
 
 get.data.def.id <- function(filename) {
