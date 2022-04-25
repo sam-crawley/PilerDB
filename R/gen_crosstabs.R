@@ -5,10 +5,6 @@ library(StatMatch)
 library(rlist)
 library(stringi)
 
-source(here("read_data.R"))
-source(here("indices.R"))
-source(here("warning_flags.R"))
-
 summary.group.size <- 5
 
 # These "countries" should *always* be skipped

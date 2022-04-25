@@ -1,0 +1,26 @@
+Package: DivSocDB
+Title: Database of divided societies
+Version: 0.0.9.0001
+Authors@R: 
+    person(given = "Sam",
+           family = "Crawley",
+           role = c("aut", "cre"),
+           email = "sam.crawley@vuw.ac.nz",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: Database of divided societies
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports: 
+    dplyr,
+    DT,
+    forcats,
+    openxlsx,
+    rlist,
+    shiny,
+    shinybusy,
+    shinyWidgets,
+    StatMatch,
+    stringi
