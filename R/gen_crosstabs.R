@@ -326,11 +326,11 @@ config.summary.data <- function(summary.data, drop.cats = F, weighted = F) {
 
 # Generate a single crosstab from stored summary data
 gen.crosstab <- function(summary.data, drop.cats = F, weighted = F, totals = F) {
-  if (is.null(summary.data))
-    return (NULL)
-  
   summary.data <- config.summary.data(summary.data, drop.cats = drop.cats, weighted = weighted)
   
+  if (! is.data.frame(summary.data) || nrow(summary.data) == 0)
+    return (NULL)  
+
   to.pct <- function(n, t = NULL) {
     if (is.null(t))
       t <- sum(n)
