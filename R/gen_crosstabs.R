@@ -21,10 +21,7 @@ version.maj = 1
 version.min = 0
 
 # Generate crosstabs for all datasets
-gen.piler.db <- function(ids.to.load = NULL, use.existing.data = T, existing.data = NULL, calc.summaries = T, full.version = F) {
-  if (! is.null(ids.to.load) && is.null(existing.data) && save.output)
-    stop("Can't save output if ids.to.load provided, but existing.data *not* provided")
-  
+gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.data = NULL, calc.summaries = T, full.version = F) {
   tabs <- list()
   cat.sum <- list()
   data.src.info <- list()
