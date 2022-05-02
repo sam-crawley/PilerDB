@@ -6,17 +6,16 @@ library(DT)
 library(shinybusy)
 
 divSocApp <- function() {
-  res <- read_rds("output/divided.rds")
-  crosstabs <- res$crosstabs
-  category.sum <- res$cat.sum
-  data.src.info <- res$data.src.info
-  summary.table <- res$summary
-  group.sizes <- res$group.sizes
-  max.parties <- res$max.parties
+  crosstabs <- piler$crosstabs
+  category.sum <- piler$cat.sum
+  data.src.info <- piler$data.src.info
+  summary.table <- piler$summary
+  group.sizes <- piler$group.sizes
+  max.parties <- piler$max.parties
   
   data.src.list <- sort(unique(summary.table$`Data Source`))
 
-  ui <- navbarPage(title = "Divided Society Data", header = tags$div(style="float: right; margin-right: 10px", tags$b("DB Version:"), res$version),
+  ui <- navbarPage(title = "Divided Society Data", header = tags$div(style="float: right; margin-right: 10px", tags$b("DB Version:"), piler$version),
     tabPanel("Crosstabs",
       add_busy_spinner(spin = "cube-grid"),
       tabsetPanel(id = "mainPanel", 
@@ -138,7 +137,7 @@ divSocApp <- function() {
   server <- function(input, output, session) {
     
     output$tableOutput = renderDT(
-      get.summary.table(res, input$datasrc, input$group.basis, input$country, input$incomplete.data),
+      get.summary.table(piler, input$datasrc, input$group.basis, input$country, input$incomplete.data),
       options = list(
         lengthChange = F, 
         paging = F, 
@@ -222,7 +221,7 @@ divSocApp <- function() {
     observeEvent(input$tableOutput_rows_selected, {
       row <- input$tableOutput_rows_selected
       
-      displayed.sum.table <- get.summary.table(res, input$datasrc, input$group.basis, input$country, input$incomplete.data, with.id = T)
+      displayed.sum.table <- get.summary.table(piler, input$datasrc, input$group.basis, input$country, input$incomplete.data, with.id = T)
       selected.row <- displayed.sum.table[row,]
       
       country.data <- crosstabs[[selected.row$ID]]
