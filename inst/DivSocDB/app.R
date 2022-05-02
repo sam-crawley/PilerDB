@@ -1,1 +1,2 @@
+library(DivSocDB)
 DivSocDB::divSocApp()

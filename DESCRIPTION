@@ -13,7 +13,7 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Imports: 
+Depends: 
     countrycode,
     dplyr,
     DT,
@@ -30,6 +30,5 @@ Imports:
     stringi,
     stringr,
     tibble,
-    tidyr
-Depends: 
+    tidyr,
     R (>= 2.10)
