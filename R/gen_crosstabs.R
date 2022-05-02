@@ -21,7 +21,7 @@ version.maj = 1
 version.min = 0
 
 # Generate crosstabs for all datasets
-gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.output = F, calc.summaries = T, full.version = F) {
+gen.piler.db <- function(ids.to.load = NULL, use.existing.data = T, existing.data = NULL, calc.summaries = T, full.version = F) {
   if (! is.null(ids.to.load) && is.null(existing.data) && save.output)
     stop("Can't save output if ids.to.load provided, but existing.data *not* provided")
   
@@ -29,7 +29,10 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
   cat.sum <- list()
   data.src.info <- list()
   
-  if (! is.null(existing.data)) {
+  if (use.existing.data) {
+    if (is.null(existing.data))
+      existing.data <- piler
+    
     tabs <- existing.data$crosstabs
     cat.sum <- existing.data$cat.sum
     data.src.info <- existing.data$data.src.info
@@ -92,10 +95,6 @@ gen.all.crosstabs <- function(ids.to.load = NULL, existing.data = NULL, save.out
     res$group.sizes <- get.group.size.summary(res$crosstabs)
     res$group.sizes.by.group <- map(c(group.names), ~ get.group.size.summary(res$crosstabs, group.to.use = .x)) %>% set_names(group.names)
     res$max.parties <- get.max.parties(res$group.sizes)
-  }
-  
-  if (save.output) {
-    write_rds(res, "output/divided.rds")
   }
   
   res
