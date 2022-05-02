@@ -21,7 +21,7 @@ version.maj = 1
 version.min = 0
 
 # Generate crosstabs for all datasets
-gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.data = NULL, calc.summaries = T, full.version = F) {
+gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.data = NULL, calc.summaries = T, full.version = F, datasets.dir = NULL) {
   tabs <- list()
   cat.sum <- list()
   data.src.info <- list()
@@ -62,7 +62,7 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
     
     source(data.def, local = e, encoding = "UTF-8")
     
-    data <- read.div.data(e$data.spec)
+    data <- read.div.data(e$data.spec, data.def.file = data.def, datasets.dir = datasets.dir)
     
     cat.sum[[id]] <- gen.category.summary(data, e$cat.defs)
     src.tabs <- gen.country.crosstabs(data, e$cat.defs, id, wave.var = e$data.spec$wave_var, split.by.year = e$data.spec$split.by.year)

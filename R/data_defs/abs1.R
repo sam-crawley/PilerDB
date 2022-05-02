@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "datasets/asain barom/W1 Merged Data/Wave.1_Data/Merge/Wave1_20170906.sav",
+  file.name = "Wave1_20170906.sav",
   file.type = 'sav',
   file.encoding = "latin1",
   question.text = c(

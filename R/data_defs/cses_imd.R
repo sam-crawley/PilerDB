@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "datasets/cses/IMD/cses_imd.dta",
+  file.name = "cses_imd.dta",
   file.type = 'dta',
   wave_var = "module",
   split.by.year = T,

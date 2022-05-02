@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "datasets/asain barom/ABS3w.0.Merged/ABS3 merge20210506.sav",
+  file.name = "ABS3 merge20210506.sav",
   file.type = 'sav',
   question.text = c(
     "Religion" = "What is your religion?"

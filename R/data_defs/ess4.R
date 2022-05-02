@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "datasets/ess/Round 4/ESS4e04_5.dta",
+  file.name = "ESS4e04_5.dta",
   file.type = 'dta',
   question.text = c(
     "Party" = "Which party feel closer to",

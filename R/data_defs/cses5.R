@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "datasets/cses/Module 5/cses5.dta",
+  file.name = "cses5.dta",
   file.type = 'dta',
   split.by.year = T,
   country.format = 'country.name',

@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "datasets/latino/1995/Latinobarometro_1995_data_english_v2014_06_27.dta",
+  file.name = "Latinobarometro_1995_data_english_v2014_06_27.dta",
   file.type = 'dta',
   file.encoding = "latin1",  
   question.text = c(

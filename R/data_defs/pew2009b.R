@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "datasets/pew/2009fall/Pew Global Attitudes Fall 2009 Dataset.sav",
+  file.name = "Pew Global Attitudes Fall 2009 Dataset.sav",
   file.type = 'sav',
   file.encoding = "latin1",
   question.text = c(

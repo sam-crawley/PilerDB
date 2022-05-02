@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "datasets/afrobarom/merged-round-5-data-34-countries-2011-2013-last-update-july-2015.sav",
+  file.name = "merged-round-5-data-34-countries-2011-2013-last-update-july-2015.sav",
   file.type = 'sav',
   question.text = c(
     "Party" = "If a presidential election were held tomorrow, which party’s candidate would you vote for?",

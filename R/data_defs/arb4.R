@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "datasets/arab/Wave 4/ABIV_English.dta",
+  file.name = "ABIV_English.dta",
   file.type = 'dta',
   question.text = c(
     "Party" = "Which of the existing parties is closest to representing your political, social and economic aspirations?",

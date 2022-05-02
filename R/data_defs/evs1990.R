@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "datasets/evs/1990/ZA4460_v3-0-0.dta",
+  file.name = "ZA4460_v3-0-0.dta",
   file.type = 'dta',
   file.encoding = "latin1",
   question.text = c(

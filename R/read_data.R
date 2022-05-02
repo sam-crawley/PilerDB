@@ -1,7 +1,3 @@
-library(haven)
-library(countrycode)
-
-
 # Data Spec fields
 # * file.name = file name to load
 # * file.type = either sav or dta
@@ -29,12 +25,20 @@ allowed.field.names <- c(main.vars, "Country", "Year", "Weight")
 # Directory where the definition R files can be found
 data.def.dir <- "R/data_defs"
 
-read.div.data <- function(data.spec, raw = F) {
+# Directory where the survey datasets are stored (by default)
+default.datasets.dir = here::here("datasets")
+
+read.div.data <- function(data.spec, data.def.file, raw = F, datasets.dir = NULL) {
   if (! all(names(data.spec$field.def) %in% allowed.field.names))
     stop("field.def contains invalid field names")
+
+  if (is.null(datasets.dir))
+    datasets.dir <- default.datasets.dir
   
-  if (! file.exists(data.spec$file.name))
-    stop("Cannot find file ", data.spec$file.name)
+  file.path <- get.dataset.file.path(data.def.file = data.def.file, datasets.dir = datasets.dir, data.spec = data.spec)
+  
+  if (! file.exists(file.path))
+    stop("Cannot find file ", file.path)
   
   rename.spec <- data.spec$field.def[! is.na(data.spec$field.def)]
   
@@ -47,7 +51,7 @@ read.div.data <- function(data.spec, raw = F) {
   
   encoding <- if_else(is.null(data.spec$file.encoding), "UTF-8", data.spec$file.encoding)
   
-  data <- read_func(data.spec$file.name, encoding = encoding)
+  data <- read_func(file.path, encoding = encoding)
   
   if (raw)
     return(data)
@@ -103,11 +107,11 @@ load.data.by.id <- function(id, process = T) {
     stop("Cannot find data.def file: ", file)
   
   e <- new.env()
-  
+    
   source(file, local = e, encoding = "UTF-8")
-  
-  data <- read.div.data(e$data.spec)
-  
+    
+  data <- read.div.data(e$data.spec, file)
+
   if (process)
     data <- process.data(data, e$cat.defs)
   
@@ -123,6 +127,30 @@ get.data.def.list <- function() {
 
 get.data.def.id <- function(filename) {
   toupper( str_match(filename, "/(\\w+?).R$")[,2] )
+}
+
+get.dataset.file.path <- function(data.def.file, datasets.dir, data.spec) {
+  def.id <- get.data.def.id(data.def.file)
+  def.prefix <- str_remove(def.id, "\\d+.?$")
+  
+  if (def.id == def.prefix)
+    def.prefix <- NULL
+  
+  file.path <- paste(datasets.dir, def.prefix, def.id, data.spec$file.name, sep = "/")
+}
+
+check.dataset.files <- function() {
+  walk(get.data.def.list(), function(def.file) {
+    e <- new.env()
+    
+    source(def.file, local = e, encoding = "UTF-8")
+    
+    file.path <- get.dataset.file.path(data.def.file = def.file, datasets.dir = default.datasets.dir, data.spec = e$data.spec)
+    
+    if (! file.exists(file.path)) {
+      cat("Cannot find file", file.path, "\n")
+    }
+  })
 }
 
 

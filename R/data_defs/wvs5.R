@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "datasets/WVS/W5/WV5_Data_Stata_v20180912.dta",
+  file.name = "WV5_Data_Stata_v20180912.dta",
   file.type = 'dta',
   question.text = c(
     "Party" = "If there were a national election tomorrow, for which party on this list would you vote?",

@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "datasets/arab/Wave 5/ABV_Release_Data.dta",
+  file.name = "ABV_Release_Data.dta",
   file.type = 'dta',
   question.text = c(
     "Party" = "Which party if any do you feel closest to?",

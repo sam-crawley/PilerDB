@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "datasets/latino/2018/Latinobarometro_2018_Esp_Stata_v20190303.dta",
+  file.name = "Latinobarometro_2018_Esp_Stata_v20190303.dta",
   file.type = 'dta',
   question.text = c(
     "Party" = "Which party would you vote for if elections were next Sunday?",
