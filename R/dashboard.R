@@ -1,10 +1,4 @@
-library(dplyr)
-library(stringr)
-library(shiny)
-library(shinyWidgets)
-library(DT)
-library(shinybusy)
-
+# Dashboard shiny app to display piler DB
 divSocApp <- function() {
   crosstabs <- piler$crosstabs
   category.sum <- piler$cat.sum
