@@ -104,33 +104,29 @@ get.high.group.missing <- function(crosstabs, flagged.only = T) {
     if (flagged.only)
       high.missing <- high.missing %>% filter(flag == T)
     
-    if (nrow(high.missing) > 0) {
-      return(
-        high.missing %>% 
-          mutate(datasource = country, group = group) %>%
-          rename(
-            missing = missing.percent,
-            group.name = Group,
-            group.size = total.percent,
-            comp.missing = max.percent
-          ) %>%
-          select(
-            datasource,
-            group,
-            group.name,
-            group.size,
-            missing,
-            comp.group,
-            comp.missing,
-            missing.diff,
-            flag
-          )
-      )
-    }
-    
-    return (NULL)
+    return(
+      high.missing %>% 
+        mutate(datasource = country, group = group) %>%
+        rename(
+          missing = missing.percent,
+          group.name = Group,
+          group.size = total.percent,
+          comp.missing = max.percent
+        ) %>%
+        select(
+          datasource,
+          group,
+          group.name,
+          group.size,
+          missing,
+          comp.group,
+          comp.missing,
+          missing.diff,
+          flag
+        )
+    )
   })
-  
+
   res %>% mutate(across(c(group.size, missing, comp.missing, missing.diff), ~round(.x, 3))) %>%
     arrange(desc(missing))
 }
