@@ -1,0 +1,35 @@
+digraph {
+   
+ graph[layout = dot, rankdir = LR]
+ 
+ node [shape="folder", fixedwidth = true, width = 1.8, height = 0.8];
+  { node [label = "Asian Barometer"]; data1 }
+  { node [label = "Afrobarometer"]; data2 }
+  { node [label = "CSES"]; data3 }
+  { node [label = "ESS"]; data4 }
+  { node [label = "EVS"]; data5 }
+  { node [label = "Latinobarometer"]; data6 }
+  { node [label = "Pew Global\nAttitudes"]; data7 }
+  { node [label = "World Values"]; data8 }
+ 
+ 
+  proc [label = "Build PILER", shape = oval]
+ db [label = 'PILER DB', shape = cylinder ]
+ output1 [label = "Excel", shape = rect ]
+ output2 [label = "Web Dashboard", shape = rect ]
+ 
+ data1 -> proc
+ data2 -> proc
+ data3 -> proc
+ data4 -> proc
+ data5 -> proc
+ data6 -> proc
+ data7 -> proc
+ data8 -> proc
+ 
+ proc -> db
+ 
+ db -> output1
+ db -> output2
+ 
+}
