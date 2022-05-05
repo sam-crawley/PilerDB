@@ -22,9 +22,6 @@ group.names <- c("Language", "Religion", "Ethnicity")
 main.vars <- c("Party", group.names)
 allowed.field.names <- c(main.vars, "Country", "Year", "Weight")
 
-# Directory where the definition R files can be found
-data.def.dir <- "R/data_defs"
-
 # Directory where the survey datasets are stored (by default)
 default.datasets.dir = here::here("datasets")
 
@@ -100,8 +97,18 @@ read.div.data <- function(data.spec, data.def.file, raw = F, datasets.dir = NULL
   return(data)
 }
 
+# Get directory where the definition R files can be found
+get.data.def.dir <- function() {
+  cur.pkg <- packageName()
+  
+  if (is.null(cur.pkg))
+    return (here::here("inst/data_defs"))
+  else
+    system.file("data_defs", package=packageName())
+}
+
 load.data.by.id <- function(id, process = T) {
-  file <- paste0(data.def.dir, "/", tolower(id), ".R")
+  file <- paste0(get.data.def.dir(), "/", tolower(id), ".R")
   
   if (! file.exists(file))
     stop("Cannot find data.def file: ", file)
@@ -119,6 +126,8 @@ load.data.by.id <- function(id, process = T) {
 }
 
 get.data.def.list <- function() {
+  data.def.dir <- get.data.def.dir()
+  
   if (! dir.exists(data.def.dir))
     stop("Cannot find data def dir ", data.def.dir)
   

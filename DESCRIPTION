@@ -31,5 +31,5 @@ Depends:
     stringr,
     tibble,
     tidyr,
-    here
+    here,
     R (>= 2.10)
