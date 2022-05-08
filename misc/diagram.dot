@@ -5,15 +5,16 @@ digraph {
  node [shape="folder", fixedwidth = true, width = 1.8, height = 0.8];
   { node [label = "Asian Barometer"]; data1 }
   { node [label = "Afrobarometer"]; data2 }
-  { node [label = "CSES"]; data3 }
-  { node [label = "ESS"]; data4 }
-  { node [label = "EVS"]; data5 }
-  { node [label = "Latinobarometer"]; data6 }
-  { node [label = "Pew Global\nAttitudes"]; data7 }
-  { node [label = "World Values"]; data8 }
+  { node [label = "Arab Barometer"]; data3 }
+  { node [label = "CSES"]; data4 }
+  { node [label = "ESS"]; data5}
+  { node [label = "EVS"]; data6 }
+  { node [label = "Latinobarometer"]; data7 }
+  { node [label = "Pew Global\nAttitudes"]; data8 }
+  { node [label = "World Values"]; data9 }
  
  
-  proc [label = "Build PILER", shape = oval]
+ proc [label = "Build PILER", shape = oval]
  db [label = 'PILER DB', shape = cylinder ]
  output1 [label = "Excel", shape = rect ]
  output2 [label = "Web Dashboard", shape = rect ]
@@ -26,6 +27,7 @@ digraph {
  data6 -> proc
  data7 -> proc
  data8 -> proc
+ data9 -> proc
  
  proc -> db
  
