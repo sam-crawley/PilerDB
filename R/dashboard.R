@@ -8,6 +8,8 @@ divSocApp <- function() {
   max.parties <- piler$max.parties
   
   data.src.list <- sort(unique(summary.table$`Data Source`))
+  
+  excel.dir <- get.excel.dir()
 
   ui <- navbarPage(title = "Divided Society Data", header = tags$div(style="float: right; margin-right: 10px", tags$b("DB Version:"), piler$version),
     tabPanel("Crosstabs",
@@ -197,7 +199,7 @@ divSocApp <- function() {
       },
       
       content <- function(file) {
-        file.copy('output/divided_summary.xlsx', file)
+        file.copy(paste0(excel.dir, '/divided_summary.xlsx'), file)
       }
     )
     
@@ -208,7 +210,7 @@ divSocApp <- function() {
       },
       
       content <- function(file) {
-        file.copy('output/divided_crosstabs.xlsx', file)
+        file.copy(paste0(excel.dir, '/divided_crosstabs.xlsx'), file)
       }
     )
     
@@ -270,8 +272,6 @@ divSocApp <- function() {
         h4(textOutput(paste0("WarningHeader", countryTabID))),
         htmlOutput(paste0("WarningMsg", countryTabID)),
   
-        #h5("Available groups (after removals)", tableOutput(paste0("AvailCounts", countryTabID))),
-        
         h4(textOutput(paste0("LanguageHeading", countryTabID))),
         DTOutput(paste0("LanguageTable", countryTabID)),
         

@@ -189,3 +189,12 @@ get.country.warnings <- function(country.data) {
   return (warnings)
   
 }
+
+get.excel.dir <- function() {
+  cur.pkg <- packageName()
+  
+  if (is.null(cur.pkg))
+    return (here::here("inst/excel"))
+  else
+    system.file("excel", package=packageName())
+}

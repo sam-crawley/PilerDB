@@ -1,7 +1,7 @@
 # Functions to generate Excel spreadsheets of the DB
 
 gen.spreadsheets <- function(tabs) {
-  write.divided.xlsx(tabs, include.crosstabs = F, file = "output/divided_summary.xlsx")
+  write.divided.xlsx(tabs, include.crosstabs = F, file = "inst/divided_summary.xlsx")
   write.divided.xlsx(tabs, include.summary = F, include.group.sizes = F, include.summary.by.group = F)
 }
 
@@ -17,7 +17,7 @@ get.excel.summary.sheet <- function(res) {
 
 
 write.divided.xlsx <- function(res, include.summary = T, include.summary.by.group = T, include.group.sizes = T, include.crosstabs = T, include.group.sizes.by.group = T,
-                               file = "output/divided_crosstabs.xlsx") {
+                               file = "inst/divided_crosstabs.xlsx") {
   options("openxlsx.numFmt" = NULL)
   wb <- createWorkbook()
   
