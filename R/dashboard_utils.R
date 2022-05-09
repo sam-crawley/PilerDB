@@ -196,5 +196,5 @@ get.excel.dir <- function() {
   if (is.null(cur.pkg))
     return (here::here("inst/excel"))
   else
-    system.file("excel", package=packageName())
+    system.file("excel", package=packageName(), mustWork = T)
 }
