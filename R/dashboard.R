@@ -1,5 +1,11 @@
 # Dashboard shiny app to display piler DB
-divSocApp <- function() {
+divSocApp <- function(logger = NULL) {
+  if (is.null(logger)) {
+    logger <- log4r::logger(threshold = "DEBUG")
+  }
+  
+  log4r::info(logger, "PILER Dashboard initialising")
+  
   crosstabs <- piler$crosstabs
   category.sum <- piler$cat.sum
   data.src.info <- piler$data.src.info
@@ -10,6 +16,8 @@ divSocApp <- function() {
   data.src.list <- sort(unique(summary.table$`Data Source`))
   
   excel.dir <- get.excel.dir()
+  
+  log4r::debug(logger, "Path to excel files: ", excel.dir)
 
   ui <- navbarPage(title = "Divided Society Data", header = tags$div(style="float: right; margin-right: 10px", tags$b("DB Version:"), piler$version),
     tabPanel("Crosstabs",
