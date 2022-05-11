@@ -1,1 +1,3 @@
+library(PilerDB)
+
 PilerDB::launchIndexTester()
