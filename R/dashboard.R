@@ -1,5 +1,5 @@
 # Dashboard shiny app to display piler DB
-divSocApp <- function(logger = NULL) {
+launchPilerDash <- function(logger = NULL) {
   if (is.null(logger)) {
     logger <- log4r::logger(threshold = "DEBUG")
   }
@@ -19,7 +19,7 @@ divSocApp <- function(logger = NULL) {
   
   log4r::debug(logger, "Path to excel files: ", excel.dir)
 
-  ui <- navbarPage(title = "Divided Society Data", header = tags$div(style="float: right; margin-right: 10px", tags$b("DB Version:"), piler$version),
+  ui <- navbarPage(title = "PILER DB", header = tags$div(style="float: right; margin-right: 10px", tags$b("DB Version:"), piler$version),
     tabPanel("Crosstabs",
       add_busy_spinner(spin = "cube-grid"),
       tabsetPanel(id = "mainPanel", 
@@ -203,22 +203,22 @@ divSocApp <- function(logger = NULL) {
   
     output$downloadSummaryData <- downloadHandler(
       filename <- function() {
-        "divided_summary.xlsx"
+        "piler_summary.xlsx"
       },
       
       content <- function(file) {
-        file.copy(paste0(excel.dir, '/divided_summary.xlsx'), file)
+        file.copy(paste0(excel.dir, '/piler_summary.xlsx'), file)
       }
     )
     
       
     output$downloadCrosstabData <- downloadHandler(
       filename <- function() {
-        "divided_crosstabs.xlsx"
+        "piler_crosstabs.xlsx"
       },
       
       content <- function(file) {
-        file.copy(paste0(excel.dir, '/divided_crosstabs.xlsx'), file)
+        file.copy(paste0(excel.dir, '/piler_crosstabs.xlsx'), file)
       }
     )
     

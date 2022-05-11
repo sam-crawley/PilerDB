@@ -1,12 +1,12 @@
-Package: DivSocDB
-Title: Database of divided societies
+Package: PilerDB
+Title: Database used to generate measures of ethnic polarization
 Version: 0.0.9.0001
 Authors@R: 
     person(given = "Sam",
            family = "Crawley",
            role = c("aut", "cre"),
            email = "sam.crawley@vuw.ac.nz",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+           comment = c(ORCID = "0000-0002-7847-0411"))
 Description: Database of divided societies
 License: GPL (>= 3)
 Encoding: UTF-8

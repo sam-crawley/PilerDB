@@ -1,2 +1,1 @@
-library(DivSocDB)
-DivSocDB::launchIndexTester()
+PilerDB::launchIndexTester()

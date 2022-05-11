@@ -191,5 +191,5 @@ get.country.warnings <- function(country.data) {
 }
 
 get.excel.dir <- function() {
-    system.file("excel", package="DivSocDB", mustWork = T)
+    system.file("excel", package="PilerDB", mustWork = T)
 }
