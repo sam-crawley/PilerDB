@@ -1,0 +1,2 @@
+library(DivSocDB)
+DivSocDB::launchIndexTester()
