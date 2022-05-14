@@ -129,7 +129,7 @@ calc.tau <- function(country.data, group, weighted = F) {
   
   assoc <- NULL
   try({
-    assoc <- suppressWarnings(pw.assoc(as.formula(paste(group, "~ Party")), country.data, out.df = T, weights = wt.var))
+    assoc <- suppressWarnings(StatMatch::pw.assoc(as.formula(paste(group, "~ Party")), country.data, out.df = T, weights = wt.var))
   })
   
   assoc$tau

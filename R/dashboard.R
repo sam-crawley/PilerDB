@@ -21,7 +21,7 @@ launchPilerDash <- function(logger = NULL) {
 
   ui <- navbarPage(title = "PILER DB", header = tags$div(style="float: right; margin-right: 10px", tags$b("DB Version:"), piler$version),
     tabPanel("Crosstabs",
-      add_busy_spinner(spin = "cube-grid"),
+      shinybusy::add_busy_spinner(spin = "cube-grid"),
       tabsetPanel(id = "mainPanel", 
         tabPanel("Summary",
           pageWithSidebar(
@@ -53,7 +53,7 @@ launchPilerDash <- function(logger = NULL) {
               width = 2
             ),
             mainPanel(
-              DTOutput("tableOutput", height = "auto"),
+              DT::DTOutput("tableOutput", height = "auto"),
               width = 10
             )
           )
@@ -64,7 +64,7 @@ launchPilerDash <- function(logger = NULL) {
                        sort(c('(Highest Tau)', group.names)), 
                        multiple = F
            ),                
-          DTOutput("tableGroupSizes")
+          DT::DTOutput("tableGroupSizes")
         )
       )
     ),
@@ -119,7 +119,7 @@ launchPilerDash <- function(logger = NULL) {
            width = 2
          ),
          mainPanel(
-           DTOutput("catSumTable", height = "auto"),
+           DT::DTOutput("catSumTable", height = "auto"),
            width = 10
          )
        )
@@ -140,7 +140,7 @@ launchPilerDash <- function(logger = NULL) {
   
   server <- function(input, output, session) {
     
-    output$tableOutput = renderDT(
+    output$tableOutput = DT::renderDT(
       get.summary.table(piler, input$datasrc, input$group.basis, input$country, input$incomplete.data),
       options = list(
         lengthChange = F, 
@@ -155,7 +155,7 @@ launchPilerDash <- function(logger = NULL) {
       rownames = F
     )
     
-    output$catSumTable = renderDT(
+    output$catSumTable = DT::renderDT(
       get.cat.sum.table(category.sum, input$cat.datasrc, input$cat.var),
       options = list(
         paging = T,
@@ -189,7 +189,7 @@ launchPilerDash <- function(logger = NULL) {
       )
     ))
     
-    output$tableGroupSizes <- renderDT(
+    output$tableGroupSizes <- DT::renderDT(
       get.group.sizes(group.sizes, input$group.basis.gs),
       options = list(
         lengthChange = F, 
@@ -281,13 +281,13 @@ launchPilerDash <- function(logger = NULL) {
         htmlOutput(paste0("WarningMsg", countryTabID)),
   
         h4(textOutput(paste0("LanguageHeading", countryTabID))),
-        DTOutput(paste0("LanguageTable", countryTabID)),
+        DT::DTOutput(paste0("LanguageTable", countryTabID)),
         
         h4(textOutput(paste0("ReligionHeading", countryTabID))),
-        DTOutput(paste0("ReligionTable", countryTabID)),
+        DT::DTOutput(paste0("ReligionTable", countryTabID)),
         
         h4(textOutput(paste0("EthnicityHeading", countryTabID))),
-        DTOutput(paste0("EthnicityTable", countryTabID)),
+        DT::DTOutput(paste0("EthnicityTable", countryTabID)),
         
         h4("Statistics"),
         textOutput(paste0("SampleSize", countryTabID)),

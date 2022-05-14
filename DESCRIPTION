@@ -14,24 +14,24 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Imports:
-    log4r
-Depends: 
     countrycode,
-    dplyr,
+    openxlsx,
+    log4r,
+    shinybusy,
+    rlist,
     DT,
+    StatMatch,
+    here
+Depends: 
+    dplyr,
     forcats,
     haven,
-    openxlsx,
     purrr,
     readr,
-    rlist,
     shiny,
-    shinybusy,
     shinyWidgets,
-    StatMatch,
     stringi,
     stringr,
     tibble,
     tidyr,
-    here,
     R (>= 2.10)

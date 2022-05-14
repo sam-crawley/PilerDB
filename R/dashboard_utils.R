@@ -157,7 +157,7 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
         )
       ))        
       
-      output[[grp.output.table]] <- renderDT(
+      output[[grp.output.table]] <- DT::renderDT(
         crosstab,
         options = list(
           lengthChange = F, 
@@ -172,7 +172,7 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
     }
     else {
       output[[grp.output.header]] <- renderText("")
-      output[[grp.output.table]]<- renderDT(NULL)
+      output[[grp.output.table]]<- DT::renderDT(NULL)
     }
   })
 }

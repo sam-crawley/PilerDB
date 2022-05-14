@@ -66,7 +66,7 @@ read.div.data <- function(data.spec, data.def.file, raw = F, datasets.dir = NULL
   data <- data %>%
     mutate(
       Country.orig = Country,
-      Country = countrycode(Country, 
+      Country = countrycode::countrycode(Country, 
                             origin = data.spec$country.format, 
                             destination = 'country.name', 
                             custom_match = data.spec$country.custom,

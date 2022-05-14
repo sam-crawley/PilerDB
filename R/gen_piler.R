@@ -1,14 +1,4 @@
-library(dplyr)
-library(forcats)
-library(purrr)
-library(tibble)
-library(stringr)
-library(tidyr)
-library(readr)
-library(openxlsx)
-library(StatMatch)
-library(rlist)
-library(stringi)
+# Functions to generate the PILER DB
 
 summary.group.size <- 5
 
@@ -113,10 +103,10 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL, 
   # Split data up by country
   split.factor <- list(data$Country)
   if (! is.null(wave.var)) {
-    split.factor <- list.append(split.factor, data[[wave.var]])
+    split.factor <- rlist::list.append(split.factor, data[[wave.var]])
   }
   if (split.by.year) {
-    split.factor <- list.append(split.factor, data$Year)
+    split.factor <- rlist::list.append(split.factor, data$Year)
   }
   
   data.by.country <- split(data, split.factor, drop = T)
@@ -492,9 +482,6 @@ drop.rows.from.country.data <- function(d, group.var, weighted = F) {
 }
 
 calc.all.indices <- function(country.data, sum.dfs, drop.cats = F, weighted = F) {
-  #country <- unique(country.data$Country)
-  #cat("Calc indices for ", country, "\n")
-  
   indices <- map_dfr(group.names, function(group) {
     summary.data <- sum.dfs[[group]]
     
