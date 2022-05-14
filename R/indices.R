@@ -135,7 +135,7 @@ calc.tau <- function(country.data, group, weighted = F) {
   assoc$tau
 }
 
-calc.gallagher <- function(party.sizes.by.grp, grp.sizes, party.sizes, loosmore = F) {
+calc.gallagher <- function(party.sizes.by.grp, grp.sizes, party.sizes, loosmore = F, by.party = F) {
   # Calculate unweighted values for each party
   res <- party.sizes.by.grp %>% 
     inner_join(grp.sizes, by = "Group") %>%
@@ -153,6 +153,9 @@ calc.gallagher <- function(party.sizes.by.grp, grp.sizes, party.sizes, loosmore 
       group_by(Party) %>% 
       summarise(total = sqrt(sum(value)/2))
   }
+  
+  if (by.party)
+    return (res %>% mutate(total = total*100))
   
   # Apply weights
   res.wt <- party.sizes %>%
