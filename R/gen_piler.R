@@ -10,7 +10,86 @@ cats.to.drop <- c("Missing", "Other")
 version.maj = 1
 version.min = 0
 
-# Generate crosstabs for all datasets
+#' Generate the PILER DB from scratch
+#' 
+#' This function generates a new PILER DB from the original dataset files. The datasets that will be used
+#' are defined by the data_defs (see below for details).
+#' 
+#' The dataset files themselves are not distributed to this package due to licensing restructions. However
+#'   they are all available online for free.
+#' 
+#' @param ids.to.load A vector of dataset IDs to load into the new DB. If NULL, all datasets are loaded.
+#' @param use.existing.data Logical value indicating if an existing version of the PILER DB should be
+#'   loaded. If true, any datasets specified in ids.to.load will overwrite the existing data.
+#' @param existing.data The existing PILER DB object to use. If NULL, will use the piler object from
+#'   the package.
+#' @param calc.summaries Logical. If true, summary data is calculated and added to the object returned.
+#' @param full.version Logical. If true, this should be considered a "full" version of the DB. If false,
+#'   a date string will be appended to the version number.
+#' @param datasets.dir Path to original dataset files (used to generate the DB). The default is to look
+#'   in the "datasets" directory in the root directory of the current project (found via here::here()).
+#' @return A PILER DB (list) object. See \link{piler} for details of the structure. 
+#'
+#' @section dafe_defs:
+#' 
+#' These are R files that define of how the datasets should be loaded.
+#' 
+#' Each dataset file (i.e. survey wave) has a corresponding definition file. The
+#' definition file (or "data def") creates two objects:
+#' \describe{
+#'   \item{data.spec}{A list of parameters about the data file itself (see below for details).}
+#'   \item{cat.defs}{A list of category recodes for each group type.}
+#' }
+#' 
+#' The data def files are placed in the "data_defs" directory, which is under "inst" in git
+#'   and in the root directory of the installed package. When building the DB, \code{gen.piler.db}
+#'   looks for these data definitions, loads the dataset file, does some processing, and adds
+#'   the results to the DB.
+#'   
+#' The file name should be an identifier for the wave (e.g. "WVS7" for World Values Survey 7), followed
+#'  by ".R". This identifier will be used throughout the database to identify this wave. The identifier
+#'  must be letters followed by numbers/letters. The letters are used to indicated the survey organisation,
+#'  and the numbers/letters used to indicate the wave. e.g. for "PEW2009a", "PEW" is the organisation, and
+#'  "2009a" is the wave. (The first digit is assumed to be the start of the wave name).
+#'   
+#' @section data.spec fields:
+#' The data.spec should be a list with the following fields (all required, unless otherwise indicated):
+#' 
+#' \describe{
+#'   \item{file.name}{The name of the dataset file to be loaded (without the path). The path is generated
+#'   from the dataset identifier, e.g. for "WVS7", the path will be "WVS/WVS7" in the dataset directory.
+#'   The dataset directory is set in the call to  \code{gen.piler.db}.}
+#'   \item{file.type}{Type of the datafile, currently must be "sav" or "dta".}
+#'   \item{file.encoding}{Encoding to use when reading the file, defaults to UTF-8.}
+#'   \item{field.def}{Named character vector of fields that will used to generate crosstabs, etc. for the DB. The names
+#'     should be Party, Language, Religion, Ethnicity, Year, Weight, Country, and the values should be the corresponding
+#'     names of the columns in the data file. The first four indicate the Party/Group data for this data file (can be NA
+#'     if not included in this data file). Year is the year of the survey (the max value of this column will be used if
+#'     there are multiple values for a given country). Country is the name of the country (which will be converted, see below).
+#'     Weight is the survey weights to be applied later. Columns in the dataset will be renamed before further processing is done.}
+#'   \item{wave_var}{(Optional) For multiwave datasets, this variable in the data indicates the wave/module.
+#'           Data is split based on this variable, and the value of the variable is appended
+#'           to the data source ID (meaning each wave appears as a different data source).}
+#'   \item{split_by_year}{Logical, default is false. If true, splits out data by the value of the Year variable.
+#'                 Some datasets (CSES) contain multiple surveys for the same country,
+#'                 so this separates them out.}
+#'   \item{country.format}{The original format of the country in the datafile (from countrycode::codelist). 
+#'     When building the DB, the value is converted using countrycode to 'country.name' format}
+#'   \item{country.dict}{(Optional) country dict to use (passed to the custom_dict parameter of countrycoude())}
+#'   \item{country.custom}{(Optional) Names vector to be passed to custom_match parameter of countrycode()}
+#'   \item{fixups}{(Optional) A function which applies any fixups as the last step of reading the datafile. The only parameter is
+#'     the dataframe of the wave. Note, at this point the columns have been renamed, as per field.def.}
+#'   \item{pre_fixups}{(Optional) The same as fixups, but this is applied immediately after the datafile is loaded.}
+#' }
+#' 
+#' @section cat.defs structure:
+#' 
+#' This should be a names list of named lists. The outer list should have names that are one of main variable names
+#' (i.e. Party, Religion, Ethnicity, Language), although all are optional. Each of the values should be lists with
+#' values being a vector of categories for that variable in the dataset that should be recoded. The name is what those
+#' categories will be recoded to (usually "Missing" or "Other").
+#' 
+#' @export
 gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.data = NULL, calc.summaries = T, full.version = F, datasets.dir = NULL) {
   tabs <- list()
   cat.sum <- list()

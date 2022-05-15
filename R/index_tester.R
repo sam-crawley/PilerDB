@@ -1,5 +1,8 @@
-# Simple app to test difference scenarios for the ATT-Pol (Gallagher) and other
-#  index calculations
+#' Index tester shiny app
+#'
+#' Simple app to test difference scenarios for the ATT-Pol (Gallagher) and other
+#'  index calculations
+#' @export
 launchIndexTester <- function() {
   ui <- fluidPage(
   

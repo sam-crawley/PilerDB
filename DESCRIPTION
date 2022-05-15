@@ -21,17 +21,16 @@ Imports:
     rlist,
     DT,
     StatMatch,
-    here
-Depends: 
     dplyr,
-    forcats,
-    haven,
-    purrr,
-    readr,
-    shiny,
-    shinyWidgets,
     stringi,
+    haven,
+    shiny,
+    here,
+    forcats,
+    purrr,
+    shinyWidgets,
     stringr,
     tibble,
-    tidyr,
+    tidyr
+Depends:
     R (>= 2.10)

@@ -1,36 +1,15 @@
-# Data Spec fields
-# * file.name = file name to load
-# * file.type = either sav or dta
-# * file.encoding = encoding to use when reading the file, defaults to UTF-8
-# * field.def = vector of fields to use for the analysis, with names being the column names
-#               (names should be ones from field.names)
-#               For the main vars, if the field is missing from the dataset, it should be set
-#               to NA
-# * wave_var = for multiwave datasets, this variable in the data indicates the wave/module
-#             Data is split based on this variable, and the value of the variable is appended
-#             to the data source ID (meaning each wave appears as a different data source)
-# * split_by_year = logical. If true, splits out data by the value of the Year variable
-#                   Some datasets (CSES) contain multiple surveys for the same country,
-#                   so this separates them out.
-# * country.format = the original format of the country (see countrycode::codelist)
-# * country.dict = country dict (passed to custom_dict) to use
-# * country.custom = names vector to be passed to custom_match parameter of countrycode()
-# * fixups = a function to apply some custom fixups to the data before returning it
-# * pre_fixups = a function to apply custom fixups to the data *before* other processing is done
+# Functions to read the files for the datasets.
 
 group.names <- c("Language", "Religion", "Ethnicity")
 main.vars <- c("Party", group.names)
 allowed.field.names <- c(main.vars, "Country", "Year", "Weight")
-
-# Directory where the survey datasets are stored (by default)
-default.datasets.dir = here::here("datasets")
 
 read.div.data <- function(data.spec, data.def.file, raw = F, datasets.dir = NULL) {
   if (! all(names(data.spec$field.def) %in% allowed.field.names))
     stop("field.def contains invalid field names")
 
   if (is.null(datasets.dir))
-    datasets.dir <- default.datasets.dir
+    datasets.dir <- get.datasets.dir()
   
   file.path <- get.dataset.file.path(data.def.file = data.def.file, datasets.dir = datasets.dir, data.spec = data.spec)
   
@@ -40,9 +19,9 @@ read.div.data <- function(data.spec, data.def.file, raw = F, datasets.dir = NULL
   rename.spec <- data.spec$field.def[! is.na(data.spec$field.def)]
   
   if (data.spec$file.type == "dta")
-    read_func <- read_dta
+    read_func <- haven::read_dta
   else if (data.spec$file.type == "sav")
-    read_func <- read_sav
+    read_func <- haven::read_sav
   else
     stop("Unknown file type")
   
@@ -60,7 +39,7 @@ read.div.data <- function(data.spec, data.def.file, raw = F, datasets.dir = NULL
   data <- data %>%
     rename(all_of(rename.spec))
   
-  if (is.labelled(data$Country))
+  if (haven::is.labelled(data$Country))
     data$Country <- str_trim(as.character(haven::as_factor(data$Country)))
   
   data <- data %>%
@@ -99,12 +78,12 @@ read.div.data <- function(data.spec, data.def.file, raw = F, datasets.dir = NULL
 
 # Get directory where the definition R files can be found
 get.data.def.dir <- function() {
-  cur.pkg <- packageName()
-  
-  if (is.null(cur.pkg))
-    return (here::here("inst/data_defs"))
-  else
-    system.file("data_defs", package=packageName())
+  system.file("data_defs", package=packageName())
+}
+
+# Directory where the survey datasets are stored (by default)
+get.datasets.dir <- function() {
+  here::here("datasets")
 }
 
 load.data.by.id <- function(id, process = T) {
@@ -183,7 +162,7 @@ coalese.vars <- function(data, cols, new_var)  {
 get.es.countries <- function() {
   c <- tibble(spanish = countrycode::codelist$cldr.name.es,
              country.name = countrycode::codelist$cldr.name.en) %>%
-    bind_rows(c(
+    dplyr::bind_rows(c(
       'spanish' = 'Rep. Dominicana',
       'country.name' = 'Dominican Republic'
     ))
@@ -191,7 +170,7 @@ get.es.countries <- function() {
   c.no.accent <- tibble(spanish = stringi::stri_trans_general(countrycode::codelist$cldr.name.es, id = "Latin-ASCII"),
                         country.name = countrycode::codelist$cldr.name.en)
   
-  bind_rows(c, c.no.accent) %>% distinct(spanish, .keep_all = T)
+  dplyr::bind_rows(c, c.no.accent) %>% dplyr::distinct(spanish, .keep_all = T)
 }
 
 country.dict.es <- get.es.countries()

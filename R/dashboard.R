@@ -1,4 +1,7 @@
-# Dashboard shiny app to display piler DB
+#' Dashboard shiny app to display PILER DB
+#' @export
+#' @import shiny
+#' @import shinyWidgets
 launchPilerDash <- function(logger = NULL) {
   if (is.null(logger)) {
     logger <- log4r::logger(threshold = "DEBUG")
