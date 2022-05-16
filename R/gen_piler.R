@@ -357,8 +357,27 @@ find.groups.to.drop <- function(summary.data, group.type) {
     as.character()
 }
 
-# "Configure" the summary.data DF, dropping categories as necessary,
-#  and selecting the 'n' column (weighted or unweighted)
+
+#' "Configure" a survey-specific summary data frame
+#' 
+#' Prepare a "summary" data frame (i.e. the group-specific
+#'   data frame in the "crosstabs" section of the piler DB).
+#' Drops categories as necessary, and selects the appropriate 'n'
+#'   column (weighted or unweighted)
+#'   
+#' This function generally does not need to be called directly, but can be
+#'   useful for doing some kinds of analyses.
+#' 
+#' @param summary.data The summary data, from 
+#'   piler$crosstabs\[\[survey\]\]\[\[group\]\]
+#'
+#' @param drop.cats Logical, defaults to false. If true, "Missing" and "Other"
+#'   categories are dropped, along with any categories less than 2% of the
+#'   overall sample size.
+#' @param weighted Logical, defaults to false. If true, the "weighted" values
+#'   of the crosstabs are used, rather than raw numbers.
+#'
+#' @export
 config.summary.data <- function(summary.data, drop.cats = F, weighted = F) {
   if (! is.data.frame(summary.data))
     return (NA)

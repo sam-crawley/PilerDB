@@ -83,7 +83,9 @@ update.summary.indices <- function(orig.indices, summary.data.list, drop.cats = 
   left_join(orig.indices, new.indices, by = "group")
 }
 
-# Calculate some summary data used for many of the indices
+# TODO: document properly
+#' Calculate some summary data used for many of the indices
+#' @export
 build.index.summary.data <- function(summary.data) {
   group.sizes <- summary.data %>% 
     group_by(Group) %>% 
@@ -135,6 +137,8 @@ calc.tau <- function(country.data, group, weighted = F) {
   assoc$tau
 }
 
+# TODO: document
+#' @export
 calc.gallagher <- function(party.sizes.by.grp, grp.sizes, party.sizes, loosmore = F, by.party = F) {
   # Calculate unweighted values for each party
   res <- party.sizes.by.grp %>% 
@@ -154,17 +158,18 @@ calc.gallagher <- function(party.sizes.by.grp, grp.sizes, party.sizes, loosmore 
       summarise(total = sqrt(sum(value)/2))
   }
   
-  if (by.party)
-    return (res %>% mutate(total = total*100))
-  
   # Apply weights
   res.wt <- party.sizes %>%
     inner_join(res, by = "Party") %>%
-    mutate(total = total * percent)
+    mutate(total.wt = total * percent)
+  
+  if (by.party)
+    return (res.wt %>%
+              mutate(across(c(total, total.wt), ~.x * 100)))
   
   res.wt %>% 
     ungroup() %>% 
-    summarise(total = sum(total)) %>%
+    summarise(total = sum(total.wt)) %>%
     pull(total) * 100
 }
 
