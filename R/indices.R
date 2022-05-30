@@ -100,12 +100,12 @@ build.index.summary.data <- function(summary.data) {
   party.support.by.group <- summary.data %>%
     group_by(Party) %>%
     mutate(Party_Total = sum(n)) %>%
-    mutate(percent = n / Party_Total)
+    mutate(percent = if_else(n == 0, 0, n / Party_Total))
   
   group.size.by.party <- summary.data %>%
     group_by(Group) %>%
     mutate(Group_Total = sum(n)) %>%
-    mutate(percent = n / Group_Total)
+    mutate(percent = if_else(n == 0, 0, n / Group_Total))
   
   return (list(
     group.sizes = group.sizes,
