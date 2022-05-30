@@ -156,11 +156,7 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
   )
   
   if (calc.summaries) {
-    res$summary <- calc.summary.data(res$crosstabs)
-    res$summary.by.group <- map(c(group.names), ~ calc.summary.data(res$crosstabs, group.to.use = .x)) %>% set_names(group.names)
-    res$group.sizes <- get.group.size.summary(res$crosstabs)
-    res$group.sizes.by.group <- map(c(group.names), ~ get.group.size.summary(res$crosstabs, group.to.use = .x)) %>% set_names(group.names)
-    res$max.parties <- get.max.parties(res$group.sizes)
+    res <- calc.all.summaries(res)
   }
   
   res
@@ -281,6 +277,17 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   tables
 }
 
+# (Re-)calculate the all summary data from the country crosstabs
+calc.all.summaries <- function(res) {
+  res$summary <- calc.summary.data(res$crosstabs)
+  res$summary.by.group <- map(c(group.names), ~ calc.summary.data(res$crosstabs, group.to.use = .x)) %>% set_names(group.names)
+  res$group.sizes <- get.group.size.summary(res$crosstabs)
+  res$group.sizes.by.group <- map(c(group.names), ~ get.group.size.summary(res$crosstabs, group.to.use = .x)) %>% set_names(group.names)
+  res$max.parties <- get.max.parties(res$group.sizes)
+  
+  return(res)
+}
+
 # Calc summarised group data for a single country
 #  This data is stored in the .rds file and can be converted into crosstabs
 #  for display purposes
@@ -308,9 +315,10 @@ calc.summarised.group.data <- function(data, group.var) {
 
 # Regenerate the indices data for all countries, without re-generating the crosstabs, etc.
 #  This is much quicker than generating everything from scratch
-regen.all.indicies <- function(tabs) {
-  map(tabs$crosstabs, function(country.data) {
-    #cat("Regen", country.data$Summary$general$ID, "\n")
+regen.all.indicies <- function(piler, calc.summaries = T) {
+  piler.new <- list()
+  
+  piler.new$crosstabs <- map(piler$crosstabs, function(country.data) {
     
     summary.data.list <- country.data[group.names]
     
@@ -342,6 +350,12 @@ regen.all.indicies <- function(tabs) {
     
     country.data
   })
+  
+  if (calc.summaries) {
+    piler.new <- calc.all.summaries(piler.new)
+  }
+  
+  return (piler.new)
 }
 
 
