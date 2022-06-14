@@ -17,6 +17,7 @@ data.spec <- list(
     "Country" = "COUNTRY",
     "Year" = NA
   ),
+  manual.exclusions = c('United Kingdom'),
   pre_fixups = function(data) {
     # Coalesce necessary vars
     party.vars <- c("PARTY", str_subset(names(data), regex("^Q103", ignore_case = T))) %>%

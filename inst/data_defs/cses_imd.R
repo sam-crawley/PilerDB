@@ -19,6 +19,12 @@ data.spec <- list(
     "Country" = "IMD1006_NAM",
     "Year" = "IMD1008_YEAR"
   ),
+  manual.exclusions = list(
+    "1997" = 'United Kingdom',
+    "2005" = 'United Kingdom',
+    "2015" = 'United Kingdom',
+    "1999" = 'Belgium'
+  ),
   fixups = function(data) {
     # Strip out country prefixes from levels
     levels(data$Party) <- str_remove(levels(data$Party), "^\\d+\\. \\w+ - \\s*")

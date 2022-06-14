@@ -16,6 +16,7 @@ data.spec <- list(
     "Country" = "country",
     "Year" = NA
   ),
+  manual.exclusions = c('Lebanon'),
   fixups = function(data) {
     data %>% mutate(Year = 2017)
   }

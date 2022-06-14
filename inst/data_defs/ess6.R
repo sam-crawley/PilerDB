@@ -18,6 +18,7 @@ data.spec <- list(
     "Country" = "cntry",
     "Year" = NA
   ),
+  manual.exclusions = c('Cyprus'),
   pre_fixups = function(data) {
     # Coalesce necessary vars
     data <- coalese.vars(data, str_subset(names(data), "^prtcl"), "prtcl")

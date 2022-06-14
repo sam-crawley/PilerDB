@@ -22,6 +22,7 @@ data.spec <- list(
     "Country" = "c_abrv",
     "Year" = "year"
   ),
+  manual.exclusions = c('Belgium'),
   fixups = function(data) {
     # Strip out country prefixes from levels
     for (var in main.vars) {

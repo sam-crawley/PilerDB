@@ -16,6 +16,7 @@ data.spec <- list(
     "Country" = "COUNTRY",
     "Year" = NA
   ),
+  manual.exclusions = c('Malaysia', 'United Kingdom'),
   pre_fixups = function(data) {
     # Coalesce necessary vars
     data <- coalese.vars(data, c('RELIG', str_subset(names(data), regex("^Q55", ignore_case = T))), "relig")

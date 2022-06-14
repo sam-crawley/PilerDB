@@ -77,6 +77,9 @@ version.min = 0
 #'     When building the DB, the value is converted using countrycode to 'country.name' format}
 #'   \item{country.dict}{(Optional) country dict to use (passed to the custom_dict parameter of countrycoude())}
 #'   \item{country.custom}{(Optional) Names vector to be passed to custom_match parameter of countrycode()}
+#'   \item{manual.exclusions}{List of countries that should be excluded from the DB.
+#'                  For datasets that use split_by_year, this should be a list of lists, with the key being the
+#'                  year, and the value the list of countries to exclude from that year.}
 #'   \item{fixups}{(Optional) A function which applies any fixups as the last step of reading the datafile. The only parameter is
 #'     the dataframe of the wave. Note, at this point the columns have been renamed, as per field.def.}
 #'   \item{pre_fixups}{(Optional) The same as fixups, but this is applied immediately after the datafile is loaded.}
@@ -134,7 +137,11 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
     data <- read.div.data(e$data.spec, data.def.file = data.def, datasets.dir = datasets.dir)
     
     cat.sum[[id]] <- gen.category.summary(data, e$cat.defs)
-    src.tabs <- gen.country.crosstabs(data, e$cat.defs, id, wave.var = e$data.spec$wave_var, split.by.year = e$data.spec$split.by.year)
+    src.tabs <- gen.country.crosstabs(data, e$cat.defs, id, 
+                                      wave.var = e$data.spec$wave_var, 
+                                      split.by.year = e$data.spec$split.by.year,
+                                      manual.exclusions = e$data.spec$manual.exclusions
+                                      )
     data.src.info[[id]] <- get.data.src.info(data, e$data.spec)
     
     tabs <- append(tabs, src.tabs)
@@ -165,7 +172,7 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
 # Produce a data structure for a single dataset that includes crosstabs for each country
 #  At this level, we should only be doing summarising that requires access to the original dataset
 #  (Because the idea is that the original data will not be available after this point)
-gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL, split.by.year = F) {
+gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL, split.by.year = F, manual.exclusions = NULL) {
   if (is.null(split.by.year))
     split.by.year = F
   
@@ -205,7 +212,16 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL, 
       year <- as.integer(splt[[splt.idx]])
     }
     
-    gen.single.country.data(data.by.country[[key]], cntry, data.source, data.source.orig, year)
+    excluded = F
+    if (! is.null(manual.exclusions)) {
+      if (is.null(year) & cntry %in% manual.exclusions)
+        excluded = T
+      # For 'split_by_year' datasets, we check manual exclusions for each year
+      else if (! is.null(year) & ! is.null(manual.exclusions[[as.character(year)]]) & cntry %in% manual.exclusions[[as.character(year)]])
+        excluded = T
+    }
+    
+    gen.single.country.data(data.by.country[[key]], cntry, data.source, data.source.orig, year, excluded)
   })
   
   res <- set_names(res, map_chr(res, ~ .x$Summary$general$ID))
@@ -213,7 +229,7 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL, 
   return(res)
 }
 
-gen.single.country.data <- function(d, cntry, data.source, data.source.orig, year = NULL) {
+gen.single.country.data <- function(d, cntry, data.source, data.source.orig, year = NULL, excluded = F) {
   
   country.orig <- d %>% distinct(Country.orig) %>% pull(Country.orig)
   
@@ -235,7 +251,7 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   cor.nomiss = calc.all.indices(d, tables, drop.cats = T)
   cor.nomiss.wt = calc.all.indices(d, tables, drop.cats = T, weighted = T)
   
-  group.basis <- calc.group.basis(cor.nomiss.wt)
+  group.basis <- ifelse(! excluded, calc.group.basis(cor.nomiss.wt), NA_character_)
   
   gallagher <- NA
   loosmore <- NA
@@ -270,8 +286,8 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
     cor.nomiss.wt = cor.nomiss.wt,
     country.orig = country.orig,
     avail.counts = avail.counts,
-    avail.counts.orig = avail.counts.orig
-    
+    avail.counts.orig = avail.counts.orig,
+    manually.excluded = excluded
   )
   
   tables
@@ -673,7 +689,9 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     #  The logic is slightly different, depending on whether the group basis
     #  was passed to this function
     is.excluded = F
-    if (group.basis.selected)
+    if (orig.sum.data$manually.excluded)
+      is.excluded <- T
+    else if (group.basis.selected)
       is.excluded <- is.na(sum$Gallagher)
     else
       is.excluded <- is.na(sum$`Group Basis`)
@@ -705,6 +723,8 @@ calc.summary.data <- function(res, group.to.use = NULL) {
         }
         else if (max(orig.sum.data$cor.nomiss.wt$n.eff, na.rm = T) <= 200)
           sum$excluded <- "N <= 200 after removals"
+        else if (orig.sum.data$manually.excluded)
+          sum$excluded <- "Manually excluded"
       })
       
       return(sum)
