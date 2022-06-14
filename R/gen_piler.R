@@ -214,10 +214,10 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL, 
     
     excluded = F
     if (! is.null(manual.exclusions)) {
-      if (is.null(year) & cntry %in% manual.exclusions)
+      if (is.null(year) && cntry %in% manual.exclusions)
         excluded = T
       # For 'split_by_year' datasets, we check manual exclusions for each year
-      else if (! is.null(year) & ! is.null(manual.exclusions[[as.character(year)]]) & cntry %in% manual.exclusions[[as.character(year)]])
+      else if (! is.null(year) && ! is.null(manual.exclusions[[as.character(year)]]) && cntry %in% manual.exclusions[[as.character(year)]])
         excluded = T
     }
     
