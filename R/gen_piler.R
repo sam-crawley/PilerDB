@@ -415,13 +415,11 @@ config.summary.data <- function(summary.data, drop.cats = F, weighted = F) {
   # Select the right n column, depending on whether we wanted weighted or
   #  unweighted
   if (weighted) {
-    summary.data <- summary.data %>% 
-      select(-n) %>%
-      rename(n = "n.weighted")
+    summary.data$n <- summary.data$n.weighted 
+    summary.data$n.weighted <- NULL
   }  
   else {
-    summary.data <- summary.data %>% 
-      select(-n.weighted)
+    summary.data$n.weighted <- NULL
   }  
   
   # Drop out unwanted categories, and those < 0.02
@@ -762,7 +760,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
 get.group.size.summary <- function(res, group.to.use = NULL) {
   # Add in group sizes for 3 largest groups for each country,
   #  as well as breakdowns for each Party/Main Group combo
-  map_dfr(res, function(country.data) {
+  get.grp.size.row <- function(country.data) {
     if (is.null(group.to.use))
       group.basis <- country.data$Summary$general$`Group Basis`
     else
@@ -775,7 +773,7 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
     
     if (! is.data.frame(summary.data))
       return(NULL)
-
+    
     gs.row <- country.data$Summary$general %>%
       select(Country, `Data Source`, Year) %>%
       mutate(`Group Basis` = group.basis)
@@ -785,9 +783,9 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
       summarise(n = sum(n)) %>% 
       filter(n > 0) %>%
       slice_max(n, n=5, with_ties = F)      
-
+    
     main.groups <- gs$Group
-
+    
     for (row in 1:summary.group.size) {
       sum.row <- gs[row, ]
       gs.row <- suppressMessages(bind_cols(gs.row, sum.row))
@@ -835,9 +833,11 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
         "Group 5...28" = NA
       )
     }
-
+    
     gs.row
-  })
+  }
+  
+  map_dfr(res, get.grp.size.row)
 }
 
 get.max.parties <- function(group.sizes) {
