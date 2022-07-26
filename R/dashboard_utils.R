@@ -54,9 +54,9 @@ gen.group.size.names <- function(max.parties) {
   )
 }
 
-get.group.sizes <- function(group.sizes, group.basis) {
+get.group.sizes <- function(group.sizes, group.sizes.by.group, group.basis) {
   if (group.basis != "(Highest Tau)")
-    group.sizes <- res$group.sizes.by.group[[group.basis]]
+    group.sizes <- group.sizes.by.group[[group.basis]]
   
   group.sizes
 }

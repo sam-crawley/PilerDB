@@ -193,7 +193,7 @@ launchPilerDash <- function(logger = NULL) {
     ))
     
     output$tableGroupSizes <- DT::renderDT(
-      get.group.sizes(group.sizes, input$group.basis.gs),
+      get.group.sizes(group.sizes, piler$group.sizes.by.group, input$group.basis.gs),
       options = list(
         lengthChange = F, 
         paging = F, 
