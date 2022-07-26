@@ -18,6 +18,7 @@ data.spec <- list(
     "Year" = "V238",
     "Weight" = "V236"
   ),
+  manual.exclusions = c('United Kingdom'),
   fixups = function(data) {
     # Strip out country prefixes from levels
     for (var in main.vars) {

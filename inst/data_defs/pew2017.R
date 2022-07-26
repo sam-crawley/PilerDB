@@ -16,7 +16,6 @@ data.spec <- list(
     "Country" = "Country",
     "Year" = NA
   ),
-  manual.exclusions = c('United Kingdom'),
   pre_fixups = function(data) {
     # Coalece necessary vars
     rel.vars <- str_subset(names(data), regex("^D_RELIG_", ignore_case = T)) %>% 
