@@ -13,7 +13,9 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
   if (drop.cats & ! is.null(country.data))
     country.data <- drop.rows.from.country.data(country.data, group, weighted = weighted)
 
-  n.eff <- nrow(country.data)
+  n.eff <- NA
+  if (is.data.frame(summary.data))
+    n.eff <- sum(summary.data$n)
   
   if (! is.data.frame(summary.data) || n.eff <= 200)
     return(
