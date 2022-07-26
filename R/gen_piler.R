@@ -769,7 +769,7 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
     if (is.na(group.basis) || is.null(group.basis))
       return(NULL)
     
-    summary.data <- config.summary.data(country.data[[group.basis]], drop.cats = T)
+    summary.data <- config.summary.data(country.data[[group.basis]], drop.cats = T, weighted = T)
     
     if (! is.data.frame(summary.data))
       return(NULL)
