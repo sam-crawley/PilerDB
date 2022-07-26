@@ -52,7 +52,7 @@ cat.defs <- list(
                   "None/No party (Volunteered)", "Would not vote (Volunteered)", "Would not vote (Volunteered)",
                   "Don\u2019t know/haven\u2019t decided yet (Volunteered)", "Don t know", "No preference (Volunteered)", "Blank", "Missing",
                   "Don\u2019t know", "None / No party", "Dont know", "Would not vote  (Volunteered)", "Blank /null vote (Volunteered)",
-                  "Undecided", "Nothing (Volunteered)"),
+                  "Undecided", "Nothing (Volunteered)", "None  (Volunteered)"),
     "Other" = c("Independent", "Other party (Volunteered)", "Other", "Other   (Volunteered)", "Other (Volunteered)",
                 "Other  (Volunteered)", "Other (SPECIFY)", "Other party (SPECIFY)", "A party with credible candidate (Volunteered)",
                 "Any party (Volunteered)", "Independent candidate/Azaad Umeedwaar", "Independents")

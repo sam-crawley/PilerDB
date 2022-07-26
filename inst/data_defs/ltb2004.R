@@ -24,7 +24,7 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("No responde", "No sabe"),
+    "Missing" = c("No responde", "No sabe", "No documentado"),
     "Other" = c("Otros (partidos nacionales y provinciales)", "Vota nulo/Blanco", "No vota/Ninguno", "No inscrito/No ten\u{c3}\u{ad}a edad")
   ),
   Language = list(
