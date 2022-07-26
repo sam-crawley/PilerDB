@@ -5,7 +5,7 @@ summary.group.size <- 5
 # These "countries" should *always* be skipped
 global.country.skip <- c("Hong Kong SAR China", "Macao SAR China", "Puerto Rico")
 
-cats.to.drop <- c("Missing", "Other")
+cats.to.drop <- c("Missing", "Other", "No Religion")
 
 version.maj = 1
 version.min = 0
