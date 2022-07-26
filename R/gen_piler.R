@@ -730,28 +730,30 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     
     main.summary.data <- country.data[[group.to.use]]
     
+    total.sample <- sum(main.summary.data$n.weighted)
+    
     sum$total.included <- orig.sum.data$cor.nomiss.wt %>%
       filter(group == group.to.use) %>%
       pull(n.eff)
-    sum$total.included.pct <- sum$total.included / sum$`Sample Size`
+    sum$total.included.pct <- sum$total.included / total.sample
     
     parties.to.drop <- find.groups.to.drop(main.summary.data, "Party")
     
     sum$party.missing <- main.summary.data %>% 
-      filter(! Party %in% c(cats.to.drop, parties.to.drop)) %>%
-      summarise(n = sum(n)) %>% 
+      filter(Party %in% c(cats.to.drop, parties.to.drop)) %>%
+      summarise(n = sum(n.weighted)) %>% 
       pull(n)
     
-    sum$party.missing.pct <- sum$party.missing / sum$`Sample Size`
+    sum$party.missing.pct <- sum$party.missing / total.sample
     
     groups.to.drop <- find.groups.to.drop(main.summary.data, "Group")
     
     sum$group.missing <- main.summary.data %>% 
-      filter(! Group %in% c(cats.to.drop, groups.to.drop)) %>%
-      summarise(n = sum(n)) %>% 
+      filter(Group %in% c(cats.to.drop, groups.to.drop)) %>%
+      summarise(n = sum(n.weighted)) %>% 
       pull(n)
     
-    sum$group.missing.pct <- sum$group.missing / sum$`Sample Size`
+    sum$group.missing.pct <- sum$group.missing / total.sample
     
     sum
   })
