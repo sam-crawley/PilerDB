@@ -760,6 +760,12 @@ calc.summary.data <- function(res, group.to.use = NULL) {
 }
 
 get.group.size.summary <- function(res, group.to.use = NULL) {
+  # Take a DF, and binds each row to a single row
+  bind.to.sigle.row <- function(df) {
+    df <- split(df, seq(nrow(df)))
+    bind_cols(df)
+  }
+  
   # Add in group sizes for 3 largest groups for each country,
   #  as well as breakdowns for each Party/Main Group combo
   get.grp.size.row <- function(country.data) {
@@ -784,21 +790,28 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
       group_by(Group) %>% 
       summarise(n = sum(n)) %>% 
       filter(n > 0) %>%
-      slice_max(n, n=5, with_ties = F)      
+      slice_max(n, n=5, with_ties = F) %>%
+      arrange(desc(n))
     
     main.groups <- gs$Group
+    
+    summary.data <- summary.data %>% mutate(Group = fct_relevel(Group, as.character(main.groups)))
     
     for (row in 1:summary.group.size) {
       sum.row <- gs[row, ]
       gs.row <- suppressMessages(bind_cols(gs.row, sum.row))
-    }
+    }    
+    
+    #gs.row <- suppressMessages(bind_cols(gs.row, bind.to.sigle.row(gs)))
     
     party.group.sizes <- summary.data %>% 
       filter(Group %in% main.groups) %>% 
+      arrange(Group) %>%
       pivot_wider(names_from = Group, values_from = n) %>%
       rowwise() %>% 
       mutate(Total = sum(c_across(-Party))) %>%
-      select(Party, Total, everything())
+      select(Party, Total, everything()) %>%
+      arrange(desc(Total))
     
     names(party.group.sizes) <- c("Party.Grp", "Total", paste("Group", 1:length(main.groups)))
     
@@ -812,6 +825,8 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
     for (row in 1:nrow(party.group.sizes)) {
       gs.row <- suppressMessages(bind_cols(gs.row, party.group.sizes[row, ]))
     }
+    
+    #gs.row <- suppressMessages(bind_cols(gs.row, bind.to.sigle.row(party.group.sizes)))
     
     # Workaround for only 1 party - columns need to be renamed
     # XXX: this assumes there are 5 groups...
@@ -845,6 +860,3 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
 get.max.parties <- function(group.sizes) {
   length(names(group.sizes)[str_detect(names(group.sizes), "^Party.Grp")])
 }
-
-  
-  
