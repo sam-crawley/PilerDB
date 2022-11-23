@@ -11,5 +11,9 @@ cross-national surveys.
 The code is designed to make it straightforward to extend coverage in the
 database by adding new surveys.
 
+To view the PILER DB via the Shiny web interface, install this package, and run:
+
+PilerDB::launchPilerDash()
+
 More information can be found in the package documentation and associated
 papers.
