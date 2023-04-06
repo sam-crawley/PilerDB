@@ -43,6 +43,7 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
   
 }
 
+#' @export
 calc.summary.indices <- function(summary.data, include.extra = T) {
   index.summaries <- build.index.summary.data(summary.data)
 

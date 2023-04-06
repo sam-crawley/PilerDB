@@ -2,6 +2,7 @@
 
 export(build.index.summary.data)
 export(calc.gallagher)
+export(calc.summary.indices)
 export(config.summary.data)
 export(gen.piler.db)
 export(launchIndexTester)
