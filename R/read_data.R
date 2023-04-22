@@ -86,7 +86,7 @@ get.datasets.dir <- function() {
   here::here("datasets")
 }
 
-load.data.by.id <- function(id, raw = F, process = T) {
+load.data.by.id <- function(id, raw = F, process = T, datasets.dir = NULL) {
   process <- if_else(raw, F, process)
   
   file <- paste0(get.data.def.dir(), "/", tolower(id), ".R")
@@ -98,7 +98,7 @@ load.data.by.id <- function(id, raw = F, process = T) {
     
   source(file, local = e, encoding = "UTF-8")
     
-  data <- read.div.data(e$data.spec, file, raw = raw)
+  data <- read.div.data(e$data.spec, file, raw = raw, datasets.dir = datasets.dir)
 
   if (process)
     data <- process.data(data, e$cat.defs)
