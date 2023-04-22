@@ -27,6 +27,7 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
     )  
   
   tau <- calc.tau(country.data, group, weighted = weighted)
+  cc <- calc.cross.cutting(country.data, group, weighted = weighted)
   
   summary.indices <- calc.summary.indices(summary.data)
   
@@ -35,7 +36,8 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
     n.eff = as.integer(n.eff),
     parties = as.integer(length(unique(summary.data$Party))),
     groups = as.integer(length(unique(summary.data$Group))),
-    tau = tau
+    tau = tau,
+    cc
   )
   
   bind_cols(res, summary.indices)
@@ -138,6 +140,33 @@ calc.tau <- function(country.data, group, weighted = F) {
   })
   
   assoc$tau
+}
+
+calc.cross.cutting <- function(country.data, group, weighted = F) {
+  wt.var = NULL
+  if (weighted)
+    wt.var = "Weight"
+  
+  country.data <- country.data %>% mutate(
+    Party = fct_drop(Party),
+    "{group}" = fct_drop(.data[[group]])
+  )
+
+  map_dfc(group.names, function(g) {
+    val <- NA
+
+    if (g != group & length(unique(country.data[[group]])) > 1 & length(unique(country.data[[g]])) > 1) {
+      assoc <- NULL
+      try({
+        assoc <- suppressWarnings(StatMatch::pw.assoc(as.formula(paste(group, "~", g)), country.data, out.df = T, weights = wt.var))
+      })
+      
+      val <- 1 - assoc$V
+    }
+    
+    tibble(val) %>% set_names(paste0("cc.", str_sub(g, 0, 1)))
+    
+  })
 }
 
 # TODO: document
