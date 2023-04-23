@@ -593,15 +593,15 @@ get.data.src.info <- function(data, data.def) {
 #  at a time, since someone could be a member of a language group that is smaller
 #  than 2%, but be a member of a large religion group. We would want to keep this
 #  person in the analysis for religion, but not for language
-drop.rows.from.country.data <- function(d, group.var, weighted = F) {
+drop.rows.from.country.data <- function(d, group1.var, group2.var, weighted = F) {
   weights <- NULL
   if (weighted)
     weights <- d$Weight
   
   d <- d %>% 
-    mutate(across(all_of(c("Party", group.var)), ~fct_lump_prop(fct_drop(.x), 0.02, w = weights))) %>%
+    mutate(across(all_of(c(group1.var, group2.var)), ~fct_lump_prop(fct_drop(.x), 0.02, w = weights))) %>%
     filter(
-      ! .data[[group.var]] %in% cats.to.drop & ! Party %in% cats.to.drop
+      ! .data[[group1.var]] %in% cats.to.drop & ! .data[[group2.var]] %in% cats.to.drop
     )
   
   d
@@ -616,7 +616,7 @@ calc.all.indices <- function(country.data, sum.dfs, drop.cats = F, weighted = F)
 
   indices %>%
     mutate(across(tau, ~ifelse(is.nan(.x) | is.infinite(.x), NA, .x))) %>%
-    mutate(across(-group, ~round(.x, digits = 3))) %>%
+    mutate(across(-group, ~round(as.numeric(.x), digits = 3))) %>%
     remove_rownames()
 }
 
@@ -667,6 +667,9 @@ calc.summary.data <- function(res, group.to.use = NULL) {
         sum$`Loosmore Hanby` <- stats$loosmore
         sum$PVF <- stats$PVF
         sum$PVP <- stats$PVP
+        
+        sum$cross.cutting <- mean(c(stats$cc.L, stats$cc.R, stats$cc.E), na.rm = T)
+        sum$cross.cutting <- ifelse(is.infinite(sum$cross.cutting) | is.nan(sum$cross.cutting), NA, sum$cross.cutting)
         
         sum <- sum %>% mutate(across(c(Gallagher, `Loosmore Hanby`, PVF, PVP), ~ round(.x, 2)))
       }

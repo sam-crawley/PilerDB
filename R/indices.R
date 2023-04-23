@@ -10,8 +10,10 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
     country.data <- country.data %>% filter(! is.na(Weight))
   }
   
+  cc <- calc.cross.cutting(country.data, group, drop.cats = drop.cats, weighted = weighted)
+  
   if (drop.cats & ! is.null(country.data))
-    country.data <- drop.rows.from.country.data(country.data, group, weighted = weighted)
+    country.data <- drop.rows.from.country.data(country.data, "Party", group, weighted = weighted)
 
   n.eff <- NA
   if (is.data.frame(summary.data))
@@ -27,7 +29,6 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
     )  
   
   tau <- calc.tau(country.data, group, weighted = weighted)
-  cc <- calc.cross.cutting(country.data, group, weighted = weighted)
   
   summary.indices <- calc.summary.indices(summary.data)
   
@@ -142,31 +143,51 @@ calc.tau <- function(country.data, group, weighted = F) {
   assoc$tau
 }
 
-calc.cross.cutting <- function(country.data, group, weighted = F) {
-  wt.var = NULL
-  if (weighted)
-    wt.var = "Weight"
+calc.cross.cutting <- function(country.data, group, drop.cats = F, weighted = F) {
+  purrr::map_chr(group.names, function(g) {
+    if (g == group)
+      return (NA)
+    
+    # If drop.cats requested, we do our own version of that here
+    #  Because we're dropping cats for group vs group, we need to do that separately
+    #  from the party vs group drop cats done for the other index calculations
+    if (drop.cats)
+      country.data <- drop.rows.from.country.data(country.data, group, g, weighted = weighted)
+
+    country.data <- country.data %>% mutate(
+      "{group}" = fct_drop(.data[[group]]),
+      "{g}" = fct_drop(.data[[g]]),
+    )
+    
+    if (length(unique(country.data[[group]])) <= 1 | length(unique(country.data[[g]])) <= 1)
+      return (NA)
+    
+    weights <- NULL
+    if (weighted)
+      weights <- country.data$Weight
+    
+    val <- calc.cc.selway(country.data[[group]], country.data[[g]], weights)
+    
+    val
+    
+  }) %>% 
+    set_names(map_chr(group.names, ~paste0("cc.", str_sub(.x, 0, 1)))) %>%
+    as_tibble_row()
+}
+
+# Calculate Selway's cross-cutting measure
+#  (Done this way since it's quicker than StatMatch::pw.assoc())
+calc.cc.selway <- function(var1, var2, weight = NULL) {
+  chi.sq <- weights::wtd.chi.sq(var1, var2, weight=weight, na.rm = T, drop.missing.levels = T)
   
-  country.data <- country.data %>% mutate(
-    Party = fct_drop(Party),
-    "{group}" = fct_drop(.data[[group]])
-  )
-
-  map_dfc(group.names, function(g) {
-    val <- NA
-
-    if (g != group & length(unique(country.data[[group]])) > 1 & length(unique(country.data[[g]])) > 1) {
-      assoc <- NULL
-      try({
-        assoc <- suppressWarnings(StatMatch::pw.assoc(as.formula(paste(group, "~", g)), country.data, out.df = T, weights = wt.var))
-      })
-      
-      val <- 1 - assoc$V
-    }
-    
-    tibble(val) %>% set_names(paste0("cc.", str_sub(g, 0, 1)))
-    
-  })
+  var1 <- fct_drop(var1)
+  var2 <- fct_drop(var2)
+  
+  m <- min(length(levels(var1)) - 1, length(levels(var2)) - 1)  
+  
+  cc <- 1 - sqrt(chi.sq[[1]] / ( length(var1) * m ))
+  
+  cc
 }
 
 # TODO: document
