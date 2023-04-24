@@ -1,6 +1,9 @@
 data.spec <- list(
-  file.name = "merged_r6_data_2016_36countries2.sav",
+  # NOTE: the file from Afrobarometer has encoding problems. To fix it, it needs
+  #  to be loaded in SPSS and saved as "SPSS Statistics Local Encoding"
+  file.name = "merged_r6_data_2016_36countries2_fix.sav",
   file.type = 'sav',
+  file.encoding = "latin1",
   question.text = c(
     "Party" = "If a presidential election were held tomorrow, which party’s candidate would you vote for?",
     "Language" = "Which language is your home language?",
