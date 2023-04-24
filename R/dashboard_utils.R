@@ -21,12 +21,13 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
       "Eth" = Ethnicity,
       "Excluded Reason" = excluded,
       "Flagged" = warning.flags,
-      "ATT-Pol" = Gallagher 
+      "ATT-Pol" = Gallagher,
+      "CC" = cross.cutting
     ) %>%
     mutate(across(c(Lng, Rel, Eth), ~if_else(.x, "\u{2713}", "\u{2716}"))) %>%
     mutate(Flagged = if_else(is.na(Flagged), "", "\u{D83D}\u{DEA9}")) %>%
     select(-`Loosmore Hanby`) %>%
-    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, Tau, `ATT-Pol`, PVF, PVP, Lng, Rel, Eth, Flagged, everything())
+    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, Tau, `ATT-Pol`, PVF, PVP, CC, Lng, Rel, Eth, Flagged, everything())
   
   if (! with.id)
     tab <- tab %>% select(-ID)

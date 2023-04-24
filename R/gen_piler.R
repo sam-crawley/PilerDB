@@ -668,7 +668,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
         sum$PVF <- stats$PVF
         sum$PVP <- stats$PVP
         
-        sum$cross.cutting <- mean(c(stats$cc.L, stats$cc.R, stats$cc.E), na.rm = T)
+        sum$cross.cutting <- round(mean(c(stats$cc.L, stats$cc.R, stats$cc.E), na.rm = T), 2)
         sum$cross.cutting <- ifelse(is.infinite(sum$cross.cutting) | is.nan(sum$cross.cutting), NA, sum$cross.cutting)
         
         sum <- sum %>% mutate(across(c(Gallagher, `Loosmore Hanby`, PVF, PVP), ~ round(.x, 2)))
