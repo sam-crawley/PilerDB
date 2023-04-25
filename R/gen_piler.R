@@ -212,9 +212,8 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL, 
   
   data.by.country <- split(data, split.factor, drop = T)
   
-  # Create crosstabs for each country
-  # (Produces a list of lists, keyed by country+data.source+year)
-  res <- map(names(data.by.country), function(key) {
+  # Collect params so we can pass to future_map to do the processing for each country
+  ct.params <- map(names(data.by.country), function(key) {
     cntry <- key
     data.source.orig = data.source
     year <- NULL
@@ -240,7 +239,20 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL, 
         excluded = T
     }
     
-    gen.single.country.data(data.by.country[[key]], cntry, data.source, data.source.orig, year, excluded)
+    list(
+      data = data.by.country[[key]],
+      cntry = cntry,
+      data.source = data.source,
+      data.source.orig = data.source.orig,
+      year = year,
+      excluded = excluded
+    )
+  })
+  
+  # Create crosstabs for each country
+  # (Produces a list of lists, keyed by country+data.source+year)
+  res <- furrr::future_map(ct.params, function(params) {  
+    gen.single.country.data(params[['data']], params[['cntry']], params[['data.source']], params[['data.source.orig']], params[['year']], params[['excluded']])
   })
   
   res <- set_names(res, map_chr(res, ~ .x$Summary$general$ID))
@@ -263,7 +275,7 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   avail.counts.orig <- calc.avail.counts(d, with.removals = F)
   
   if (is.null(year))
-    year <- max(as.numeric(d$Year), na.rm = T)
+    year <- max(as.integer(d$Year), na.rm = T)
   
   cor = calc.all.indices(d, tables)
   cor.wt = calc.all.indices(d, tables, weighted = T)
