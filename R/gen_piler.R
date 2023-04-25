@@ -669,7 +669,7 @@ calc.group.basis <- function(cor) {
 
 # Calculate a DF summarising all countries
 calc.summary.data <- function(res, group.to.use = NULL) {
-  map_dfr(res, function(country.data) {
+  furrr::future_map_dfr(res, function(country.data) {
     orig.sum.data <- country.data$Summary
     #cat(orig.sum.data$general$ID, "\n")
     
@@ -888,7 +888,7 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
     gs.row
   }
   
-  map_dfr(res, get.grp.size.row)
+  furrr::future_map_dfr(res, get.grp.size.row)
 }
 
 get.max.parties <- function(group.sizes) {
