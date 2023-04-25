@@ -120,12 +120,12 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
   
   data.defs <- get.data.def.list()
   
-  for (data.def in data.defs) {
+  res <- map(data.defs, function(data.def) {
     id <- get.data.def.id(data.def)
     
     if (! is.null(ids.to.load)) {
       if (! id %in% ids.to.load)
-        next()
+        return (NULL)
     }
     
     cat("Processing", data.def, "\n")
@@ -136,16 +136,35 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
     
     data <- read.div.data(e$data.spec, data.def.file = data.def, datasets.dir = datasets.dir)
     
-    cat.sum[[id]] <- gen.category.summary(data, e$cat.defs)
+    data.cat.sum <- gen.category.summary(data, e$cat.defs)
     src.tabs <- gen.country.crosstabs(data, e$cat.defs, id, 
                                       wave.var = e$data.spec$wave_var, 
                                       split.by.year = e$data.spec$split.by.year,
                                       manual.exclusions = e$data.spec$manual.exclusions
                                       )
-    data.src.info[[id]] <- get.data.src.info(data, e$data.spec)
+    info <- get.data.src.info(data, e$data.spec)
     
-    tabs <- append(tabs, src.tabs)
-  }
+    return (list(
+      id = id,
+      cat.sum = data.cat.sum,
+      tabs = src.tabs,
+      info = info
+    ))
+    
+  })
+  
+  # Reshape data
+  res <- compact(res)
+  names <- purrr::modify(res, "id")  %>% as.character()
+  
+  new.tabs <- purrr::modify(res, "tabs") %>% purrr::flatten()
+  tabs <- append(tabs, new.tabs)
+  
+  new.cat.sum <- purrr::modify(res, "cat.sum") %>% set_names(names)
+  cat.sum <- append(cat.sum, new.cat.sum)
+  
+  new.data.src.info <- purrr::modify(res, "info") %>% set_names(names)
+  data.src.info <- append(cat.sum, new.data.src.info)
   
   tabs <- add.warning.flags(tabs)
   
