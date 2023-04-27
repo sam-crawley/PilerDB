@@ -651,20 +651,14 @@ calc.all.indices <- function(country.data, sum.dfs, drop.cats = F, weighted = F)
     remove_rownames()
 }
 
-# Calculate the 'group basis' (i.e. group with highest GK Tau correlation)
+# Calculate the 'group basis' (i.e. group with highest gallagher)
 calc.group.basis <- function(cor) {
-  if (all(is.na(cor$tau))) {
-    # If all tau's are NA, go by Gallagher instead (if available)
-    if (has_name(cor, 'gallagher'))
-      return (cor %>% slice_max(gallagher, with_ties = F) %>% pull(group))
-    else
-      # Gallagher wasn't calculated, so no way of determining group basis
-      return (NA)
-  }
-  
-  cor %>% 
-    slice_max(tau, with_ties = F) %>% 
-    pull(group)
+  if (has_name(cor, 'gallagher'))
+    return (cor %>% slice_max(gallagher, with_ties = F) %>% pull(group))
+  else
+    # Gallagher wasn't calculated, so no way of determining group basis
+    return (NA)
+
 }
 
 # Calculate a DF summarising all countries
