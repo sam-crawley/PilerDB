@@ -699,7 +699,12 @@ calc.summary.data <- function(res, group.to.use = NULL) {
         sum$PVF <- stats$PVF
         sum$PVP <- stats$PVP
         
-        sum$cross.cutting <- round(mean(c(stats$cc.L, stats$cc.R, stats$cc.E), na.rm = T), 2)
+        # Calculate a mean cross.cutting values from all available values
+        sum$cross.cutting <- orig.sum.data$cor.nomiss.wt %>% 
+          select(group, starts_with("cc")) %>% 
+          pivot_longer(-group) %>% 
+          filter((group == "Language" | group == "Religion" & name == "cc.E")) %>% 
+          summarise(mean = round(mean(value, na.rm = T), 2)) %>% pull(mean)
         sum$cross.cutting <- ifelse(is.infinite(sum$cross.cutting) | is.nan(sum$cross.cutting), NA, sum$cross.cutting)
         
         sum <- sum %>% mutate(across(c(Gallagher, `Loosmore Hanby`, PVF, PVP), ~ round(.x, 2)))
