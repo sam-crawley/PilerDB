@@ -47,7 +47,7 @@ launchPilerDash <- function(logger = NULL) {
                           )),
               pickerInput("group.basis", 
                           label = "Group Basis", 
-                          sort(c('(Highest Tau)', group.names)), 
+                          sort(c('(Highest PES)', group.names)), 
                           multiple = F
                           ),            
               checkboxInput("incomplete.data",
@@ -64,7 +64,7 @@ launchPilerDash <- function(logger = NULL) {
         tabPanel("Group Sizes",
            pickerInput("group.basis.gs", 
                        label = "Group Basis", 
-                       sort(c('(Highest Tau)', group.names)), 
+                       sort(c('(Highest PES)', group.names)), 
                        multiple = F
            ),                
           DT::DTOutput("tableGroupSizes")

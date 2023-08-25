@@ -131,8 +131,8 @@ write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", incl
   summary.sheet <- summary.data %>%
     mutate(across(ends_with('.pct'), ~set.class('percentage', .))) %>%
     select(-Religion, -Ethnicity, -Language, -ID, -`Loosmore Hanby`) %>%
-    arrange(desc(cor.nomiss)) %>%
-    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, cor.nomiss, Gallagher, cross.cutting, everything()) %>%
+    arrange(desc(Gallagher)) %>%
+    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, Gallagher, cor.nomiss, cross.cutting, everything()) %>%
     relocate(warning.flags, .after = everything())
   
   hs2 <- openxlsx::createStyle(textDecoration = "bold")
@@ -146,7 +146,7 @@ write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", incl
   openxlsx::mergeCells(wb, tab.name, cols = 14:15, rows = 1)
   openxlsx::mergeCells(wb, tab.name, cols = 16:17, rows = 1)
   
-  summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "Correlation", "ATT-Pol", "CC",
+  summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "PES", "Tau", "CC",
                        "PVP", "PVF", "Exclusion Reason", "(N)", "(%)", "(N)", "(%)", "(N)", "(%)", "Warning Flags")
   
   openxlsx::writeData(wb, tab.name, data.frame(t(summary.headers)), startRow = 2, startCol = 1, colNames = F, rowNames = F)

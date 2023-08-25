@@ -3,7 +3,7 @@
 # Get the main 'summary' table on the Crosstabs tab of the shiny app
 get.summary.table <- function(res, datasrc, group.basis, country, incomplete.data = F, with.id = F) {
   table.to.use <- res$summary
-  if (group.basis != "(Highest Tau)")
+  if (group.basis != "(Highest PES)")
     table.to.use <- res$summary.by.group[[group.basis]]
   
   tab <- table.to.use  %>%
@@ -21,13 +21,13 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
       "Eth" = Ethnicity,
       "Excluded Reason" = excluded,
       "Flagged" = warning.flags,
-      "ATT-Pol" = Gallagher,
+      "PES" = Gallagher,
       "CC" = cross.cutting
     ) %>%
     mutate(across(c(Lng, Rel, Eth), ~if_else(.x, "\u{2713}", "\u{2716}"))) %>%
     mutate(Flagged = if_else(is.na(Flagged), "", "\u{D83D}\u{DEA9}")) %>%
     select(-`Loosmore Hanby`) %>%
-    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, Tau, `ATT-Pol`, PVF, PVP, CC, Lng, Rel, Eth, Flagged, everything())
+    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, Tau, PVF, PVP, CC, Lng, Rel, Eth, Flagged, everything())
   
   if (! with.id)
     tab <- tab %>% select(-ID)
@@ -56,7 +56,7 @@ gen.group.size.names <- function(max.parties) {
 }
 
 get.group.sizes <- function(group.sizes, group.sizes.by.group, group.basis) {
-  if (group.basis != "(Highest Tau)")
+  if (group.basis != "(Highest PES)")
     group.sizes <- group.sizes.by.group[[group.basis]]
   
   group.sizes
