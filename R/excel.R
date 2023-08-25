@@ -130,9 +130,9 @@ write.divided.xlsx <- function(res, include.summary = T, include.summary.by.grou
 write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", included.excluded.col = T) {
   summary.sheet <- summary.data %>%
     mutate(across(ends_with('.pct'), ~set.class('percentage', .))) %>%
-    select(-Religion, -Ethnicity, -Language, -ID, -`Loosmore Hanby`) %>%
-    arrange(desc(Gallagher)) %>%
-    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, Gallagher, cor.nomiss, cross.cutting, everything()) %>%
+    select(-Religion, -Ethnicity, -Language, -ID) %>%
+    arrange(desc(PES)) %>%
+    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, cor.nomiss, cross.cutting, everything()) %>%
     relocate(warning.flags, .after = everything())
   
   hs2 <- openxlsx::createStyle(textDecoration = "bold")

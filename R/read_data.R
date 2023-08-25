@@ -25,7 +25,7 @@ read.div.data <- function(data.spec, data.def.file, raw = F, datasets.dir = NULL
   else
     stop("Unknown file type")
   
-  encoding <- if_else(is.null(data.spec$file.encoding), "UTF-8", data.spec$file.encoding)
+  encoding <- ifelse(is.null(data.spec$file.encoding), "UTF-8", data.spec$file.encoding)
   
   data <- read_func(file.path, encoding = encoding)
   
@@ -64,7 +64,7 @@ read.div.data <- function(data.spec, data.def.file, raw = F, datasets.dir = NULL
   
   data <- data %>%
     mutate(across(all_of(available.vars), haven::as_factor)) %>%
-    mutate(across(all_of(available.vars), ~fct_explicit_na(.x, na_level = "Missing"))) %>%
+    mutate(across(all_of(available.vars), ~fct_na_value_to_level(.x, level = "Missing"))) %>%
     mutate(Weight = as.numeric(Weight)) %>%
     arrange(Country)
   

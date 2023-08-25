@@ -284,15 +284,15 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   
   group.basis <- ifelse(! excluded, calc.group.basis(cor.nomiss.wt), NA_character_)
   
-  gallagher <- NA
-  loosmore <- NA
+  pes <- NA
+  pes.abs <- NA
   pvp <- NA
   pvf <- NA
   
   if (! is.na(group.basis)) {
     cor.vals <- cor.nomiss.wt %>% filter(group == group.basis)
-    gallagher <- cor.vals$gallagher
-    loosmore <- cor.vals$loosmore
+    pesr <- cor.vals$pes
+    pes.abs <- cor.vals$pes.abs
     pvp <- cor.vals$PVP
     pvf <- cor.vals$PVF
   }
@@ -306,8 +306,7 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
       'Year' = year,
       'Sample Size' = nrow(d),
       'Group Basis' = group.basis,
-      'Gallagher' = gallagher,
-      'Loosmore Hanby' = loosmore,
+      'PES' = pes,
       'PVP' = pvp,
       'PVF' = pvf
     ),
@@ -376,22 +375,19 @@ regen.all.indicies <- function(piler, calc.summaries = T) {
     
     group.basis <- calc.group.basis(country.data$Summary$cor.nomiss.wt)
     
-    gallagher <- NA
-    loosmore <- NA
+    pes <- NA
     pvp <- NA
     pvf <- NA
     
     if (! is.na(group.basis)) {
       cor.vals <- country.data$Summary$cor.nomiss.wt %>% filter(group == group.basis)
-      gallagher <- cor.vals$gallagher
-      loosmore <- cor.vals$loosmore
+      pes <- cor.vals$pes
       pvp <- cor.vals$PVP
       pvf <- cor.vals$PVF
     }
     
     country.data$Summary$general$`Group Basis` = group.basis
-    country.data$Summary$general$`Gallagher` = gallagher
-    country.data$Summary$general$`Loosmore Hanby` = loosmore
+    country.data$Summary$general$`PES` = pes
     country.data$Summary$general$`PVP` = pvp
     country.data$Summary$general$`PVF` = pvf
     
@@ -651,12 +647,12 @@ calc.all.indices <- function(country.data, sum.dfs, drop.cats = F, weighted = F)
     remove_rownames()
 }
 
-# Calculate the 'group basis' (i.e. group with highest gallagher)
+# Calculate the 'group basis' (i.e. group with highest PES)
 calc.group.basis <- function(cor) {
-  if (has_name(cor, 'gallagher'))
-    return (cor %>% slice_max(gallagher, with_ties = F) %>% pull(group))
+  if (has_name(cor, 'pes'))
+    return (cor %>% slice_max(pes, with_ties = F) %>% pull(group))
   else
-    # Gallagher wasn't calculated, so no way of determining group basis
+    # PES wasn't calculated, so no way of determining group basis
     return (NA)
 
 }
@@ -665,8 +661,7 @@ calc.group.basis <- function(cor) {
 calc.summary.data <- function(res, group.to.use = NULL) {
   furrr::future_map_dfr(res, function(country.data) {
     orig.sum.data <- country.data$Summary
-    #cat(orig.sum.data$general$ID, "\n")
-    
+
     group.basis.selected <- F
     
     sum <- orig.sum.data$general %>%
@@ -687,9 +682,8 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     if (nrow(stats) > 0) {
       sum$cor.nomiss <- round(stats$tau, 2)
         
-      if (has_name(stats, 'gallagher')) {
-        sum$Gallagher <- stats$gallagher
-        sum$`Loosmore Hanby` <- stats$loosmore
+      if (has_name(stats, 'pes')) {
+        sum$PES <- stats$pes
         sum$PVF <- stats$PVF
         sum$PVP <- stats$PVP
         
@@ -701,7 +695,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
           summarise(mean = round(mean(value, na.rm = T), 2)) %>% pull(mean)
         sum$cross.cutting <- ifelse(is.infinite(sum$cross.cutting) | is.nan(sum$cross.cutting), NA, sum$cross.cutting)
         
-        sum <- sum %>% mutate(across(c(Gallagher, `Loosmore Hanby`, PVF, PVP), ~ round(.x, 2)))
+        sum <- sum %>% mutate(across(c(PES, PVF, PVP), ~ round(.x, 2)))
       }
     }
     
@@ -709,7 +703,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     #  Available is defined as the correlations were able to be calculated
     #  (so includes, eg., cases where there was only one group)
     available <- country.data$Summary$cor.nomiss.wt %>% 
-      mutate(available = {if ("gallagher" %in% names(.)) ! is.na(gallagher) else F}) %>%
+      mutate(available = {if ("pes" %in% names(.)) ! is.na(pes) else F}) %>%
       select(group, available) %>% 
       pivot_wider(names_from = group, values_from = available)
     sum <- bind_cols(sum, available)
@@ -723,7 +717,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     if (orig.sum.data$manually.excluded)
       is.excluded <- T
     else if (group.basis.selected)
-      is.excluded <- is.na(sum$Gallagher)
+      is.excluded <- is.na(sum$PES)
     else
       is.excluded <- is.na(sum$`Group Basis`)
 

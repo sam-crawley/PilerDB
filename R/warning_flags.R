@@ -46,7 +46,7 @@ gen.warning.message <- function(warning.type, warning.details) {
   }
   
   if ("outlier" %in% flags) {
-    warnings <- append(warnings, "The Gallagher score for this survey is a statistical outlier for this country.")
+    warnings <- append(warnings, "The PES score for this survey is a statistical outlier for this country.")
   }
   
   return (warnings)
@@ -132,23 +132,23 @@ get.high.group.missing <- function(crosstabs, flagged.only = T) {
 }
 
 # Find surveys which are statistical outliers, using a hampel filter
-#  Calculations are based on our Gallagher measure for each country.
+#  Calculations are based on our PES measure for each country.
 #  Any surveys for a country that are outside the hampel filter range
 #   are considered outliers. However, we only check countries where
-#   the Gallagher std deviation is >= 9 (by default), to avoid
-#   removing cases when there is not much variation in the Gallagher
+#   the PES std deviation is >= 9 (by default), to avoid
+#   removing cases when there is not much variation in the PES
 #   scores for the country.
 get.outlier.cases <- function(crosstabs, sd.threshold = 9) {
-  gal.df <- map_df(names(crosstabs), ~crosstabs[[.x]]$Summary$general %>% select(ID, Country, Gallagher))
+  gal.df <- map_df(names(crosstabs), ~crosstabs[[.x]]$Summary$general %>% select(ID, Country, PES))
   
   ranges <- gal.df %>% 
     group_by(Country) %>% 
-    summarise(median = median(Gallagher, na.rm = T), mad = mad(Gallagher, constant = 1, na.rm = T), sd = sd(Gallagher, na.rm = T)) %>% 
+    summarise(median = median(PES, na.rm = T), mad = mad(PES, constant = 1, na.rm = T), sd = sd(PES, na.rm = T)) %>% 
     filter(sd >= sd.threshold) %>%
     mutate(min = median - 3 * mad, max = median + 3 * mad)
   
   flagged <- inner_join(gal.df, ranges, by = "Country") %>% 
-    mutate(outside.range = Gallagher < min | Gallagher > max)
+    mutate(outside.range = PES < min | PES > max)
   
   return (flagged %>% filter(outside.range))
   

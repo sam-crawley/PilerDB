@@ -1,6 +1,6 @@
 #' Index tester shiny app
 #'
-#' Simple app to test difference scenarios for the ATT-Pol (Gallagher) and other
+#' Simple app to test difference scenarios for the PES and other
 #'  index calculations
 #' @export
 launchIndexTester <- function() {
