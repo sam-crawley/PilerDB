@@ -163,8 +163,7 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
   new.cat.sum <- purrr::modify(res, "cat.sum") %>% set_names(names)
   cat.sum <- append(cat.sum, new.cat.sum)
   
-  new.data.src.info <- purrr::modify(res, "info") %>% set_names(names)
-  data.src.info <- append(cat.sum, new.data.src.info)
+  data.src.info <- purrr::modify(res, "info") %>% set_names(names)
   
   tabs <- add.warning.flags(tabs)
   
