@@ -360,11 +360,12 @@ calc.summarised.group.data <- function(data, group.var) {
 }
 
 # Regenerate the indices data for all countries, without re-generating the crosstabs, etc.
-#  This is much quicker than generating everything from scratch
-regen.all.indicies <- function(piler, calc.summaries = T) {
-  piler.new <- list()
+#  This is quicker than generating everything from scratch
+# XXX: not currently working
+regen.all.indicies <- function(orig.data, calc.summaries = T) {
+  piler.new <- orig.data
   
-  piler.new$crosstabs <- map(piler$crosstabs, function(country.data) {
+  piler.new$crosstabs <- furrr::future_map(orig.data$crosstabs, function(country.data) {
     
     summary.data.list <- country.data[group.names]
     
@@ -376,18 +377,21 @@ regen.all.indicies <- function(piler, calc.summaries = T) {
     group.basis <- calc.group.basis(country.data$Summary$cor.nomiss.wt)
     
     pes <- NA
+    pes.nrm <- NA
     pvp <- NA
     pvf <- NA
     
     if (! is.na(group.basis)) {
       cor.vals <- country.data$Summary$cor.nomiss.wt %>% filter(group == group.basis)
       pes <- cor.vals$pes
+      pes.nrm <- cor.vals$pes.nrm
       pvp <- cor.vals$PVP
       pvf <- cor.vals$PVF
     }
     
     country.data$Summary$general$`Group Basis` = group.basis
     country.data$Summary$general$`PES` = pes
+    country.data$Summary$general$`PES.nrm` = pes.nrm
     country.data$Summary$general$`PVP` = pvp
     country.data$Summary$general$`PVF` = pvf
     
@@ -397,6 +401,8 @@ regen.all.indicies <- function(piler, calc.summaries = T) {
   if (calc.summaries) {
     piler.new <- calc.all.summaries(piler.new)
   }
+  
+  
   
   return (piler.new)
 }
@@ -684,6 +690,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
         
       if (has_name(stats, 'pes')) {
         sum$PES <- stats$pes
+        sum$PES.nrm <- stats$pes.nrm
         sum$PVF <- stats$PVF
         sum$PVP <- stats$PVP
         
@@ -695,7 +702,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
           summarise(mean = round(mean(value, na.rm = T), 2)) %>% pull(mean)
         sum$cross.cutting <- ifelse(is.infinite(sum$cross.cutting) | is.nan(sum$cross.cutting), NA, sum$cross.cutting)
         
-        sum <- sum %>% mutate(across(c(PES, PVF, PVP), ~ round(.x, 2)))
+        sum <- sum %>% mutate(across(c(PES, PES.nrm, PVF, PVP), ~ round(.x, 2)))
       }
     }
     

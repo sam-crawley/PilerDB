@@ -51,12 +51,14 @@ calc.summary.indices <- function(summary.data, include.extra = T) {
   index.summaries <- build.index.summary.data(summary.data)
 
   pes <- calc.pes(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes)
+  pes.nrm <- normalise.pes(pes)
   pes.abs <- calc.pes(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, use.abs = T)
   huber <- calc.huber.indices(summary.data, 
                               index.summaries$group.sizes, index.summaries$party.sizes, index.summaries$group.size.by.party, index.summaries$party.support.by.group)
   
   res <- tibble(
-    pes = pes,
+    pes     = pes,
+    pes.nrm = pes.nrm,
     pes.abs = pes.abs
   )
   
@@ -68,10 +70,20 @@ calc.summary.indices <- function(summary.data, include.extra = T) {
   bind_cols(res, huber)
 }
 
+# Rescale PES to range between 0 and 1.
+normalise.pes <- function(val) {
+  # We use a hare-coded max val, which is the highest value in the DB as at Aug '23
+  #  Since the PES calculation has no theoretical maximum, it is possible future
+  #  values could exceed 1
+  max <- 51.21
+  
+  scales::rescale(val, from = c(0,51.21))
+}
+
 # Update the summary indices (i.e. not tau, since it requires the full data) for a 
 #  given configuration
 update.summary.indices <- function(orig.indices, summary.data.list, drop.cats = F, weighted = F) {
-  orig.indices <- orig.indices %>% select(any_of(c("group", "n.eff", "parties", "groups", "tau")))
+  orig.indices <- orig.indices %>% select(any_of(c("group", "n.eff", "parties", "groups", "tau")), starts_with("cc"))
   
   new.indices <- map_dfr(names(summary.data.list), function(group) {
     summary.data <- config.summary.data(summary.data.list[[group]], drop.cats = drop.cats, weighted = weighted)
