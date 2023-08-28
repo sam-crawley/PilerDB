@@ -165,7 +165,8 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
   
   data.src.info <- purrr::modify(res, "info") %>% set_names(names)
   
-  tabs <- add.warning.flags(tabs)
+  # XXX: disabled for now, since it's not really used
+  #tabs <- add.warning.flags(tabs)
   
   version <- paste(c(version.maj, version.min), collapse = ".")
   
@@ -283,19 +284,6 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   
   group.basis <- ifelse(! excluded, calc.group.basis(cor.nomiss.wt), NA_character_)
   
-  pes <- NA
-  pes.abs <- NA
-  pvp <- NA
-  pvf <- NA
-  
-  if (! is.na(group.basis)) {
-    cor.vals <- cor.nomiss.wt %>% filter(group == group.basis)
-    pes <- cor.vals$pes
-    pes.abs <- cor.vals$pes.abs
-    pvp <- cor.vals$PVP
-    pvf <- cor.vals$PVF
-  }
-  
   tables$Summary <- list(
     general = tibble(
       'ID' = paste(cntry, data.source, year),
@@ -304,10 +292,7 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
       'Data Source Orig' = data.source.orig,
       'Year' = year,
       'Sample Size' = nrow(d),
-      'Group Basis' = group.basis,
-      'PES' = pes,
-      'PVP' = pvp,
-      'PVF' = pvf
+      'Group Basis' = group.basis
     ),
     cor = cor,
     cor.wt = cor.wt,
@@ -374,26 +359,9 @@ regen.all.indicies <- function(orig.data, calc.summaries = T) {
     country.data$Summary$cor.nomiss.wt = update.summary.indices(country.data$Summary$cor.nomiss.wt, summary.data.list, drop.cats = T, weighted = T)
     
     group.basis <- calc.group.basis(country.data$Summary$cor.nomiss.wt)
-    
-    pes <- NA
-    pes.nrm <- NA
-    pvp <- NA
-    pvf <- NA
-    
-    if (! is.na(group.basis)) {
-      cor.vals <- country.data$Summary$cor.nomiss.wt %>% filter(group == group.basis)
-      pes <- cor.vals$pes
-      pes.nrm <- cor.vals$pes.nrm
-      pvp <- cor.vals$PVP
-      pvf <- cor.vals$PVF
-    }
-    
+
     country.data$Summary$general$`Group Basis` = group.basis
-    country.data$Summary$general$`PES` = pes
-    country.data$Summary$general$`PES.nrm` = pes.nrm
-    country.data$Summary$general$`PVP` = pvp
-    country.data$Summary$general$`PVF` = pvf
-    
+
     country.data
   })
   
@@ -670,7 +638,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     group.basis.selected <- F
     
     sum <- orig.sum.data$general %>%
-      select(-`Data Source Orig`, -warning.flags.details)
+      select(-`Data Source Orig`)
     
     if (is.null(group.to.use)) {
       group.to.use <- sum$`Group Basis`
@@ -684,6 +652,8 @@ calc.summary.data <- function(res, group.to.use = NULL) {
         filter(group == group.to.use)
     
     sum$cor.nomiss <- NA
+    sum$PES <- NA
+    
     if (nrow(stats) > 0) {
       sum$cor.nomiss <- round(stats$tau, 2)
         
@@ -692,7 +662,6 @@ calc.summary.data <- function(res, group.to.use = NULL) {
         sum$PES.nrm <- stats$pes.nrm
         sum$PES.abs <- stats$pes.abs
         sum$PES.abs.nrm <- stats$pes.abs.nrm
-        sum$Tau <- stats$tau
         sum$V <- stats$V
         sum$PVF <- stats$PVF
         sum$PVP <- stats$PVP
