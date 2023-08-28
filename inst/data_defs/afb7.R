@@ -2,7 +2,7 @@ data.spec <- list(
   file.name = "r7_merged_data_34ctry.release.sav",
   file.type = 'sav',
   question.text = c(
-    "Party" = "If a presidential election were held tomorrow, which party’s candidate would you vote for?",
+    "Party" = "If a presidential election were held tomorrow, which party's candidate would you vote for?",
     "Language" = "Which [ENTER NATIONALITY] language is your mother tongue or language of origin?",
     "Religion" = "What is your religion, if any?",
     "Ethnicity" = "What is your ethnic community, cultural group or tribe?"

@@ -5,7 +5,7 @@ data.spec <- list(
   file.type = 'sav',
   file.encoding = "latin1",
   question.text = c(
-    "Party" = "If a presidential election were held tomorrow, which party’s candidate would you vote for?",
+    "Party" = "If a presidential election were held tomorrow, which party's candidate would you vote for?",
     "Language" = "Which language is your home language?",
     "Religion" = "What is your religion, if any?",
     "Ethnicity" = "What is your ethnic community, cultural group or tribe?"

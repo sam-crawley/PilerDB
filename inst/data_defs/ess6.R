@@ -44,7 +44,7 @@ cat.defs <- list(
   Party = list(
     "Missing" = c("Not applicable", "Refusal", "Don't know","No answer"),
     "Other" = c("Andet - other", "Otro", "Autre", "Other (nir)", "Outro", "Other", "Independent",
-                "Other (Write in)", "Other party", "Altro", "Annat parti", "Üksikkandidaadi poolt",
+                "Other (Write in)", "Other party", "Altro", "Annat parti", "\u00DCksikkandidaadi poolt",
                 "Andere Partei")
   ),
   Language = list(
