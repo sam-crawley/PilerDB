@@ -24,11 +24,12 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
       tibble(
         group = group,
         n.eff = n.eff,
-        tau = NA
+        tau = NA,
+        V = NA
       )
     )  
   
-  tau <- calc.tau(country.data, group, weighted = weighted)
+  tauV <- calc.tau.and.V(country.data, group, weighted = weighted)
   
   summary.indices <- calc.summary.indices(summary.data)
   
@@ -37,7 +38,8 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
     n.eff = as.integer(n.eff),
     parties = as.integer(length(unique(summary.data$Party))),
     groups = as.integer(length(unique(summary.data$Group))),
-    tau = tau,
+    tau = tauV$tau,
+    V = tauV$V,
     cc
   )
   
@@ -133,7 +135,7 @@ build.index.summary.data <- function(summary.data) {
   ))
 }
 
-calc.tau <- function(country.data, group, weighted = F) {
+calc.tau.and.V <- function(country.data, group, weighted = F) {
   wt.var = NULL
   if (weighted)
     wt.var = "Weight"
@@ -144,7 +146,9 @@ calc.tau <- function(country.data, group, weighted = F) {
   )
   
   if (length(unique(country.data[[group]])) <= 1) {
-    return (NA)
+    return (
+      list(tau = NA, V = NA)
+    )
   }
   
   assoc <- NULL
@@ -152,7 +156,10 @@ calc.tau <- function(country.data, group, weighted = F) {
     assoc <- suppressWarnings(StatMatch::pw.assoc(as.formula(paste(group, "~ Party")), country.data, out.df = T, weights = wt.var))
   })
   
-  assoc$tau
+  list(
+    tau = assoc$tau,
+    V = assoc$V
+  )
 }
 
 calc.cross.cutting <- function(country.data, group, drop.cats = F, weighted = F) {
