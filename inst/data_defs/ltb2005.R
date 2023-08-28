@@ -9,7 +9,7 @@ data.spec <- list(
   ),
   country.format = 'country.name',
   country.custom = c(
-    "RepÃºblica Dominicana" = "Dominican Republic"
+    "Rep\u00C3\u00BAblica Dominicana" = "Dominican Republic"
   ),
   field.def = c(
     "Party" = "p48st",

@@ -46,10 +46,10 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Do not feel close to any party", "No responde (Refused)", "Refused", "No preference", "Don’t know", "Don't know",
-                  "Recusa (Refused)", "Menolak (Refused)", "Tidak tahu (Don’t know)", "No sabe (Don’t know)", "No contestó (Refused)",
-                  "Nao sabe (Don’t know)", "Ne sait pas (Don’t know)", "Refus (Refused)", "Kataa Kujibu (refused to respond)",
-                  "Hajui (Don’t know)", "No sabe (Don’t Know)", "Don’t Know"),
+    "Missing" = c("Do not feel close to any party", "No responde (Refused)", "Refused", "No preference", "Don\u2019t know", "Don't know",
+                  "Recusa (Refused)", "Menolak (Refused)", "Tidak tahu (Don\u2019t know)", "No sabe (Don\u2019t know)", "No contest\u00F3 (Refused)",
+                  "Nao sabe (Don\u2019t know)", "Ne sait pas (Don\u2019t know)", "Refus (Refused)", "Kataa Kujibu (refused to respond)",
+                  "Hajui (Don\u2019t know)", "Don\u2019t Know"),
     "Other" = c("Independent", "Other (SPECIFY))", "Other (Specify)", "Otro (ESPECIFICAR) (Other (SPECIFY))", "Other party",
                 "Outro (ESPECIFICAR) (Other(SPECIFY))", "Other (SPECIFY)", "Lainnya (Specify) (Other (SPECIFY))",
                 "Autres (A PRECISER) (Other (SPECIFY))", "Vingine (SPECIFY) (Other (SPECIFY))")
@@ -57,13 +57,13 @@ cat.defs <- list(
   Language = list(
   ),
   Religion = list(
-    "Missing" = c("Something else (SPECIFY), or", "Don’t know", "Don't know", "Refused"),
+    "Missing" = c("Something else (SPECIFY), or", "Don\u2019t know", "Don't know", "Refused"),
     "No Religion" = c("Atheist (do not believe in God)", "Agnostic (not sure if there is a God)", "Nothing in particular",
                       "Atheist (I do not believe in any gods or God)", "Agnostic (I don't really know whether there is a god, or whether there are any gods)")
   ),
   Ethnicity = list(
     "Missing" = c("Missing", "Some other race (Specify____ IF NEEDED: What race or races is that?)", "Refused (e.g., non-race answers like American, human, purple)",
-                  "Don't know", "Don’t know", "Refused"),
+                  "Don't know", "Don\u2019t know", "Refused"),
     "Other" = c("Other (SPECIFY)", "Other (UNSPECIFIED)")
   )
 )

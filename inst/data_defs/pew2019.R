@@ -46,23 +46,23 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Do not feel close to any party", "No sabe (Dont know)", "No responde (Refused)", "Don’t know", "Refused", "Nao sabe (Don’t know)", 
-                  "Outro (Other)", "Recusa (Refused)", "Dont know", "Menolak (Refused)", "No contestó (Refused)", "No sabe (Don’t know)",
-                   "(VOL) Don't know", "(VOL) Refused", "Tidak tahu (Don’t know)", "Don’t Know"),
+    "Missing" = c("Do not feel close to any party", "No sabe (Dont know)", "No responde (Refused)", "Don\u2019t know", "Refused", "Nao sabe (Don\u2019t know)", 
+                  "Outro (Other)", "Recusa (Refused)", "Dont know", "Menolak (Refused)", "No contest\u00F3 (Refused)", "No sabe (Don\u2019t know)",
+                   "(VOL) Don't know", "(VOL) Refused", "Tidak tahu (Don\u2019t know)"),
     "Other" = c("Otro (Other)", "Other", "Independent", "Lainnya (Other)", "(VOL) Other party", "(VOL) No preference")
   ),
   Language = list(
-    "Missing" = c("Don’t know", "Refused")
+    "Missing" = c("Don\u2019t know", "Refused")
   ),
   Religion = list(
-    "Missing" = c("Refused", "Don’t know", "Dont know", "(VOL) Refused", "Something else (SPECIFY), or", "(VOL)\u00a0Don\'t know",
+    "Missing" = c("Refused", "Don\u2019t know", "Dont know", "(VOL) Refused", "Something else (SPECIFY), or", "(VOL)\u00a0Don\'t know",
                   "Something else or"),
     "Other" = c("Something else, or"),
     "No Religion" = c("Atheist (do not believe in God)", "Agnostic (not sure if there is a God)",  "Nothing in particular",
                 "Agnostic (I dont really know whether there is a god, or whether there are any gods)", "Atheist (I do not believe in any gods or God)")
   ),
   Ethnicity = list(
-    "Missing" = c("Missing", "Don’t know", "Refused", "Dont know"),
+    "Missing" = c("Missing", "Don\u2019t know", "Refused", "Dont know"),
     "Other" = c("Other", "Other (UNSPECIFIED)")
   )
 )

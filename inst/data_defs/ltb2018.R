@@ -8,7 +8,7 @@ data.spec <- list(
     "Ethnicity" = "What ethnicity or race you identify best with?"
   ),
   country.format = 'spanish',
-  country.dict = country.dict.es,
+  #country.dict = country.dict.es,
   field.def = c(
     "Party" = "P21STGBS.A",
     "Religion" = "S5",
