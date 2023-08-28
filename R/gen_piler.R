@@ -290,7 +290,7 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
   
   if (! is.na(group.basis)) {
     cor.vals <- cor.nomiss.wt %>% filter(group == group.basis)
-    pesr <- cor.vals$pes
+    pes <- cor.vals$pes
     pes.abs <- cor.vals$pes.abs
     pvp <- cor.vals$PVP
     pvf <- cor.vals$PVF
@@ -690,6 +690,10 @@ calc.summary.data <- function(res, group.to.use = NULL) {
       if (has_name(stats, 'pes')) {
         sum$PES <- stats$pes
         sum$PES.nrm <- stats$pes.nrm
+        sum$PES.abs <- stats$pes.abs
+        sum$PES.abs.nrm <- stats$pes.abs.nrm
+        sum$Tau <- stats$tau
+        sum$V <- stats$V
         sum$PVF <- stats$PVF
         sum$PVP <- stats$PVP
         

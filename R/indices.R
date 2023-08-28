@@ -55,31 +55,37 @@ calc.summary.indices <- function(summary.data, include.extra = T) {
   pes <- calc.pes(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes)
   pes.nrm <- normalise.pes(pes)
   pes.abs <- calc.pes(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, use.abs = T)
+  pes.abs.nrm <- normalise.pes(pes.abs)
+  
   huber <- calc.huber.indices(summary.data, 
                               index.summaries$group.sizes, index.summaries$party.sizes, index.summaries$group.size.by.party, index.summaries$party.support.by.group)
   
   res <- tibble(
     pes     = pes,
     pes.nrm = pes.nrm,
-    pes.abs = pes.abs
+    pes.abs = pes.abs,
+    pes.abs.nrm = pes.abs.nrm
   )
   
   if (include.extra) {
     res$gatev <- calc.gatev(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, wt.by.party = T)
-    res$gatev.no.wt <- calc.gatev(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, wt.by.party = F)
   }
   
   bind_cols(res, huber)
 }
 
 # Rescale PES to range between 0 and 1.
-normalise.pes <- function(val) {
+normalise.pes <- function(val, abs = F) {
   # We use a hare-coded max val, which is the highest value in the DB as at Aug '23
   #  Since the PES calculation has no theoretical maximum, it is possible future
   #  values could exceed 1
   max <- 51.21
   
-  scales::rescale(val, from = c(0,51.21))
+  if (abs)
+    # Max value for the 'abs' version of PES
+    max <- 66.314
+  
+  scales::rescale(val, from = c(0,max))
 }
 
 # Update the summary indices (i.e. not tau, since it requires the full data) for a 
