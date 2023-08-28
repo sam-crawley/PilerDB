@@ -27,7 +27,7 @@ cat.defs <- list(
     "Other" = c("Otros (partidos nacionales y provinciales)", "Vota nulo/Blanco", "No vota/Ninguno", "No inscrito/No ten\u{c3}\u{ad}a edad")
   ),
   Religion = list(
-    "Missing" = c("Not applicable", "No answer/Refused", "DonÂ´t know"),
+    "Missing" = c("Not applicable", "No answer/Refused", "Don\u00C2\u00B4t know"),
     "Other" = c("Others"),
     "No Religion" = c("Believer, not belonging to any church", "Agnostic", "Atheist", "None")
   )
