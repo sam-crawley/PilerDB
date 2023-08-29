@@ -55,7 +55,7 @@ calc.summary.indices <- function(summary.data, include.extra = T) {
   pes <- calc.pes(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes)
   pes.nrm <- normalise.pes(pes)
   pes.abs <- calc.pes(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, use.abs = T)
-  pes.abs.nrm <- normalise.pes(pes.abs, abs = F)
+  pes.abs.nrm <- normalise.pes(pes.abs, abs = T)
   
   huber <- calc.huber.indices(summary.data, 
                               index.summaries$group.sizes, index.summaries$party.sizes, index.summaries$group.size.by.party, index.summaries$party.support.by.group)
