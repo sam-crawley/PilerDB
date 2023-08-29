@@ -5,6 +5,7 @@ data.spec <- list(
   question.text = c(
     "Party" = "Do you usually think of yourself as close to any particular political party? [If yes] Which party is that?"
   ),
+  party.question.type = "Closest",
   country.format = 'country.name',
   field.def = c(
     "Party" = "party",

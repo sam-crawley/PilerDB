@@ -6,6 +6,13 @@ data.spec <- list(
     "Religion" = "What is your religion?",
     "Ethnicity" = "What's your racial (ethnic) background?"
   ),
+  party.question.type = "PartyVote",
+  country.party.question.type = c(
+    "Taiwan" = "PresPartyVote",
+    "South Korea" = "PresCand",
+    "Philippines" = "PresCand",
+    "Mongolia" = "PresCand"
+  ),    
   country.format = 'country.name',
   field.def = c(
     "Party" = "q34",

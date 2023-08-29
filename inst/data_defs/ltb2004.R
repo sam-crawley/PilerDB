@@ -7,6 +7,7 @@ data.spec <- list(
     "Religion" = "What is your religion?",
     "Language" = "What is your native language?"
   ),
+  party.question.type = "PartyVote",
   country.format = 'country.name',
   field.def = c(
     "Party" = "p30st",

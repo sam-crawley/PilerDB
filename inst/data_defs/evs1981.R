@@ -6,6 +6,7 @@ data.spec <- list(
     "Party" = "Do you consider yourself to be close or not to any particular party? [If yes] To which party?",
     "Religion" = "Do you belong to a religious denomination? [If yes] Which one?"
   ),
+  party.question.type = "Closest",
   country.format = 'iso2c',
   country.custom = c(
     "GB-GBN" = "United Kingdom",

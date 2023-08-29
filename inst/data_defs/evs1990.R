@@ -6,6 +6,7 @@ data.spec <- list(
     "Party" = "If there was a general election tomorrow, which party would you vote for?",
     "Religion" = "Do you belong to a religious denomination? [If yes] Which one?"
   ),
+  party.question.type = "PartyVote",
   country.format = 'iso2c',
   country.custom = c(
     "GB-GBN" = "United Kingdom",

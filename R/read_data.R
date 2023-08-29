@@ -3,10 +3,14 @@
 group.names <- c("Language", "Religion", "Ethnicity")
 main.vars <- c("Party", group.names)
 allowed.field.names <- c(main.vars, "Country", "Year", "Weight")
+allowed.party.qtypes <- c("Closest", "PartyVote", "PresPartyVote", "PresCand")
 
 read.div.data <- function(data.spec, data.def.file, raw = F, datasets.dir = NULL) {
   if (! all(names(data.spec$field.def) %in% allowed.field.names))
     stop("field.def contains invalid field names")
+  
+  if (! data.spec$party.question.type %in% allowed.party.qtypes)
+    stop("party.question.type not defined or invalid")
 
   if (is.null(datasets.dir))
     datasets.dir <- get.datasets.dir()

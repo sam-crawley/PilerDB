@@ -6,6 +6,7 @@ data.spec <- list(
     "Religion" = "Do you belong to a religious denomination? (If yes) Which one?",
     "Ethnicity" = "Ethnic group [exact question wording not supplied]"
   ),
+  party.question.type = "PartyVote",
   country.format = 'country.name',
   field.def = c(
     "Party" = "V351",

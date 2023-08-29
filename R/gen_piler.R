@@ -120,29 +120,23 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
   
   data.defs <- get.data.def.list()
   
-  res <- map(data.defs, function(data.def) {
-    id <- get.data.def.id(data.def)
+  res <- map(data.defs, function(data.def.file) {
+    id <- get.data.def.id(data.def.file)
     
-    if (! is.null(ids.to.load)) {
-      if (! id %in% ids.to.load)
+    if (! is.null(ids.to.load) & ! id %in% ids.to.load)
         return (NULL)
-    }
     
-    cat("Processing", data.def, "\n")
+    cat("Processing", data.def.file, "\n")
     
-    e <- new.env()
+    data.def <- new.env()
     
-    source(data.def, local = e, encoding = "UTF-8")
+    source(data.def.file, local = data.def, encoding = "UTF-8")
     
-    data <- read.div.data(e$data.spec, data.def.file = data.def, datasets.dir = datasets.dir)
+    data <- read.div.data(data.def$data.spec, data.def.file = data.def.file, datasets.dir = datasets.dir)
     
-    data.cat.sum <- gen.category.summary(data, e$cat.defs)
-    src.tabs <- gen.country.crosstabs(data, e$cat.defs, id, 
-                                      wave.var = e$data.spec$wave_var, 
-                                      split.by.year = e$data.spec$split.by.year,
-                                      manual.exclusions = e$data.spec$manual.exclusions
-                                      )
-    info <- get.data.src.info(data, e$data.spec)
+    data.cat.sum <- gen.category.summary(data, data.def$cat.defs)
+    src.tabs <- gen.country.crosstabs(data, id, data.def)
+    info <- get.data.src.info(data, data.def$data.spec)
     
     return (list(
       id = id,
@@ -191,22 +185,24 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
 # Produce a data structure for a single dataset that includes crosstabs for each country
 #  At this level, we should only be doing summarising that requires access to the original dataset
 #  (Because the idea is that the original data will not be available after this point)
-gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL, split.by.year = F, manual.exclusions = NULL) {
-  if (is.null(split.by.year))
-    split.by.year = F
+gen.country.crosstabs <- function(data, data.source, data.def) {
+  data.spec <- data.def$data.spec
+  
+  if (is.null(data.spec$split.by.year))
+    data.spec$split.by.year = F
   
   # Do common processing of dataset
-  data <- process.data(data, cat.defs)
+  data <- process.data(data, data.def$cat.defs)
   
   data <- data %>%
     filter(! Country %in% global.country.skip)
   
   # Split data up by country
   split.factor <- list(data$Country)
-  if (! is.null(wave.var)) {
-    split.factor <- rlist::list.append(split.factor, data[[wave.var]])
+  if (! is.null(data.spec$wave.var)) {
+    split.factor <- rlist::list.append(split.factor, data[[data.spec$wave.var]])
   }
-  if (split.by.year) {
+  if (data.spec$split.by.year) {
     split.factor <- rlist::list.append(split.factor, data$Year)
   }
   
@@ -222,22 +218,26 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL, 
     cntry <- splt[[1]]
     
     splt.idx <- 2
-    if (! is.null(wave.var)) {
+    if (! is.null(data.spec$wave.var)) {
       data.source <- paste0(data.source, splt[[splt.idx]])
       splt.idx <- splt.idx+1
     }
-    if (split.by.year) {
+    if (data.spec$split.by.year) {
       year <- as.integer(splt[[splt.idx]])
     }
     
     excluded = F
-    if (! is.null(manual.exclusions)) {
-      if (is.null(year) && cntry %in% manual.exclusions)
+    if (! is.null(data.spec$manual.exclusions)) {
+      if (is.null(year) && cntry %in% data.spec$manual.exclusions)
         excluded = T
       # For 'split_by_year' datasets, we check manual exclusions for each year
-      else if (! is.null(year) && ! is.null(manual.exclusions[[as.character(year)]]) && cntry %in% manual.exclusions[[as.character(year)]])
+      else if (! is.null(year) && ! is.null(data.spec$manual.exclusions[[as.character(year)]]) && cntry %in% data.spec$manual.exclusions[[as.character(year)]])
         excluded = T
     }
+    
+    party.question.type <- data.spec$party.question.type
+    if (! is.null(data.spec$country.party.question.type) & has_name(data.spec$country.party.question.type, cntry))
+      party.question.type <- data.spec$country.party.question.type[[cntry]]
     
     list(
       data = data.by.country[[key]],
@@ -245,14 +245,23 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL, 
       data.source = data.source,
       data.source.orig = data.source.orig,
       year = year,
-      excluded = excluded
+      excluded = excluded,
+      party.question.type = party.question.type
     )
   })
   
   # Create crosstabs for each country
   # (Produces a list of lists, keyed by country+data.source+year)
   res <- furrr::future_map(ct.params, function(params) {  
-    gen.single.country.data(params[['data']], params[['cntry']], params[['data.source']], params[['data.source.orig']], params[['year']], params[['excluded']])
+    gen.single.country.data(
+      params[['data']], 
+      params[['cntry']], 
+      params[['data.source']], 
+      params[['data.source.orig']],
+      params[['party.question.type']],
+      params[['year']], 
+      params[['excluded']]
+    )
   })
   
   res <- set_names(res, map_chr(res, ~ .x$Summary$general$ID))
@@ -260,7 +269,7 @@ gen.country.crosstabs <- function(data, cat.defs, data.source, wave.var = NULL, 
   return(res)
 }
 
-gen.single.country.data <- function(d, cntry, data.source, data.source.orig, year = NULL, excluded = F) {
+gen.single.country.data <- function(d, cntry, data.source, data.source.orig, party.question.type, year = NULL, excluded = F) {
   
   country.orig <- d %>% distinct(Country.orig) %>% pull(Country.orig)
   
@@ -292,7 +301,8 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, yea
       'Data Source Orig' = data.source.orig,
       'Year' = year,
       'Sample Size' = nrow(d),
-      'Group Basis' = group.basis
+      'Group Basis' = group.basis,
+      'Party Question Type' = party.question.type
     ),
     cor = cor,
     cor.wt = cor.wt,

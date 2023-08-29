@@ -7,7 +7,8 @@ data.spec <- list(
     "Party" = "Which party do you feel closest to?",
     "Language" = "Language usually spoken at home",
     "Religion" = "Religious denomination"
-  ),  
+  ),
+  party.question.type = "Closest",
   field.def = c(
     "Party" = "E3024_3",
     "Language" = "E2019",

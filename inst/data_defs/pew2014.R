@@ -7,6 +7,7 @@ data.spec <- list(
     "Ethnicity" = "Which ethnic/nationality/tribal group do you belong to? [Question wording varies by country]",
     "Language" = "What languages do you usually speak at home?"
   ),
+  party.question.type = "Closest",
   country.format = 'country.name',
   field.def = c(
     "Party" = "prty",

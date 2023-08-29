@@ -6,6 +6,7 @@ data.spec <- list(
     "Party" = "If there were elections tomorrow, which party would you vote for?",
     "Religion" = "What is your religion?"
   ),
+  party.question.type = "PartyVote",
   country.format = 'country.name',
   field.def = c(
     "Party" = "sp58",

@@ -7,6 +7,7 @@ data.spec <- list(
     "Language" = "Which language is your home language?",
     "Religion" = "What is your religion, if any?"
   ),
+  party.question.type = "Closest",
   country.format = 'country.name',
   field.def = c(
     "Party" = "q87a",

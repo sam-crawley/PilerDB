@@ -10,6 +10,7 @@ data.spec <- list(
     "Religion" = "Religious denomination",
     "Ethnicity" = "Race of respondent"
   ),
+  party.question.type = "Closest",
   field.def = c(
     "Party" = "IMD3005_3",
     "Language" = "IMD2013",

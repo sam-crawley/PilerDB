@@ -10,6 +10,7 @@ data.spec <- list(
     "Religion" = "What is your religion, if any?",
     "Ethnicity" = "What is your ethnic community, cultural group or tribe?"
   ),
+  party.question.type = "PresPartyVote",
   country.format = 'country.name',
   field.def = c(
     "Party" = "Q99",

@@ -7,6 +7,7 @@ data.spec <- list(
     "Language" = "What is your native language?",
     "Ethnicity" = "What ethnicity or race you identify best with?"
   ),
+  party.question.type = "PartyVote",
   country.format = 'country.name',
   field.def = c(
     "Party" = "P16STGBS",

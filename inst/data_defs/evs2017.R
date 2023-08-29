@@ -5,6 +5,7 @@ data.spec <- list(
     "Party" = "Which (political) party appeals to you most?",
     "Religion" = "Do you belong to a religious denomination? [If yes] Which one?"
   ),
+  party.question.type = "Closest",
   country.format = 'iso2c',
   field.def = c(
     "Party" = "v174_cs",

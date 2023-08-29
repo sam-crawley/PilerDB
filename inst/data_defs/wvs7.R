@@ -7,6 +7,7 @@ data.spec <- list(
     "Ethnicity" = "Ethnic group [exact question wording not supplied]",
     "Language" = "What language do you normally speak at home?"
   ),
+  party.question.type = "PartyVote",
   country.format = 'iso3c',
   field.def = c(
     "Party" = "Q223",

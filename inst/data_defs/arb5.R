@@ -5,6 +5,7 @@ data.spec <- list(
     "Party" = "Which party if any do you feel closest to?",
     "Religion" = "What is your religious denomination?"
   ),
+  party.question.type = "Closest",
   country.format = 'country.name',
   field.def = c(
     "Party" = "Q503A",

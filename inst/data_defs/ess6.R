@@ -6,6 +6,7 @@ data.spec <- list(
     "Religion" = "Do you consider yourself as belonging to any particular religion or denomination? [If yes] Which one?",
     "Language" = "What language or languages do you speak most often at home? [First mentioned]"
   ),  
+  party.question.type = "Closest",
   file.encoding = "latin1",
   country.format = 'iso2c',
   country.custom = c("XK" = "Kosovo"),

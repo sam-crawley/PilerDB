@@ -5,6 +5,13 @@ data.spec <- list(
   question.text = c(
     "Religion" = "What is your religion?"
   ),
+  party.question.type = "PartyVote",
+  country.party.question.type = c(
+    "Taiwan" = "PresCand",
+    "South Korea" = "PresCand",
+    "Philippines" = "PresCand",
+    "Mongolia" = "PresCand"
+  ),  
   country.format = 'country.name',
   field.def = c(
     "Party" = "q39",

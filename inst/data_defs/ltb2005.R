@@ -7,6 +7,7 @@ data.spec <- list(
     "Religion" = "What is your religion?",
     "Language" = "What is your native language?"
   ),
+  party.question.type = "PartyVote",
   country.format = 'country.name',
   country.custom = c(
     "Rep\u00C3\u00BAblica Dominicana" = "Dominican Republic"

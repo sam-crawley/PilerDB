@@ -7,6 +7,7 @@ data.spec <- list(
     "Religion" = "What is your present religion, if any? [Question wording varies by country]",
     "Ethnicity" = "Which ethnic group do you belong to?"
   ),
+  party.question.type = "Closest",
   country.format = 'country.name',
   field.def = c(
     "Party" = "prty",
