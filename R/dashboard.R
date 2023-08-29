@@ -150,7 +150,7 @@ launchPilerDash <- function(logger = NULL) {
         paging = F, 
         searching = F,
         order = list(list(5, 'desc')),
-        columnDefs = list(list(className = 'dt-center', targets = 9:11))
+        columnDefs = list(list(className = 'dt-center', targets = 12:14))
       ),
       server = T, 
       selection = 'single',
