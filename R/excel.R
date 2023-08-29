@@ -132,22 +132,23 @@ write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", incl
     mutate(across(ends_with('.pct'), ~set.class('percentage', .))) %>%
     select(-Religion, -Ethnicity, -Language, -ID) %>%
     arrange(desc(PES)) %>%
-    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, PES.nrm, cor.nomiss, cross.cutting, everything()) %>%
-    relocate(warning.flags, .after = everything())
+    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, PES.nrm, cor.nomiss, cross.cutting, V, PES.abs, PES.abs.nrm, 
+           PVP, PVF, excluded, everything())
   
   hs2 <- openxlsx::createStyle(textDecoration = "bold")
   
   openxlsx::addWorksheet(wb, tab.name)
-  outer.headers <- c("", "", "", "", "", "", "", "", "", "", "",
+  outer.headers <- c("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
                      "Included in Group", "", "Party Missing", "", "Group Missing")
   openxlsx::writeData(wb, tab.name, data.frame(t(outer.headers)), startRow = 1, startCol = 1, colNames = F, rowNames = F)
   openxlsx::addStyle(wb, sheet = tab.name, hs2, rows = 1, cols = 1:length(outer.headers))
-  openxlsx::mergeCells(wb, tab.name, cols = 12:13, rows = 1)
-  openxlsx::mergeCells(wb, tab.name, cols = 14:15, rows = 1)
-  openxlsx::mergeCells(wb, tab.name, cols = 16:17, rows = 1)
+  openxlsx::mergeCells(wb, tab.name, cols = 17:18, rows = 1)
+  openxlsx::mergeCells(wb, tab.name, cols = 19:20, rows = 1)
+  openxlsx::mergeCells(wb, tab.name, cols = 21:22, rows = 1)
   
   summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "PES", "PES.nrm", "Tau", "CC",
-                       "PVP", "PVF", "Exclusion Reason", "(N)", "(%)", "(N)", "(%)", "(N)", "(%)", "Warning Flags")
+                       "V", "PES.abs", "PES.abs.nrm", "PVP", "PVF", "Exclusion Reason", "Party Question Type",
+                       "(N)", "(%)", "(N)", "(%)", "(N)", "(%)")
   
   openxlsx::writeData(wb, tab.name, data.frame(t(summary.headers)), startRow = 2, startCol = 1, colNames = F, rowNames = F)
   openxlsx::setColWidths(wb, sheet = tab.name, cols = 1:length(summary.headers), widths = "auto")
