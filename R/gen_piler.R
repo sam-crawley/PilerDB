@@ -751,7 +751,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     sum$total.included <- orig.sum.data$cor.nomiss.wt %>%
       filter(group == group.to.use) %>%
       pull(n.eff)
-    sum$total.included.pct <- sum$total.included / total.sample
+    sum$total.included.pct <- round(sum$total.included / total.sample, 4)
     
     parties.to.drop <- find.groups.to.drop(main.summary.data, "Party")
     
@@ -760,7 +760,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
       summarise(n = sum(n.weighted)) %>% 
       pull(n)
     
-    sum$party.missing.pct <- sum$party.missing / total.sample
+    sum$party.missing.pct <- round(sum$party.missing / total.sample, 4)
     
     groups.to.drop <- find.groups.to.drop(main.summary.data, "Group")
     
@@ -769,7 +769,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
       summarise(n = sum(n.weighted)) %>% 
       pull(n)
     
-    sum$group.missing.pct <- sum$group.missing / total.sample
+    sum$group.missing.pct <- round(sum$group.missing / total.sample, 4)
     
     sum
   })
