@@ -294,6 +294,7 @@ launchPilerDash <- function(logger = NULL) {
         
         h4("Statistics"),
         textOutput(paste0("SampleSize", countryTabID)),
+        textOutput(paste0("PartyQuestionType", countryTabID)),
         h5("Correlations - all categories"),
         tableOutput(paste0("CorTable", countryTabID)),
         h5("Correlations - all categories, weighted"),
@@ -333,6 +334,9 @@ launchPilerDash <- function(logger = NULL) {
       output[[paste0("SampleSize", countryTabID)]] <- renderText({
         paste("Sample Size:", sample.size)
       })
+      output[[paste0("PartyQuestionType", countryTabID)]] <- renderText({
+        paste("Party Question Type:", country.data$Summary$general$`Party Question Type`)
+      })      
       output[[paste0("CorTable", countryTabID)]] <- renderTable(country.data$Summary$cor)
       output[[paste0("CorWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.wt)
       output[[paste0("CorNoMissTable", countryTabID)]] <- renderTable(country.data$Summary$cor.nomiss)
