@@ -8,6 +8,9 @@ data.spec <- list(
     "Language" = "What languages do you usually speak at home?"
   ),
   party.question.type = "Closest",
+  country.party.question.type = c(
+    "Peru" = "PresCand"
+  ),
   country.format = 'country.name',
   field.def = c(
     "Party" = "prty",
