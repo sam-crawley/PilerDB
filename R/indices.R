@@ -60,11 +60,16 @@ calc.summary.indices <- function(summary.data, include.extra = T) {
   huber <- calc.huber.indices(summary.data, 
                               index.summaries$group.sizes, index.summaries$party.sizes, index.summaries$group.size.by.party, index.summaries$party.support.by.group)
   
+  dist <- calc.dist(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes)
+  dist.cmp <- calc.dist(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, complex.q = T)
+  
   res <- tibble(
     pes     = pes,
     pes.nrm = pes.nrm,
     pes.abs = pes.abs,
-    pes.abs.nrm = pes.abs.nrm
+    pes.abs.nrm = pes.abs.nrm,
+    dist = dist,
+    dist.cmp = dist.cmp
   )
   
   if (include.extra) {
@@ -275,6 +280,26 @@ calc.gatev <- function(party.support.by.group, group.sizes, party.sizes, wt.by.p
     ungroup() %>% 
     summarise(gatev = sqrt(sum(nom) / sum(denom))) %>%
     pull(gatev)
+}
+
+calc.dist <- function(party.support.by.group, group.sizes, party.sizes, complex.q = F) {
+  if (nrow(group.sizes) == 0 | nrow(party.sizes) == 0)
+    return (NA)
+  
+  joined_data <- party.support.by.group %>% 
+    rename(party.spt = percent) %>%
+    left_join(group.sizes, by = c("Group")) %>%
+    rename(group.size = percent) %>%
+    left_join(party.sizes, by = c("Party")) %>%
+    rename(party.size = percent) %>%
+    mutate(D = (party.spt - group.size) ^ 2) %>%
+    mutate(Q = ifelse(complex.q, party.size * group.size, party.size)) %>%
+    mutate(dist = Q * D)
+
+  # Calculate DIST
+  DIST <- sum(joined_data$dist)
+  
+  return(DIST)
 }
 
 calc.huber.indices <- function(summary.data, group.sizes, party.sizes, group.sizes.by.pty, party.sizes.by.grp) {
