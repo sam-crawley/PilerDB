@@ -49,7 +49,7 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
 }
 
 #' @export
-calc.summary.indices <- function(summary.data, include.extra = T) {
+calc.summary.indices <- function(summary.data, include.extra = F) {
   index.summaries <- build.index.summary.data(summary.data)
 
   pes <- calc.pes(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes)
@@ -69,11 +69,13 @@ calc.summary.indices <- function(summary.data, include.extra = T) {
     pes.abs = pes.abs,
     pes.abs.nrm = pes.abs.nrm,
     dist = dist,
-    dist.cmp = dist.cmp
+    dist.cmp = dist.cmp,
+    dist.new = dist.new
   )
   
   if (include.extra) {
     res$gatev <- calc.gatev(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, wt.by.party = T)
+    res$dist.new <- calc.dist.new(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes)
   }
   
   bind_cols(res, huber)
@@ -300,6 +302,33 @@ calc.dist <- function(party.support.by.group, group.sizes, party.sizes, complex.
   DIST <- sum(joined_data$dist)
   
   return(DIST)
+}
+
+calc.dist.new <- function(party.support.by.group, group.sizes, party.sizes) {
+  p_diff <- party.support.by.group %>% 
+    rename(party.spt = percent) %>%
+    left_join(party.sizes, by = c("Party")) %>%
+    rename(party.size = percent) %>%
+    mutate(p.diff = abs(party.size - party.spt) / nrow(party.sizes)) %>%
+    group_by(Group) %>%
+    summarise(p.diff = sum(p.diff))
+    
+  combinations <- expand.grid(Group1 = index.summaries$group.sizes$Group, Group2 = index.summaries$group.sizes$Group)
+  
+  joined_data <- combinations %>%
+    left_join(p_diff, by = c("Group1" = "Group")) %>%
+    rename(g1.p.diff = p.diff) %>% 
+    left_join(p_diff, by = c("Group2" = "Group")) %>%
+    rename(g2.p.diff = p.diff) %>% 
+    left_join(group.sizes, by = c("Group1" = "Group")) %>%
+    rename(g1.size = percent) %>%  
+    left_join(group.sizes, by = c("Group2" = "Group")) %>%
+    rename(g2.size = percent) %>%
+    mutate(D = abs(g1.p.diff - g2.p.diff)) %>%
+    mutate(Q = g1.size * g2.size) %>%
+    mutate(dist = Q * D)
+  
+  sum(joined_data$dist)
 }
 
 calc.huber.indices <- function(summary.data, group.sizes, party.sizes, group.sizes.by.pty, party.sizes.by.grp) {
