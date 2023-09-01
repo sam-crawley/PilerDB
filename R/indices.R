@@ -69,8 +69,7 @@ calc.summary.indices <- function(summary.data, include.extra = F) {
     pes.abs = pes.abs,
     pes.abs.nrm = pes.abs.nrm,
     dist = dist,
-    dist.cmp = dist.cmp,
-    dist.new = dist.new
+    dist.cmp = dist.cmp
   )
   
   if (include.extra) {
@@ -305,13 +304,16 @@ calc.dist <- function(party.support.by.group, group.sizes, party.sizes, complex.
 }
 
 calc.dist.new <- function(party.support.by.group, group.sizes, party.sizes) {
+  n.groups  <- nrow(group.sizes)
+  n.parties <- nrow(party.sizes)
+  
   p_diff <- party.support.by.group %>% 
     rename(party.spt = percent) %>%
     left_join(party.sizes, by = c("Party")) %>%
     rename(party.size = percent) %>%
-    mutate(p.diff = abs(party.size - party.spt) / nrow(party.sizes)) %>%
+    mutate(p.diff = (party.size - party.spt)^2) %>%
     group_by(Group) %>%
-    summarise(p.diff = sum(p.diff))
+    summarise(p.diff = 2 * sum(p.diff))
     
   combinations <- expand.grid(Group1 = index.summaries$group.sizes$Group, Group2 = index.summaries$group.sizes$Group)
   
@@ -324,7 +326,7 @@ calc.dist.new <- function(party.support.by.group, group.sizes, party.sizes) {
     rename(g1.size = percent) %>%  
     left_join(group.sizes, by = c("Group2" = "Group")) %>%
     rename(g2.size = percent) %>%
-    mutate(D = abs(g1.p.diff - g2.p.diff)) %>%
+    mutate(D = g1.p.diff * g2.p.diff) %>%
     mutate(Q = g1.size * g2.size) %>%
     mutate(dist = Q * D)
   
