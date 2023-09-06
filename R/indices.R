@@ -282,7 +282,7 @@ calc.gatev <- function(party.support.by.group, group.sizes, party.sizes, wt.by.p
     pull(gatev)
 }
 
-calc.dist <- function(party.support.by.group, group.sizes, party.sizes, complex.q = F) {
+calc.dist <- function(party.support.by.group, group.sizes, party.sizes) {
   if (nrow(group.sizes) == 0 | nrow(party.sizes) == 0)
     return (NA)
   

@@ -672,6 +672,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
         sum$PES.nrm <- stats$pes.nrm
         sum$PES.abs <- stats$pes.abs
         sum$PES.abs.nrm <- stats$pes.abs.nrm
+        sum$PES.dist <- stats$pes.dist
         sum$V <- stats$V
         sum$PVF <- stats$PVF
         sum$PVP <- stats$PVP
