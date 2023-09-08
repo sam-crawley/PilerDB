@@ -2,6 +2,36 @@
 #'
 #' Simple app to test difference scenarios for the PES and other
 #'  index calculations
+
+calc.test.indicies <- function(data) {
+  if (nrow(data) == 0 | all(data$n == 0))
+    return (data.frame())
+  
+  res <- calc.summary.indices(data, include.extra = T)
+  
+  extra <- map_dfr(1:nrow(data), function(row.n) {
+    row <- data[row.n,]
+    
+    if (row$n == 0)
+      return (NULL)
+    
+    tibble(
+      Party = rep(row$Party, row$n),
+      Group = rep(row$Group, row$n)
+    )
+  })
+  
+  if (nrow(unique(extra)) == 1)
+    return (data.frame())
+  
+  assoc.res <- StatMatch::pw.assoc(Group ~ Party, extra, out.df = T)
+  
+  res$V <- assoc.res$V
+  res$tau <- assoc.res$tau
+  
+  res
+}
+
 #' @export
 launchIndexTester <- function() {
   ui <- fluidPage(
@@ -9,7 +39,6 @@ launchIndexTester <- function() {
       # Application title
       titlePanel("Index Tester"),
   
-      # Sidebar with a slider input for number of bins 
       sidebarLayout(
           sidebarPanel(
               textInput("group.count", "Number of Groups",  value = 2, width = "80px"),
@@ -17,7 +46,6 @@ launchIndexTester <- function() {
               width = 2
           ),
   
-          # Show a plot of the generated distribution
           mainPanel(
               htmlOutput("gallTable"),
               h3("Indices: "),
@@ -26,7 +54,6 @@ launchIndexTester <- function() {
       )
   )
   
-  # Define server logic required to draw a histogram
   server <- function(input, output) {
       output$gallTable <- renderUI({
           group.headers <- map(1:input$group.count, ~tags$td(paste("Group", .x)))
@@ -62,7 +89,7 @@ launchIndexTester <- function() {
       })
   
       
-      output$gall.res <- renderTable(calc.summary.indices(party.by.grp.size.dat(), include.extra = T))
+      output$gall.res <- renderTable(calc.test.indicies(party.by.grp.size.dat()))
   
   }
   
