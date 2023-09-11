@@ -15,7 +15,7 @@ version.min = 0
 #' This function generates a new PILER DB from the original dataset files. The datasets that will be used
 #' are defined by the data_defs (see below for details).
 #' 
-#' The dataset files themselves are not distributed to this package due to licensing restructions. However
+#' The dataset files themselves are not distributed to this package due to licensing restrictions. However
 #'   they are all available online for free.
 #' 
 #' @param ids.to.load A vector of dataset IDs to load into the new DB. If NULL, all datasets are loaded.
@@ -672,7 +672,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
         sum$PES.nrm <- stats$pes.nrm
         sum$PES.abs <- stats$pes.abs
         sum$PES.abs.nrm <- stats$pes.abs.nrm
-        sum$PES.dist <- stats$pes.dist
+        sum$PES.old <- stats$pes.old
         sum$V <- stats$V
         sum$PVF <- stats$PVF
         sum$PVP <- stats$PVP
