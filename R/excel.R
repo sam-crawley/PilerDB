@@ -133,12 +133,12 @@ write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", incl
     select(-Religion, -Ethnicity, -Language, -ID) %>%
     arrange(desc(PES)) %>%
     select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, PES.nrm, cor.nomiss, cross.cutting, V, PES.abs, PES.abs.nrm, 
-           PVP, PVF, excluded, everything())
+           PES.old, PVP, PVF, excluded, everything())
   
   hs2 <- openxlsx::createStyle(textDecoration = "bold")
   
   openxlsx::addWorksheet(wb, tab.name)
-  outer.headers <- c("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  outer.headers <- c("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
                      "Included in Group", "", "Party Missing", "", "Group Missing")
   openxlsx::writeData(wb, tab.name, data.frame(t(outer.headers)), startRow = 1, startCol = 1, colNames = F, rowNames = F)
   openxlsx::addStyle(wb, sheet = tab.name, hs2, rows = 1, cols = 1:length(outer.headers))
@@ -147,7 +147,7 @@ write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", incl
   openxlsx::mergeCells(wb, tab.name, cols = 21:22, rows = 1)
   
   summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "PES", "PES.nrm", "Tau", "CC",
-                       "V", "PES.abs", "PES.abs.nrm", "PVP", "PVF", "Exclusion Reason", "Party Question Type",
+                       "V", "PES.abs", "PES.abs.nrm", "PES.old", "PVP", "PVF", "Exclusion Reason", "Party Question Type",
                        "(N)", "(%)", "(N)", "(%)", "(N)", "(%)")
   
   openxlsx::writeData(wb, tab.name, data.frame(t(summary.headers)), startRow = 2, startCol = 1, colNames = F, rowNames = F)
