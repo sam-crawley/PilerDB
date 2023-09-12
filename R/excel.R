@@ -142,9 +142,9 @@ write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", incl
                      "Included in Group", "", "Party Missing", "", "Group Missing")
   openxlsx::writeData(wb, tab.name, data.frame(t(outer.headers)), startRow = 1, startCol = 1, colNames = F, rowNames = F)
   openxlsx::addStyle(wb, sheet = tab.name, hs2, rows = 1, cols = 1:length(outer.headers))
-  openxlsx::mergeCells(wb, tab.name, cols = 17:18, rows = 1)
-  openxlsx::mergeCells(wb, tab.name, cols = 19:20, rows = 1)
-  openxlsx::mergeCells(wb, tab.name, cols = 21:22, rows = 1)
+  openxlsx::mergeCells(wb, tab.name, cols = 18:19, rows = 1)
+  openxlsx::mergeCells(wb, tab.name, cols = 20:21, rows = 1)
+  openxlsx::mergeCells(wb, tab.name, cols = 22:23, rows = 1)
   
   summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "PES", "PES.nrm", "Tau", "CC",
                        "V", "PES.abs", "PES.abs.nrm", "PES.old", "PVP", "PVF", "Exclusion Reason", "Party Question Type",
