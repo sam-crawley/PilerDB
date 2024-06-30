@@ -299,7 +299,8 @@ calc.pes.old <- function(party.support.by.group, group.sizes, party.sizes) {
   sqrt(sum(joined_data$pes.old) / 2) * 100
 }
 
-calc.huber.indices <- function(summary.data, group.sizes, party.sizes, group.sizes.by.pty, party.sizes.by.grp) {
+#' @export
+calc.huber.indices <- function(summary.data, group.sizes, party.sizes, group.sizes.by.pty, party.sizes.by.grp, by.party = F) {
   # Calculate differences in party support between each pair of groups
   rT <- expand_grid(unique(summary.data$Group), unique(summary.data$Group), unique(summary.data$Party), .name_repair = "minimal") %>%
     set_names("g1", "g2", "p") %>%
@@ -342,6 +343,12 @@ calc.huber.indices <- function(summary.data, group.sizes, party.sizes, group.siz
     rename('p2.party.sizes' = percent) %>%
     mutate(PVF = rP*p1.party.sizes*p2.party.sizes) %>%
     mutate(PVP = rP*p1.party.sizes*p2.party.sizes^2)
+  
+  if (by.party) {
+    return(
+      rP.sum %>% group_by(p1) %>% summarise(PVF = sum(PVF), PVP = sum(PVP)*4)
+    )
+  }
   
   list(
     VF  = rT.sum %>% ungroup() %>% summarise(VF = sum(VF)) %>% pull(VF),
