@@ -20,10 +20,12 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
       "Rel" = Religion,
       "Eth" = Ethnicity,
       "Excluded Reason" = excluded,
+      "Flagged" = warning.flags,
       "CC" = cross.cutting
     ) %>%
     mutate(across(c(Lng, Rel, Eth), ~if_else(.x, "\u{2713}", "\u{2716}"))) %>%
-    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, PES.nrm, Tau, PVF, PVP, CC, Lng, Rel, Eth, everything())
+    mutate(Flagged = if_else(is.na(Flagged), "", "\u{D83D}\u{DEA9}")) %>%
+    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, PES.nrm, Tau, PVF, PVP, CC, Lng, Rel, Eth, Flagged, everything())
   
   if (! with.id)
     tab <- tab %>% select(-ID)

@@ -139,7 +139,18 @@ get.high.group.missing <- function(crosstabs, flagged.only = T) {
 #   removing cases when there is not much variation in the PES
 #   scores for the country.
 get.outlier.cases <- function(crosstabs, sd.threshold = 9) {
-  gal.df <- map_df(names(crosstabs), ~crosstabs[[.x]]$Summary$general %>% select(ID, Country, PES))
+  gal.df <- map_df(names(crosstabs), function(id) {
+    d = crosstabs[[id]]$Summary$general
+    
+    if (is.na(d$`Group Basis`))
+      return (NULL)
+    
+    pes = crosstabs[[id]]$Summary$cor.nomiss.wt %>% 
+      filter(group == d$`Group Basis`) %>%
+      pull(pes)
+    
+    d %>% mutate(PES = pes) %>% select(ID, Country, PES)
+  })
   
   ranges <- gal.df %>% 
     group_by(Country) %>% 

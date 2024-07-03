@@ -307,11 +307,11 @@ launchPilerDash <- function(logger = NULL) {
         textOutput(paste0("country.orig", countryTabID))
       )
       
-      #country.warnings <- get.country.warnings(country.data)
-      #if (country.warnings$has.warning) {
-      #  output[[paste0("WarningHeader", countryTabID)]] <- renderText("Warnings")
-      #  output[[paste0("WarningMsg", countryTabID)]] <- renderUI(HTML(paste(country.warnings$message, collapse = "<br/><br/>")))
-      #}
+      country.warnings <- get.country.warnings(country.data)
+      if (country.warnings$has.warning) {
+        output[[paste0("WarningHeader", countryTabID)]] <- renderText("Warnings")
+        output[[paste0("WarningMsg", countryTabID)]] <- renderUI(HTML(paste(country.warnings$message, collapse = "<br/><br/>")))
+      }
       
       observeEvent(input[[paste0("ShowAllData", countryTabID)]], {
         generate.country.tables(countryTabID, country.data, output, 

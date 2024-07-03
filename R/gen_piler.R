@@ -15,7 +15,7 @@ version.min = 0
 #' This function generates a new PILER DB from the original dataset files. The datasets that will be used
 #' are defined by the data_defs (see below for details).
 #' 
-#' The dataset files themselves are not distributed to this package due to licensing restrictions. However
+#' The dataset files themselves are not distributed with this package due to licensing restrictions. However
 #'   they are all available online for free.
 #' 
 #' @param ids.to.load A vector of dataset IDs to load into the new DB. If NULL, all datasets are loaded.
@@ -160,7 +160,7 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
   data.src.info <- purrr::modify(res, "info") %>% set_names(names)
   
   # XXX: disabled for now, since it's not really used
-  #tabs <- add.warning.flags(tabs)
+  tabs <- add.warning.flags(tabs)
   
   version <- paste(c(version.maj, version.min), collapse = ".")
   
@@ -648,7 +648,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     group.basis.selected <- F
     
     sum <- orig.sum.data$general %>%
-      select(-`Data Source Orig`)
+      select(-`Data Source Orig`, -warning.flags.details)
     
     if (is.null(group.to.use)) {
       group.to.use <- sum$`Group Basis`
