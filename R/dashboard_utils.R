@@ -25,6 +25,7 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
     ) %>%
     mutate(across(c(Lng, Rel, Eth), ~if_else(.x, "\u{2713}", "\u{2716}"))) %>%
     mutate(Flagged = if_else(is.na(Flagged), "", "\u{D83D}\u{DEA9}")) %>%
+    select(-PES.abs, -PES.abs.nrm, -PES.old, -V) %>%
     select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, PES.nrm, Tau, PVF, PVP, CC, Lng, Rel, Eth, Flagged, everything())
   
   if (! with.id)
