@@ -151,7 +151,7 @@ get.outlier.cases <- function(crosstabs, sd.threshold = 9) {
     
     d %>% mutate(PES = pes) %>% select(ID, Country, PES)
   })
-  
+
   ranges <- gal.df %>% 
     group_by(Country) %>% 
     summarise(median = median(PES, na.rm = T), mad = mad(PES, constant = 1, na.rm = T), sd = sd(PES, na.rm = T)) %>% 

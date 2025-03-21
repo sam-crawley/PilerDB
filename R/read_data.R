@@ -90,6 +90,7 @@ get.datasets.dir <- function() {
   here::here("datasets")
 }
 
+#' @export
 load.data.by.id <- function(id, raw = F, process = T, datasets.dir = NULL) {
   process <- if_else(raw, F, process)
   

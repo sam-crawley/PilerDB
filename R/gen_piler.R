@@ -8,7 +8,7 @@ global.country.skip <- c("Hong Kong SAR China", "Macao SAR China", "Puerto Rico"
 cats.to.drop <- c("Missing", "Other", "No Religion")
 
 version.maj = 1
-version.min = 0
+version.min = 1
 
 #' Generate the PILER DB from scratch
 #' 
@@ -159,7 +159,6 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
   
   data.src.info <- purrr::modify(res, "info") %>% set_names(names)
   
-  # XXX: disabled for now, since it's not really used
   tabs <- add.warning.flags(tabs)
   
   version <- paste(c(version.maj, version.min), collapse = ".")
