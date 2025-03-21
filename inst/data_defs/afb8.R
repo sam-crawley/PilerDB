@@ -48,6 +48,6 @@ cat.defs <- list(
                 "Relacionado com o Género", "Relacionado com a Ocupação", "Relacionado com a Religião",
                 "Relacionado com a Classe", "Relacionado com a Raça", 
                 "(National identity) only, or “doesn’t think of self in those terms”"),
-    "Missing" = c("Missing", "Not asked in the country", "Not asked in this country")
+    "Missing" = c("Missing", "Not asked in the country", "Not asked in this country", "Don’t know")
   )
 )
