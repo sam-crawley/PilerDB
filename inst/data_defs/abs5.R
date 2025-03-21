@@ -11,7 +11,8 @@ data.spec <- list(
     "Taiwan" = "PresPartyVote",
     "South Korea" = "PresCand",
     "Philippines" = "PresCand",
-    "Mongolia" = "PresCand"
+    "Mongolia" = "PresPartyVote",
+    "Indonesia" = "PresCand"
   ),    
   country.format = 'country.name',
   field.def = c(
