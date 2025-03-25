@@ -47,7 +47,10 @@ cat.defs <- list(
   ),
   Religion = list(
     "Missing" = c("VOLUNTEERED: REFUSED", "VOLUNTEERED: DON'T KNOW", "MISSING"),
-    "Other" = c("INDEPENDENT, OTHER [SEE ELECTION STUDY NOTES]", "[SEE ELECTION STUDY NOTES]", "OTHER: NOT SPECIFIED"),
+    "Other" = c("INDEPENDENT, OTHER [SEE ELECTION STUDY NOTES]", "[SEE ELECTION STUDY NOTES]", "OTHER: NOT SPECIFIED",
+                "EHTNORELIGIONIST, OTHER [SEE ELECTION STUDY NOTES]",
+                "PAGAN, HEATHEN, TRIBAL RELIGIONSIST, TRADITIONAL RELIGIONIST, ANIMISM, SHAMANISM",
+                "TRADITIONAL FOLK BELIEF/NICHIREN SHSHU", "More than one major religion (e.g., Christian, Jewish, Muslim, etc.)"),
     "No Religion" = c("AGNOSTIC", "ATHEIST", "NONE")
   )
 )
