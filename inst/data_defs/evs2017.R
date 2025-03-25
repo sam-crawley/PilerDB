@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "ZA7500_v4-0-0.dta",
+  file.name = "ZA7500_v5-0-0.dta",
   file.type = 'dta',
   question.text = c(
     "Party" = "Which (political) party appeals to you most?",
@@ -47,7 +47,14 @@ cat.defs <- list(
   ),
   Religion = list(
     "Missing" = c("not applicable", "no answer", "dont know"),
-    "Other" = c("Other, please specify (Write in)", "Other than Christian", "Other", "Other religious denomination, please specify (Write in)", "Other, which?",
-                "Other Non Christian", "Other non-Christian (WRITE IN)", "Small religious communities")
+    "Other" = c("Other, please specify (Write in)", "Other than Christian", "Other", 
+                "Other religious denomination, please specify (Write in)", "Other, which?",
+                "Other Non Christian", "Other non-Christian (WRITE IN)", "Small religious communities",
+                "Other Islamic Community of Faith", "Other Christian", 
+                "Other Christian Religions (Jeovah's Withnesses, Mormons, etc.)",
+                "Other, Non-Christian Religion", "Other Evangelical (e.g. Baptists, Methodists)",
+                "Other Protestants", "Other Christian (specify)", "Other non-Christian (specify)",
+                "Other protestant (which one?)", "Other Protestant (WRITE IN)",
+                "Other Christian (WRITE IN)")
   )
 )
