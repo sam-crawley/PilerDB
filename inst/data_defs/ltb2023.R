@@ -18,7 +18,10 @@ data.spec <- list(
     "Country" = "idenpa",
     "Year" = "numinves",
     "Weight" = "wt"
-  )
+  ),
+  fixups = function(data) {
+    data <- data %>% mutate(Year = 2023)
+  }
 )
 
 cat.defs <- list(
