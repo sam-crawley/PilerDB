@@ -10,12 +10,14 @@ add.warning.flags <- function(crosstabs) {
     warning.flags <- c()
     warning.flags.details <- NA
 
-    # Add "high group missing" flag    
-    hgm.country <- hgm %>% filter(datasource == country)
-    
-    if (nrow(hgm.country) >= 1) {
-      warning.flags <- append(warning.flags, "high_group_missing")
-      warning.flags.details <- list(hgm.country)
+    # Add "high group missing" flag
+    if (nrow(hgm) > 0) {
+      hgm.country <- hgm %>% filter(datasource == country)
+      
+      if (nrow(hgm.country) >= 1) {
+        warning.flags <- append(warning.flags, "high_group_missing")
+        warning.flags.details <- list(hgm.country)
+      }
     }
     
     # Add "outlier" flag
@@ -126,6 +128,9 @@ get.high.group.missing <- function(crosstabs, flagged.only = T) {
         )
     )
   })
+  
+  if (nrow(res) == 0)
+    return(res)
 
   res %>% mutate(across(c(group.size, missing, comp.missing, missing.diff), ~round(.x, 3))) %>%
     arrange(desc(missing))
