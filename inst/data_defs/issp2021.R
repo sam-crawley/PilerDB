@@ -2,9 +2,9 @@ data.spec <- list(
   file.name = "ZA8000_v2-0-0.dta",
   file.type = 'dta',
   question.text = c(
-    "Party" = "If elections where this Sunday, which party would you vote for?",
-    "Religion" = "What is your religion?",
-    "Ethnicity" = "What ethnicity or race you identify best with?"
+    "Party" = "Which party did you vote for?",
+    "Religion" = "Do you belong to a religion and, if yes, which religion do you belong to?",
+    "Ethnicity" = "Nationality / ethnic group"
   ),
   party.question.type = "PartyVote",
   country.format = 'iso2c',
@@ -60,6 +60,6 @@ cat.defs <- list(
     "Other" = c("Both parents born in Austria", "Both parents born abroad", "One parent born in abroad",
                 "Danish group", "Religious group", "Migrants group", "Returnees", "Others", "Other North American",
                 "Other countries", "Other (please specify)", "Other non western",
-                "Other western")
+                "Other western", "None or other group")
   )
 )
