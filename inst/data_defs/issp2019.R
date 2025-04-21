@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "ZA7650_v2-0-0.dta",
+  file.name = "ZA7600_v3-0-0.dta",
   file.type = 'dta',
   question.text = c(
     "Party" = "Which party did you vote for?",
@@ -8,6 +8,9 @@ data.spec <- list(
   ),
   party.question.type = "PartyVote",
   country.format = 'iso2c',
+  country.custom = c(
+    "GB-GBN" = "United Kingdom"
+  ),
   field.def = c(
     "Party" = "prty",
     "Religion" = "relig",
@@ -39,27 +42,27 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Invalid ballot", "Blank vote", "Voted blanc or null", "Uncertain"),
+    "Missing" = c("Invalid ballot", "None"),
     "Other" = c("Other party", "Independent candidate", "Other candidate", "Other Party",
-                "Mixed vote (Candidates of several lists)", "A different party", "Other (Please specify)")
+                "Mixed vote (Candidates of several lists)", "A different party",
+                "Other party or political organization")
   ),
   Religion = list(
     "Missing" = c(),
     "Other" = c("Other", "Other religions", "Other Asian religions",
                 "Other non-Christian religions", "Other religious denomination",
-                "Other religion", "Other Non-Christian", "Inter- or Non-denominational", "Other religion", 
-                "Other Religions", "Other Asian Religions", "Other (specify)",
-                "Other non-Christian denomination", "Other non-Christian", "Other religion (specify)",
-                "No answer to which religion or denomination"),
+                "Other religion", "Inter- or Non-denominational", "Other religion", 
+                "Other Religions", "Other non-Christian denomination", "Other non-Christian",
+                "Other Religion", "Other Non-Christians", "Other non-Christian religion",
+                "No answer to which religion or denomination", "Other non-Christian Denomination"),
     "No Religion" = c("Atheist")
   ),
   Ethnicity = list(
-    "Missing" = c("None", "No group", "No particular group"),
+    "Missing" = c("None", "No group", "None of the these"),
     "Other" = c("Both parents born in Austria", "Both parents born abroad", "One parent born abroad",
-                "Danish group", "Religious group", "Migrants group", "Others", "Other North American",
-                "None or other group", "Other (former nations, specific regions)",
-                "Respondent mentions the country of birth and/ or nationality", "World citizens",
-                "Other Option", "Respondent mentions lower territorial levels than province (town, island, etc.)",
-                "Other, please specify", "Other North African and Middle Eastern")
+                "Danish group", "Religious group", "Migrants group", "None or other group", 
+                "Other, please specify", "Other North African and Middle Eastern",
+                "Foreigner", "Returning migrants", "Immigrants", "Mixed origin",
+                "Other ethnic groups", "Other, specify")
   )
 )
