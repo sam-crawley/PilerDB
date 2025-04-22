@@ -46,7 +46,7 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Invalid ballot", "Refused", "Don\u0092t know", "Dont know, dont remember",
+    "Missing" = c("Invalid ballot", "Refused", "Don\u0092t know", "Don\u0092t know, don\u0092t remember",
                   "No answer", "Blank vote", "Don't know, don't remember", "Does not know",
                   "Uncertain", "Don't know/don't remember", "Does not remember",
                   "Other (please specify)",
