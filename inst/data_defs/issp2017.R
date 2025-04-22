@@ -37,6 +37,10 @@ data.spec <- list(
       mutate(DATEYR = if_else(DATEYR == 9999, NA, DATEYR))
     
     data
+  },
+  fixups = function(data) {
+    # Remove unusable ethnicity questions
+    data %>% mutate(Ethnicity = if_else(Country %in% c("Australia", "Austria"), "Missing", Ethnicity))
   }
 )
 
