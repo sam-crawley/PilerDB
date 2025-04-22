@@ -36,7 +36,8 @@ data.spec <- list(
       mutate(relig = if_else(str_detect(relig, "^0\\."), "No Religion", relig)) %>%
       mutate(prty = if_else(str_detect(prty, "^0\\."), "Missing", prty)) %>%
       mutate(prty = str_replace(prty, "Yes, ", "")) %>%
-      mutate(across(c(prty, relig, ethn), ~str_replace(.x, "^\\d+\\.\\s+", "")))
+      mutate(across(c(prty, relig, ethn), ~str_replace(.x, "^\\d+\\.\\s+", ""))) %>%
+      mutate(DATEYR = if_else(DATEYR == 9999, NA, DATEYR))
     
     data
   }

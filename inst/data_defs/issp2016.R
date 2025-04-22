@@ -1,7 +1,6 @@
 data.spec <- list(
-  file.name = "ZA6980_v2-0-0.dta",
+  file.name = "ZA6900_v2-0-0.dta",
   file.type = 'dta',
-  file.encoding = "latin1",
   question.text = c(
     "Party" = "Which party did you vote for?",
     "Religion" = "Do you belong to a religion and, if yes, which religion do you belong to?",
@@ -42,32 +41,32 @@ data.spec <- list(
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Invalid ballot", "No answer incl. don't remember", "Refused", "Don\u0092t know, can\u0092t remember",
-                  "No answer", "Blank vote", "Don't know, can't remember;  No answer", "Cant remember, information insufficient",
-                  "Don\u0092t know, don\u0092t remember", "Don't know, don't remember", "Does not know",
-                  "Uncertain"),
-    "Other" = c("Other party", "Other Party", "Others", "A different party", "Independent candidate",
+    "Missing" = c("Invalid ballot", "No answer incl. don't remember", "Refused", 
+                  "No answer", "Blank vote", "Don't know, don't remember", "Does not know",
+                  "Uncertain", "Don't know", "Don't know/don't remember", "Does not remember",
+                  "Invalid balot", "Other (please specify)", "Invaild ballot"),
+    "Other" = c("Other party", "Other Party", "Others", "Independent candidate",
                 "Mixed vote (Candidates of several lists)", "Other Candidate")
   ),
   Religion = list(
-    "Missing" = c("Refused", "No answer", "Information insufficient", "Don´t know"),
-    "Other" = c("Other", "Other religions", "Other Asian religions", "Other not Christian (e.g. Jewish, Islamic)",
+    "Missing" = c("Refused", "No answer", "Don't know", "Refused to answer",
+                  "Cannot say, don't know"),
+    "Other" = c("Other", "Other religions", "Other Asian religions",
                 "Other non-Christian religions", "Other religious denomination",
-                "Other religion", "Other religion", "Other (specify)",
+                "Other religion", "Other religion",
                 "Other Religions", "Other non-Christian", "Other Non-Christian",
                 "Other Non-Christians", "Other non-Christian religion"),
-    "No Religion" = c("Atheist", "No religion, none")
+    "No Religion" = c("Atheist", "No religion, none", "None", "No denomination or life stance organisation")
   ),
   Ethnicity = list(
-    "Missing" = c("No answer", "Don't know", "Refused", "None", "Dont know",
+    "Missing" = c("No answer", "Don't know", "Refused", "None",
                   "NA incl. identifying with two groups (see DK_ETHN2)",
-                  "None / other group", "No, do not belong to a minority",
+                  "No, do not belong to a minority",
                   "Yes, belong to a minority"),
-    "Other" = c("Both parents born in Austria", "Both parents born abroad", "One parent born abroad",
-                "Other, please specify", "Immigrants", "Mixed origin", 
-                "Religious group", "Respondent mentions the country of birth and/or nationality",
-                "World citizens", "Other option", "Respondent mentions the province of birth",
-                "Respondent mentions lower territorial levels than province (",
-                "Not belonging to an indigenous group", "Others")
+    "Other" = c("Other, please specify", "Immigrants", "Mixed origin", 
+                "Religious group", "World citizens", "Other option", 
+                "Respondent mentions the province of birth", "Others",
+                "3 ethnic groups or more", "None/ other group",
+                "Respondent  mentions  lower territorial levels than province")
   )
 )
