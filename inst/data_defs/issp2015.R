@@ -66,7 +66,7 @@ cat.defs <- list(
                 "Not related to any religion, church or denomination",
                 "My own religion"),
     "No Religion" = c("Atheist", "No religion, none", "None", "No religious denomination or life stance organisation",
-                      "No religion, atheist")
+                      "No religion, atheist", "No religion")
   ),
   Ethnicity = list(
     "Missing" = c("No answer", "Don't know", "Refused", "None", "Dont know",

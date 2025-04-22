@@ -62,7 +62,7 @@ cat.defs <- list(
                 "Other Religions", "Other non-Christian", "Other non-Christian denomination",
                 "Other not christian", "Other non-Christian religions",
                 "Other non-Christian religion"),
-    "No Religion" = c("No denomination or life stance organisation", "None")
+    "No Religion" = c("No religion", "No denomination or life stance organisation", "None")
   ),
   Ethnicity = list(
     "Missing" = c("No answer", "Don't know", "Refused", "Undecided",
