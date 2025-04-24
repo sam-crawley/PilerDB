@@ -63,6 +63,6 @@ cat.defs <- list(
   ),
   Ethnicity = list(
     "Missing" = c("NAP; NAV", "NA, Don't know"),
-    "Other" = c("Other,mixed origin")
+    "Other" = c("Other,mixed origin", "SE:One non-Swedish,both non-S")
   )
 )
