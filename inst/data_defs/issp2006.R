@@ -35,8 +35,7 @@ data.spec <- list(
     
     # Handle missing (etc.) based on response code
     data <- data %>%
-      #mutate(prty = if_else(str_detect(prty, "^NAP"), "Missing", prty)) %>%
-      mutate(Year = 2007) %>%
+      mutate(Year = 2006) %>%
       mutate(prty = if_else(c_alphan == "US", "Missing", prty))
     
     data
