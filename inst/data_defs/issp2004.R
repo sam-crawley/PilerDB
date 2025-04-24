@@ -38,11 +38,6 @@ data.spec <- list(
       mutate(prty = if_else(C_ALPHAN == "US", "Missing", prty))
     
     data
-  },
-  fixups = function(data) {
-    #data %>%
-    #  mutate(across(c(Party, Religion, Ethnicity), ~str_replace(.x, "^\\d+\\.\\s+", "")))
-    data
   }
 )
 
