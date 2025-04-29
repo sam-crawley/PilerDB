@@ -4,8 +4,7 @@ data.spec <- list(
   file.encoding = "latin1",
   question.text = c(
     "Party" = "Which party did you vote for?",
-    "Religion" = "Do you belong to a religion and, if yes, which religion do you belong to?",
-    "Ethnicity" = "Nationality / ethnic group"
+    "Religion" = "Do you belong to a religion and, if yes, which religion do you belong to?"
   ),
   party.question.type = "PartyVote",
   country.format = 'country.name',
