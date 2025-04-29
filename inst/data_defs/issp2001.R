@@ -4,8 +4,7 @@ data.spec <- list(
   file.encoding = "latin1",
   question.text = c(
     "Party" = "Which party did you vote for?",
-    "Religion" = "Do you belong to a religion and, if yes, which religion do you belong to?",
-    "Ethnicity" = "Nationality / ethnic group"
+    "Religion" = "Do you belong to a religion and, if yes, which religion do you belong to?"
   ),
   party.question.type = "PartyVote",
   country.format = 'country.name',
@@ -52,8 +51,8 @@ cat.defs <- list(
                 "Other Answer (specify)", "Other list", "Other Party (specify)")
   ),
   Religion = list(
-    "Missing" = c("None", "No denomination given"),
+    "Missing" = c("No denomination given"),
     "Other" = c("Other not classified", "Other non-christian"),
-    "No Religion" = c()
+    "No Religion" = c("None")
   )
 )
