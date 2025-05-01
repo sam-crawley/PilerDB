@@ -34,7 +34,7 @@ data.spec <- list(
     data %>% 
       mutate(Party = if_else(Country %in% c("United States"), "Missing", Party)) %>%
       mutate(Religion = if_else(Religion == "Prot (n else class)", "Protestant (nec)", Religion)) %>%
-      mutate(Year = 1994)
+      mutate(Year = 1993)
   }
 )
 
