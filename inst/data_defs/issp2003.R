@@ -46,7 +46,7 @@ cat.defs <- list(
                    "None",  "Would not vote;no party preference", "No vote",
                    "None, no preference", "No party, no preference", "Would not vote;not eligible",
                    "No preference", "Abstain, no party preference", "Would not vote;No party preference",
-                   "No vote (No votará)", "No party preference;wouldn't vote", "White (En Blanco)",
+                   "No vote (No votar\u00e1)", "No party preference;wouldn't vote", "White (En Blanco)",
                    "No preference,no vote", "(Undocumented)"),
     "Other" = c("Other party", "Other answer", "Other Party", "Other list", "Others",
                 "Other Party (Otros)")

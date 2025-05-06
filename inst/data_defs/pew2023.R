@@ -43,8 +43,8 @@ data.spec <- list(
 cat.defs <- list(
   Party = list(
     "Missing" = c("Do not feel close to any party", "Don\u2019t know", "Refused", "Don't know", "Dont know", "DK/Refused",
-                  "Don’t Know", "Nao sabe (Don’t know)", "Recusa (Refused)", "Tidak tahu (Don’t know)", "Menolak (Refused)",
-                  "No sabe (Don’t know)", "No contestó (Refused)"),
+                  "Don\u2019t Know", "Nao sabe (Don\u2019t know)", "Recusa (Refused)", "Tidak tahu (Don\u2019t know)", "Menolak (Refused)",
+                  "No sabe (Don\u2019t know)", "No contest\u00f3 (Refused)"),
     "Other" = c("Other", "Independent", "Other (SPECIFY)", "Other party (please specify)", "Otro (Other)", "Outro (Other)",
                 "Lainnya (Other)")
   ),

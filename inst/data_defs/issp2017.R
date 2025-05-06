@@ -54,7 +54,7 @@ cat.defs <- list(
                 "Mixed vote (Candidates of several lists)", "Other Candidate")
   ),
   Religion = list(
-    "Missing" = c("Refused", "No answer", "Information insufficient", "Don´t know"),
+    "Missing" = c("Refused", "No answer", "Information insufficient", "Don\u00b4t know"),
     "Other" = c("Other", "Other religions", "Other Asian religions", "Other not Christian (e.g. Jewish, Islamic)",
                 "Other non-Christian religions", "Other religious denomination",
                 "Other religion", "Other religion", "Other (specify)",
@@ -67,8 +67,7 @@ cat.defs <- list(
                   "NA incl. identifying with two groups (see DK_ETHN2)",
                   "None / other group", "No, do not belong to a minority",
                   "Yes, belong to a minority"),
-    "Other" = c("Both parents born in Austria", "Both parents born abroad", "One parent born abroad",
-                "Other, please specify", "Immigrants", "Mixed origin", 
+    "Other" = c("Other, please specify", "Immigrants", "Mixed origin", 
                 "Religious group", "Respondent mentions the country of birth and/or nationality",
                 "World citizens", "Other option", "Respondent mentions the province of birth",
                 "Respondent mentions lower territorial levels than province (",
