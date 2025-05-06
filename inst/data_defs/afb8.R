@@ -22,16 +22,16 @@ data.spec <- list(
     data %>% mutate(Year = format(DATEINTR, format = "%Y")) %>%
       mutate(Ethnicity = fct_recode(Ethnicity, "Portuguese" = "3")) %>%
       mutate(Religion = fct_recode(Religion, 
-        "Christian only" = "Christian only (i.e., respondents says only “Christian”, without identifying a specific sub-group)",
-        "Muslim only" = "Muslim only (i.e., respondents says only “Muslim”, without identifying a specific sub-group)",
-        "Sunni only" = "Sunni only (i.e., respondents says only “Sunni” or “Sunni Muslim”, without identifying a specific sub-group)"
+        "Christian only" = "Christian only (i.e., respondents says only \u201CChristian\u201D, without identifying a specific sub-group)",
+        "Muslim only" = "Muslim only (i.e., respondents says only \u201CMuslim\u201D, without identifying a specific sub-group)",
+        "Sunni only" = "Sunni only (i.e., respondents says only \u201CSunni\u201D or \u201CSunni Muslim\u201D, without identifying a specific sub-group)"
       ))
   } 
 )
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Missing", "Refused", "Not asked in this country", "Not Applicable", "Don’t know"),
+    "Missing" = c("Missing", "Refused", "Not asked in this country", "Not Applicable", "Don\u2019t know"),
     "Other" = c("Other")
   ),
   Language = list(
@@ -45,9 +45,12 @@ cat.defs <- list(
   ),
   Ethnicity = list(
     "Other" = c("Other", "Relacionado com a origem regional (badio/sampadjudo)", "Relacionado com a Idade",
-                "Relacionado com o Género", "Relacionado com a Ocupação", "Relacionado com a Religião",
-                "Relacionado com a Classe", "Relacionado com a Raça", 
-                "(National identity) only, or “doesn’t think of self in those terms”"),
-    "Missing" = c("Missing", "Not asked in the country", "Not asked in this country", "Don’t know")
+                "Relacionado com o G\u00e9nero", 
+                "Relacionado com a Ocupa\u00e7\u00e3o", 
+                "Relacionado com a Religi\u00e3o",
+                "Relacionado com a Classe",
+                "Relacionado com a Ra\u00e7a",
+                "(National identity) only, or \u201Cdoesn\u2019t think of self in those terms\u201D"),
+    "Missing" = c("Missing", "Not asked in the country", "Not asked in this country", "Don\u2019t know")
   )
 )
