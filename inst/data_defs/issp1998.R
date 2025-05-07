@@ -9,7 +9,8 @@ data.spec <- list(
   party.question.type = "PartyVote",
   country.format = 'country.name',
   country.custom = c(
-    "NIRL-Northern Ireland" = "United Kingdom"
+    "NIRL-Northern Ireland" = "United Kingdom",
+    "D-E-Germany-East" = "Germany"
   ),
   field.def = c(
     "Party" = "prty",
