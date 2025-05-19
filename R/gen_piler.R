@@ -134,6 +134,8 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
     
     data <- read.div.data(data.def$data.spec, data.def.file = data.def.file, datasets.dir = datasets.dir)
     
+    check.data(data)
+    
     data.cat.sum <- gen.category.summary(data, data.def$cat.defs)
     src.tabs <- gen.country.crosstabs(data, id, data.def)
     info <- get.data.src.info(data, data.def$data.spec)
@@ -179,6 +181,24 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
   }
   
   res
+}
+
+# Do some basic checks on the data to ensure it is usable
+check.data <- function(data) {
+  if (all(data$Party %in% c("Missing", "Other")))
+    stop("Error: data file has no usable Party data")
+  
+  all_groups_missing <- data %>%
+    select(all_of(group.names)) %>%
+    map_lgl(~ all(.x %in% c("Missing", "Other"))) %>%
+    all()
+  
+  if (all_groups_missing)
+    stop("Error: data file has no usable Group data")
+  
+  if (any(is.na(data$Weight) | data$Weight == 0))
+    stop("Error: Weight column contains invalid data (0/NA)")
+  
 }
 
 # Produce a data structure for a single dataset that includes crosstabs for each country
