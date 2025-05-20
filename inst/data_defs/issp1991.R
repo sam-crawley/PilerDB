@@ -59,7 +59,7 @@ data.spec <- list(
         `98` = "Don't know, undecided",
         `99` = "NA"
       ),
-      `Great Britain` = list(
+      `United Kingdom` = list(
         `1` = "Conservative",
         `2` = "Labour",
         `3` = "Democrat,SLD,Liberal",
