@@ -1,5 +1,5 @@
 data.spec <- list(
-  file.name = "ZA1950.dta",
+  file.name = "ZA1840.dta",
   file.type = 'dta',
   file.encoding = "latin1",
   question.text = c(
@@ -9,61 +9,31 @@ data.spec <- list(
   party.question.type = "PartyVote",
   country.format = 'country.name',
   country.custom = c(
-    "aus" = "Australia",
-    "D-W" = "Germany",
-    "D-E" = "Germany",
+    "d" = "Germany",
     "gb" = "United Kingdom",
     "nirl" = "Northern Ireland",
     "usa" = "United States",
+    "a" = "Austria",
     "h" = "Hungary",
     "i" = "Italy",
     "irl" = "Ireland",
     "n" = "Norway",
-    "s" = "Sweden",
+    "nl" = "Netherlands",
     "il" = "Israel"
   ),
   field.def = c(
-    "Party" = "v83",
-    "Religion" = "v88",
+    "Party" = "v103",
+    "Religion" = "v108",
     "Language" = NA,
     "Ethnicity" = NA,
     "Country" = "v3",
     "Year" = NA,
-    "Weight" = "v114"
+    "Weight" = "v136"
   ),
   fixups = function(data) {
     # Same codes used for different parties (in different countries)
     #  So we need to recode them all based on the codebook
     party_table <- list(
-      Australia = list(
-        `1` = "Liberal Party",
-        `2` = "Australian Labour Party",
-        `3` = "National Party",
-        `4` = "Australian Democrats",
-        `5` = "Greens",
-        `6` = "Nuclear Disarmanent",
-        `94` = "Other answer",
-        `95` = "Other party",
-        `96` = "None, no party",
-        `99` = "NA"
-      ),
-      `Germany` = list(
-        `1` = "CDU/ CSU",
-        `2` = "SPD",
-        `3` = "FDP",
-        `4` = "Die Gruenen",
-        `5` = "DKP",
-        `6` = "NPD",
-        `7` = "Alternative Liste",
-        `8` = "SEW",
-        `9` = "Republikaner",
-        `94` = "Other answer",
-        `95` = "Other party",
-        `96` = "None, no party",
-        `97` = "Refused",
-        `98` = "Don't know, undecided",
-        `99` = "NA"
-      ),
       `United Kingdom` = list(
         `1` = "Conservative",
         `2` = "Labour",
@@ -80,25 +50,7 @@ data.spec <- list(
         `98` = "Don't know, undecided",
         `99` = "NA"
       ),
-      `Northern Ireland` = list(
-        `1` = "Conservative",
-        `2` = "Labour",
-        `3` = "SDP (Social Democrat, SLD, Liberal, Alliance <Mainland>",
-        `4` = "Alliance (Northern Ireland)",
-        `5` = "Democratic Unionist Party (DUP)",
-        `6` = "Official/Ulster Unionist Party (OUP)",
-        `7` = "SDLP",
-        `8` = "Green party",
-        `9` = "Sinn Fein",
-        `10` = "Workers Party",
-        `94` = "Other answer",
-        `95` = "Other party",
-        `96` = "None",
-        `97` = "Refused",
-        `98` = "DK, undecided",
-        `99` = "NA"
-      ),
-      'United States' = list(
+      `United States` = list(
         `1` = "Strong democrat",
         `2` = "Not strong democrat",
         `3` = "Independent, near democrat",
@@ -108,7 +60,53 @@ data.spec <- list(
         `7` = "Strong republican",
         `95` = "Other party",
         `98` = "DK",
+        `99` = "NA",
+        `0` = "NAP"
+      ),
+      Austria = list(
+        `1` = "Socialist Party of Austria",
+        `2` = "Austrian Peoples Party",
+        `3` = "Freedom Party",
+        `4` = "Communist Party",
+        `5` = "United Ecologists of Austria",
+        `6` = "Alternative List of Austria",
+        `97` = "None",
         `99` = "NA"
+      ),
+      `Northern Ireland` = list(
+        `1` = "Conservative",
+        `2` = "Labour",
+        `3` = "Democrat, SLD, Liberal",
+        `4` = "SDP (Social Democrat)",
+        `5` = "Alliance <Mainland>",
+        `6` = "SNP",
+        `8` = "Green party",
+        `10` = "Alliance (Northern Ireland)",
+        `11` = "Democratic Unionist Party (DUP)",
+        `12` = "Official/Ulster Unionist Party (OUP)",
+        `13` = "Other Unionists",
+        `14` = "Sinn Fein",
+        `15` = "SDLP",
+        `16` = "Workers Party",
+        `95` = "Other party",
+        `96` = "None",
+        `97` = "Refused",
+        `98` = "DK, undecided",
+        `99` = "NA"
+      ),
+      Netherlands = list(
+        `1` = "Labour Party",
+        `2` = "Peoples Party for Freedom and Democracy: Liberal Party",
+        `6` = "Christian Democratic Appeal",
+        `7` = "Political Radical Party",
+        `8` = "Democratic Party 66",
+        `9` = "Pacifist Socialist Party",
+        `10` = "Communist Party of the Netherlands",
+        `13` = "Constitutional Reformed Protestant Party",
+        `14` = "Reformed Political Union",
+        `15` = "Reformed Protestant Political Federation",
+        `16` = "Centrum Party",
+        `17` = "Evangelical Political Party"
       ),
       Ireland = list(
         `1` = "Fianna Fail",
@@ -123,17 +121,16 @@ data.spec <- list(
         `0` = "Would not vote"
       ),
       Norway = list(
-        `1` = "Red Electoral Alliance (R d Valgallianse)",
-        `2` = "Labour Party",
-        `3` = "Progress Party",
-        `4` = "Conservative Party",
-        `5` = "Christian Democratic Party",
-        `6` = "Centre party",
-        `7` = "Socialist Left Party",
-        `8` = "Liberal Party",
-        `95` = "Other parties",
-        `96` = "None, would not vote",
-        `98` = "Don't know",
+        `1` = "Progress party (to the right of Conservatives)",
+        `2` = "Conservatives",
+        `3` = "Centre party (former peasant's party)",
+        `4` = "Christians people party",
+        `5` = "Liberals",
+        `6` = "Labour",
+        `7` = "Socialist left",
+        `8` = "Communists",
+        `9` = "Coalition of Marxists-Leninists, independent socialists and anarchists",
+        `98` = "Don't know, would not vote",
         `99` = "NA"
       )
     )
@@ -146,19 +143,20 @@ data.spec <- list(
         )
       ) %>%
       mutate(Country = if_else(Country == "Northern Ireland", "United Kingdom", Country)) %>%
+      mutate(Party = if_else(Country %in% c("United States"), "Missing", Party)) %>%
       
-      mutate(Year = 1990)
+      mutate(Year = 1989)
   }
 )
 
 cat.defs <- list(
   Party = list(
     "Missing" = c("NA", "None", "Refused", "Don't know, undecided"),
-    "Other" = c("Other answer", "Other party")
+    "Other" = c("Other party")
   ),
   Religion = list(
     "Missing" = c("NO DENOMINATION"),
-    "Other" = c("OTHER RELIGION", "OTHER NON-CHRIST."),
+    "Other" = c("OTHER NON-CHRIST."),
     "No Religion" = c("none")
   )
 )
