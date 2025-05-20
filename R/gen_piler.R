@@ -796,13 +796,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
 }
 
 get.group.size.summary <- function(res, group.to.use = NULL) {
-  # Take a DF, and binds each row to a single row
-  bind.to.sigle.row <- function(df) {
-    df <- split(df, seq(nrow(df)))
-    bind_cols(df)
-  }
-  
-  # Add in group sizes for 3 largest groups for each country,
+  # Add in group sizes for n largest groups for each country,
   #  as well as breakdowns for each Party/Main Group combo
   get.grp.size.row <- function(country.data) {
     if (is.null(group.to.use))
@@ -831,14 +825,19 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
     
     main.groups <- gs$Group
     
-    summary.data <- summary.data %>% mutate(Group = fct_relevel(Group, as.character(main.groups)))
+    gs <- gs %>% 
+      mutate(row = 1,  # Create a dummy row ID to pivot on
+           col = row_number()) %>%  # Create column identifiers
+      pivot_wider(
+        id_cols = row,
+        names_from = col,
+        values_from = c(Group, n),
+        names_sep = "",
+        names_vary = "slowest"
+      ) %>%
+      select(-row)  # Remove the dummy row column
     
-    for (row in 1:summary.group.size) {
-      sum.row <- gs[row, ]
-      gs.row <- suppressMessages(bind_cols(gs.row, sum.row))
-    }    
-    
-    #gs.row <- suppressMessages(bind_cols(gs.row, bind.to.sigle.row(gs)))
+    gs.row <- bind_cols(gs.row, gs)
     
     party.group.sizes <- summary.data %>% 
       filter(Group %in% main.groups) %>% 
@@ -858,39 +857,37 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
       }
     }
     
-    for (row in 1:nrow(party.group.sizes)) {
-      gs.row <- suppressMessages(bind_cols(gs.row, party.group.sizes[row, ]))
-    }
-    
-    #gs.row <- suppressMessages(bind_cols(gs.row, bind.to.sigle.row(party.group.sizes)))
-    
-    # Workaround for only 1 party - columns need to be renamed
-    # XXX: this assumes there are 5 groups...
-    #  Probably need to re-write all this code to rely on pivot_wider
-    if (nrow(party.group.sizes) == 1) {
-      gs.row <- gs.row %>% rename(
-        "Party.Grp...15" = "Party.Grp",
-        "Total...16" = "Total",
-        "Group 1...17" = "Group 1",
-        "Group 2...18" = "Group 2",
-        "Group 3...19" = "Group 3",
-        "Group 4...20" = "Group 4",
-        "Group 5...21" = 'Group 5'
-      ) %>% mutate(
-        "Party.Grp...22" = NA,
-        "Total...23" = NA,
-        "Group 1...24" = NA,
-        "Group 2...25" = NA,
-        "Group 3...26" = NA,
-        "Group 4...27" = NA,
-        "Group 5...28" = NA
+    party.group.sizes <- party.group.sizes %>%
+      mutate(across(everything(), as.character)) %>%
+      # Add a row identifier (optional, but helps in debugging)
+      tibble::rownames_to_column("row_num") %>%
+      # Pivot longer to stack all values under a single key
+      pivot_longer(
+        cols = -row_num,
+        names_to = "col_name",
+        values_to = "value"
+      ) %>%
+      # Create new column names in the format "OriginalName_RowNum"
+      mutate(new_col = paste0(col_name, "_", row_num)) %>%
+      # Drop the old identifiers
+      select(-row_num, -col_name) %>%
+      # Pivot back to wide format (now one row)
+      pivot_wider(
+        names_from = new_col,
+        values_from = value
       )
-    }
+    
+    gs.row <- suppressWarnings(bind_cols(gs.row, party.group.sizes, .name_repair = "minimal"))
     
     gs.row
   }
   
-  furrr::future_map_dfr(res, get.grp.size.row)
+  group.sizes <- furrr::future_map(res, get.grp.size.row) |>
+    list_rbind()
+  
+  names(group.sizes) <- gsub("_\\d+$", "", names(group.sizes))
+  
+  group.sizes
 }
 
 get.max.parties <- function(group.sizes) {
