@@ -52,7 +52,7 @@ data.spec <- list(
            ~ purrr::pluck(party_table, .x, .y, .default = "Missing")
          )
        ) %>%
-       mutate(Year = 1989)
+       mutate(Year = 1988)
   }
 )
 
