@@ -3,10 +3,10 @@ data.spec <- list(
   file.type = 'dta',
   file.encoding = "latin1",
   question.text = c(
-    "Party" = "Which party did you vote for?",
+    "Party" = "[Exact question text not provided]",
     "Religion" = "Do you belong to a religion and, if yes, which religion do you belong to?"
   ),
-  party.question.type = "PartyVote",
+  party.question.type = "Closest",
   country.format = 'country.name',
   country.custom = c(
     "NIRL North Ireland" = "United Kingdom",
