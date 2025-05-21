@@ -81,7 +81,7 @@ read.div.data <- function(data.spec, data.def.file, raw = F, datasets.dir = NULL
   if (! is.null(data.spec$country.party.question.type)) {
     qt.countries <- names(data.spec$country.party.question.type)
     
-    additional.countries <- setdiff(qt.countries, data$Country)
+    additional.countries <- setdiff(qt.countries, unique(data$Country))
     
     if (length(additional.countries) != 0)
       stop("Error: country.party.question.type contains countries not in dataset: ", paste(additional.countries, collapse = ", "))
