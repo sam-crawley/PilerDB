@@ -3,7 +3,7 @@ data.spec <- list(
   file.type = 'dta',
   file.encoding = "latin1",
   question.text = c(
-    "Party" = "Which party did you vote for?",
+    "Party" = "[varies by country]",
     "Religion" = "Do you belong to a religion and, if yes, which religion do you belong to?"
   ),
   party.question.type = "PartyVote",

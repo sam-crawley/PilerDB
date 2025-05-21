@@ -8,7 +8,7 @@ data.spec <- list(
   ),
   party.question.type = "Closest",
   country.party.question.type = c(
-    "Austrlia" = "PartyVote",
+    "Australia" = "PartyVote",
     "Netherlands" = "PartyVote"
   ),
   country.format = 'country.name',
