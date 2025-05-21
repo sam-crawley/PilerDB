@@ -77,6 +77,16 @@ read.div.data <- function(data.spec, data.def.file, raw = F, datasets.dir = NULL
   if (! is.null(fixup.func))
     data <- fixup.func(data)
   
+  # Check for errors in country.party.question.type
+  if (! is.null(data.spec$country.party.question.type)) {
+    qt.countries <- names(data.spec$country.party.question.type)
+    
+    additional.countries <- setdiff(qt.countries, data$Country)
+    
+    if (length(additional.countries) != 0)
+      stop("Error: country.party.question.type contains countries not in dataset: ", paste(additional.countries, collapse = ", "))
+  }
+  
   return(data)
 }
 
