@@ -7,7 +7,7 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
     table.to.use <- res$summary.by.group[[group.basis]]
   
   tab <- table.to.use  %>%
-    mutate(across(ends_with('.pct'), ~round(.x, digits = 2) * 100)) %>%
+    mutate(across(ends_with('.pct'), ~.x * 100)) %>%
     rename(
       "Tau" = cor.nomiss,
       "Total Included (N)" = total.included,
@@ -44,7 +44,20 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
     filter(! is.na(`Group Basis`)) %>% 
     select(-`Excluded Reason`)
   
-  tab
+  tab %>%
+    DT::datatable(
+      options = list(
+        lengthChange = F, 
+        paging = F, 
+        searching = F,
+        order = list(list(5, 'desc')),
+        columnDefs = list(list(className = 'dt-center', targets = 12:14))
+      ),
+      selection = 'single',
+      class = "display compact",
+      rownames = F
+    ) %>%
+    DT::formatRound(c("Total Included (%)", "Party Missing / Other (%)", "Group Missing / Other (%)"), 2)
 }
 
 gen.group.size.names <- function(max.parties) {

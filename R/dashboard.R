@@ -145,17 +145,7 @@ launchPilerDash <- function(logger = NULL) {
     
     output$tableOutput = DT::renderDT(
       get.summary.table(piler, input$datasrc, input$group.basis, input$country, input$incomplete.data),
-      options = list(
-        lengthChange = F, 
-        paging = F, 
-        searching = F,
-        order = list(list(5, 'desc')),
-        columnDefs = list(list(className = 'dt-center', targets = 12:14))
-      ),
-      server = T, 
-      selection = 'single',
-      class = "display compact",
-      rownames = F
+      server = T
     )
     
     output$catSumTable = DT::renderDT(

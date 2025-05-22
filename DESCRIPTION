@@ -1,6 +1,6 @@
 Package: PilerDB
 Title: Database used to generate measures of ethnic polarization
-Version: 0.0.9.0001
+Version: 1.0.1.0001
 Authors@R: 
     person(given = "Sam",
            family = "Crawley",
