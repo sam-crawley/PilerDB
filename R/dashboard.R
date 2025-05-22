@@ -218,7 +218,7 @@ launchPilerDash <- function(logger = NULL) {
     observeEvent(input$tableOutput_rows_selected, {
       row <- input$tableOutput_rows_selected
       
-      displayed.sum.table <- get.summary.table(piler, input$datasrc, input$group.basis, input$country, input$incomplete.data, with.id = T)
+      displayed.sum.table <- get.summary.table(piler, input$datasrc, input$group.basis, input$country, input$incomplete.data, with.id = T, as.dt = F)
       selected.row <- displayed.sum.table[row,]
       
       country.data <- crosstabs[[selected.row$ID]]
