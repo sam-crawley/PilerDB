@@ -2,7 +2,7 @@ data.spec <- list(
   file.name = "afrobarometer_release-dataset_merge-34ctry_r8_en_2023-03-01.sav",
   file.type = 'sav',
   question.text = c(
-    "Party" = "If a presidential election were held tomorrow, which party's candidate would you vote for?",
+    "Party" = "If [presidential elections] were held tomorrow, which [party's candidate] would you vote for?",
     "Language" = "What is the primary language you speak in your home now?",
     "Religion" = "What is your religion, if any?",
     "Ethnicity" = "What is your ethnic community, cultural group or tribe?"
