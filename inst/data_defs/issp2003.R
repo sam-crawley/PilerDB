@@ -3,11 +3,27 @@ data.spec <- list(
   file.type = 'dta',
   file.encoding = "latin1",
   question.text = c(
-    "Party" = "Which party did you vote for?",
+    "Party" = "[varies by country]",
     "Religion" = "Do you belong to a religion and, if yes, which religion do you belong to?",
     "Ethnicity" = "Nationality / ethnic group"
   ),
-  party.question.type = "PartyVote",
+  party.question.type = "Closest",
+  country.party.question.type = c(
+    "Austria" = "PartyVote",
+    "Czechia" = "PartyVote",
+    "Germany" = "PartyVote",
+    "Denmark" = "PartyVote",
+    "Spain" = "PartyVote",
+    "United Kingdom" = "PartyVote",
+    "Hungary" = "PartyVote",
+    "Ireland" = "PartyVote",
+    "Latvia" = "PartyVote",
+    "Netherlands" = "PartyVote",
+    "Norway" = "PartyVote",
+    "New Zealand" = "PartyVote",
+    "Russia" = "PartyVote",
+    "Slovenia" = "PartyVote"
+  ),
   country.format = 'iso2c',
   country.custom = c(
     "GB-GBN" = "United Kingdom",

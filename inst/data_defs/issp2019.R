@@ -2,11 +2,16 @@ data.spec <- list(
   file.name = "ZA7600_v3-0-0.dta",
   file.type = 'dta',
   question.text = c(
-    "Party" = "Which party did you vote for?",
+    "Party" = "[varies by country]",
     "Religion" = "Do you belong to a religion and, if yes, which religion do you belong to?",
     "Ethnicity" = "Nationality / ethnic group"
   ),
   party.question.type = "PartyVote",
+  country.party.question.type = c(
+    "France" = "PresPartyVote",
+    "Taiwan" = "PresPartyVote",
+    "United States" = "PresPartyVote"
+  ),
   country.format = 'iso2c',
   country.custom = c(
     "GB-GBN" = "United Kingdom"
