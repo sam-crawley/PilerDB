@@ -9,7 +9,7 @@ data.spec <- list(
   ),
   party.question.type = "PartyVote",
   country.party.question.type = c(
-    "Chile" = "Closest",
+    "Chile" = "Closest"
   ),
   country.format = 'iso2c',
   country.custom = c(

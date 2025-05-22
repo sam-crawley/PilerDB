@@ -18,7 +18,6 @@ data.spec <- list(
     "Finland" = "PartyVote",
     "United Kingdom" = "PartyVote",
     "Italy" = "PartyVote",
-    "Netherlands" = "PartyVote",
     "Norway" = "PartyVote",
     "New Zealand" = "PartyVote",
     "Poland" = "PartyVote",

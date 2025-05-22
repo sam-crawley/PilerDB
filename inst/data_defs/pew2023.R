@@ -44,7 +44,7 @@ cat.defs <- list(
   Party = list(
     "Missing" = c("Do not feel close to any party", "Don\u2019t know", "Refused", "Don't know", "Dont know", "DK/Refused",
                   "Don\u2019t Know", "Nao sabe (Don\u2019t know)", "Recusa (Refused)", "Tidak tahu (Don\u2019t know)", "Menolak (Refused)",
-                  "No sabe (Don\u2019t know)", "No contest\u00f3 (Refused)"),
+                  "No sabe (Don\u2019t know)", "No contest\u00f3 (Refused)", "Yes", "No"),
     "Other" = c("Other", "Independent", "Other (SPECIFY)", "Other party (please specify)", "Otro (Other)", "Outro (Other)",
                 "Lainnya (Other)")
   ),

@@ -14,6 +14,10 @@ data.spec <- list(
     "Taiwan" = "PresPartyVote",
     "United States" = "PresPartyVote"
   ),
+  country.format = 'iso2c',
+  country.custom = c(
+    "GB-GBN" = "United Kingdom"
+  ),
   field.def = c(
     "Party" = "prty",
     "Religion" = "relig",

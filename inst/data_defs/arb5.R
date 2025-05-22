@@ -18,7 +18,8 @@ data.spec <- list(
   ),
   fixups = function(data) {
     data %>% mutate(Year = format(date, format = "%Y")) %>%
-      mutate(Year = if_else(is.na(Year), "2018", Year))
+      mutate(Year = if_else(is.na(Year), "2018", Year)) %>%
+      filter(! is.na(Weight)) # Remove observations with missing weight
   }
 )
 

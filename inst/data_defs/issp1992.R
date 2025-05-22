@@ -44,7 +44,8 @@ data.spec <- list(
   fixups = function(data) {
     data %>% 
       mutate(Party = if_else(Country %in% c("United States"), "Missing", Party)) %>%
-      mutate(Year = 1992)
+      mutate(Year = 1992) %>%
+      filter(Weight != 0)
   }
 )
 

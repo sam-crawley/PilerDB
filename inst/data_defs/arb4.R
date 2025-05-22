@@ -18,7 +18,8 @@ data.spec <- list(
     "Year" = NA
   ),
   fixups = function(data) {
-    data %>% mutate(Year = 2017)
+    data %>% mutate(Year = 2017) %>%
+      filter(! is.na(Weight)) # Remove 1 observation with missing weight
   }
 )
 

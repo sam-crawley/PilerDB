@@ -53,6 +53,9 @@ data.spec <- list(
       mutate(prty = if_else(C_ALPHAN == "US", "Missing", prty))
     
     data
+  },
+  fixups = function(data) {
+    data %>% filter(Weight != 0)
   }
 )
 

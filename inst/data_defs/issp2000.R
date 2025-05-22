@@ -46,7 +46,8 @@ data.spec <- list(
   },
   fixups = function(data) {
     data %>% mutate(Party = if_else(Country %in% c("United States"), "Missing", Party)) %>%
-      mutate(Religion = if_else(Religion == "Prot (n else class), reformated", "Protestant (nec)", Religion))
+      mutate(Religion = if_else(Religion == "Prot (n else class), reformated", "Protestant (nec)", Religion)) %>%
+      filter(Weight != 0)
   }
 )
 

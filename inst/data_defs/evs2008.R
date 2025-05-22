@@ -32,7 +32,8 @@ data.spec <- list(
     # Incorporate response from v105 to indicate if they have no religion
     data <- data %>% mutate(v105 = haven::as_factor(v105)) %>%
       mutate(Religion = fct_expand(Religion, "No Religion")) %>% 
-      mutate(Religion = replace(Religion, v105 == "no", "No Religion"))
+      mutate(Religion = replace(Religion, v105 == "no", "No Religion")) %>%
+      filter(Weight != 0)
     
     data
   }

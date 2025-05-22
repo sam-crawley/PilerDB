@@ -9,7 +9,6 @@ data.spec <- list(
   party.question.type = "PartyVote",
   country.party.question.type = c(
     "France" = "PresPartyVote",
-    "Mexico" = "PresPartyVote",
     "Taiwan" = "PresPartyVote",
     "United States" = "PresPartyVote"
   ),
