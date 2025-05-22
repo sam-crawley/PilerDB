@@ -144,16 +144,42 @@ get.dataset.file.path <- function(data.def.file, datasets.dir, data.spec) {
   file.path <- paste(datasets.dir, def.prefix, def.id, data.spec$file.name, sep = "/")
 }
 
-check.dataset.files <- function() {
+check.dataset.files <- function(load.data = F, check.data = F) {
   walk(get.data.def.list(), function(def.file) {
+    cat("Checking", def.file, "\n")
+    
     e <- new.env()
     
     source(def.file, local = e, encoding = "UTF-8")
     
-    file.path <- get.dataset.file.path(data.def.file = def.file, datasets.dir = default.datasets.dir, data.spec = e$data.spec)
+    file.path <- get.dataset.file.path(data.def.file = def.file, datasets.dir = get.datasets.dir(), data.spec = e$data.spec)
     
     if (! file.exists(file.path)) {
       cat("Cannot find file", file.path, "\n")
+    }
+    
+    if (load.data) {
+      tryCatch(
+        {
+          data <- read.div.data(e$data.spec, def.file, raw = F, datasets.dir = get.datasets.dir())
+        },
+        error=function(e) {
+          message('Failed loading data')
+          print(e)
+        }
+      )
+      
+      if (! is.null(data) & check.data) {
+        tryCatch(
+          {
+            check.data(data)
+          },
+          error=function(e) {
+            message('Data failed check')
+            print(e)
+          }
+        )
+      }
     }
   })
 }
