@@ -120,6 +120,8 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
   
   data.defs <- get.data.def.list()
   
+  party.map <- get.party.map()
+  
   res <- map(data.defs, function(data.def.file) {
     id <- get.data.def.id(data.def.file)
     
@@ -137,7 +139,7 @@ gen.piler.db <- function(ids.to.load = NULL, use.existing.data = F, existing.dat
     check.data(data)
     
     data.cat.sum <- gen.category.summary(data, data.def$cat.defs)
-    src.tabs <- gen.country.crosstabs(data, id, data.def)
+    src.tabs <- gen.country.crosstabs(data, id, data.def, party.map)
     info <- get.data.src.info(data, data.def$data.spec)
     
     return (list(
@@ -204,7 +206,7 @@ check.data <- function(data) {
 # Produce a data structure for a single dataset that includes crosstabs for each country
 #  At this level, we should only be doing summarising that requires access to the original dataset
 #  (Because the idea is that the original data will not be available after this point)
-gen.country.crosstabs <- function(data, data.source, data.def) {
+gen.country.crosstabs <- function(data, data.source, data.def, party.map) {
   data.spec <- data.def$data.spec
   
   if (is.null(data.spec$split.by.year))
@@ -265,7 +267,8 @@ gen.country.crosstabs <- function(data, data.source, data.def) {
       data.source.orig = data.source.orig,
       year = year,
       excluded = excluded,
-      party.question.type = party.question.type
+      party.question.type = party.question.type,
+      party.map = party.map
     )
   })
   
@@ -279,7 +282,8 @@ gen.country.crosstabs <- function(data, data.source, data.def) {
       params[['data.source.orig']],
       params[['party.question.type']],
       params[['year']], 
-      params[['excluded']]
+      params[['excluded']],
+      params[['party.map']]
     )
   })
   
@@ -288,9 +292,25 @@ gen.country.crosstabs <- function(data, data.source, data.def) {
   return(res)
 }
 
-gen.single.country.data <- function(d, cntry, data.source, data.source.orig, party.question.type, year = NULL, excluded = F) {
+gen.single.country.data <- function(d, cntry, data.source, data.source.orig, party.question.type, year = NULL, excluded = F, party.map) {
   
   country.orig <- d %>% distinct(Country.orig) %>% pull(Country.orig)
+  
+  country.party.map <- party.map %>% filter(Country == cntry) %>%
+    filter(! is.na(party_id)) %>%
+    select(-Country)
+  
+  # Join data onto party map table
+  d <- left_join(d, country.party.map, by = join_by(Party == piler_party))
+  
+  # Keep track of parties we've matched from the party map
+  party.back.map <- d %>% 
+    select(Party, party_name, party_id, party_code) %>% 
+    distinct(Party, party_name, .keep_all = T) %>% filter(! is.na(party_name))
+  
+  # Re-write party names to the 'standardised' version (if we matched them)
+  d <- d %>%
+    mutate(Party = if_else(! is.na(party_name), party_name, Party))
   
   tables <- map(group.names, function(var) {
     calc.summarised.group.data(d, var)
@@ -330,7 +350,8 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, par
     country.orig = country.orig,
     avail.counts = avail.counts,
     avail.counts.orig = avail.counts.orig,
-    manually.excluded = excluded
+    manually.excluded = excluded,
+    party.back.map = party.back.map
   )
   
   tables

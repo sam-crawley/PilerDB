@@ -100,6 +100,10 @@ get.datasets.dir <- function() {
   here::here("datasets")
 }
 
+get.party.map <- function() {
+  read.csv(paste0(system.file("PartyMap", package=packageName()), "/party.name.map.csv"))
+}
+
 #' @export
 load.data.by.id <- function(id, raw = F, process = T, datasets.dir = NULL) {
   process <- if_else(raw, F, process)
