@@ -38,7 +38,7 @@ cat.defs <- list(
                    "Would not vote; not eligible", "No answer, refused",
                    "No vote", "NAP, NAV, NA, DK", "Would not vote; No party prefrence",
                    "No party, no preference", "Na/ref", "No party preference; wouldnt vote",
-                   "Dk", "Na", "dk"),
+                   "Dk", "Na", "dk", "nav"),
     "Other" = c("Other party", "Other answer", "Other Party", "Non party individuals",
                 "Other left party", "Other right party", "Other religious party")
   ),
