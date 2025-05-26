@@ -306,7 +306,11 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, par
   # Keep track of parties we've matched from the party map
   party.back.map <- d %>% 
     select(Party, party_name, party_id, party_code) %>% 
-    distinct(Party, party_name, .keep_all = T) %>% filter(! is.na(party_name))
+    distinct(Party, party_name, .keep_all = T) %>% filter(! is.na(party_name)) %>%
+    rename(
+      "orig_party_name" = Party,
+      "std_party_name" = party_name
+    )
   
   # Re-write party names to the 'standardised' version (if we matched them)
   d <- d %>%

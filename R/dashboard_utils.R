@@ -46,7 +46,7 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
   
   if (! as.dt)
     return (tab)
-  
+
   tab %>%
     DT::datatable(
       options = list(
@@ -149,7 +149,22 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
       
       crosstab <- crosstab %>%
         mutate(across(ends_with("percent"), ~paste0(format(.x, nsmall = 1), '%')))
+        
+      party.back.map <- purrr::pluck(country.data$Summary, "party.back.map")
       
+      # Make previous 
+      if (! is.null(party.back.map)) {
+        crosstab <- crosstab %>%
+          left_join(party.back.map, by = join_by(Party == std_party_name)) %>%
+          mutate(Party = if_else(! is.na(orig_party_name), 
+                                 paste0("<a href='https://partyfacts.herokuapp.com/data/partycodes/", party_id, 
+                                        "/' target='_new' title='Original name: ", orig_party_name, "'>", 
+                                        Party, "</a>"),
+                                 Party)) %>%
+          select(-orig_party_name, -party_id, -party_code)
+        
+      }
+
       col.totals <- crosstab %>% filter(Party == "Total")
       crosstab   <- crosstab %>% filter(Party != "Total")
       
@@ -183,6 +198,7 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
           scrollX = T
         ),
         rownames = F,
+        escape = F,
         container = sketch
       )
     }
