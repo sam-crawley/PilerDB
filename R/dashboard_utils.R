@@ -66,7 +66,7 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
 gen.group.size.names <- function(max.parties) {
   c(
     rep(c("Name", "N"), summary.group.size),
-    rep(c("Party", "Total N", paste("Group", 1:summary.group.size)), max.parties)
+    rep(c("Party", "Orig Party", "Total N", paste("Group", 1:summary.group.size)), max.parties)
   )
 }
 
@@ -152,7 +152,7 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
         
       party.back.map <- purrr::pluck(country.data$Summary, "party.back.map")
       
-      # Make previous 
+      # Make original party name available (and link to Party Facts entry)
       if (! is.null(party.back.map)) {
         crosstab <- crosstab %>%
           left_join(party.back.map, by = join_by(Party == std_party_name)) %>%

@@ -174,7 +174,7 @@ launchPilerDash <- function(logger = NULL) {
         tr(
           lapply(c("Country", "Data Source", "Year", "Group Basis"), function (x) { th(rowspan = 2, x) }),
           lapply(1:summary.group.size, function (x) { th(colspan = 2, paste("Group", x)) }),
-          lapply(paste("Supporters of party", 1:max.parties), function (x) { th(colspan = summary.group.size+2, x) })
+          lapply(paste("Supporters of party", 1:max.parties), function (x) { th(colspan = summary.group.size+3, x) })
         ),
         tr(
           lapply(gen.group.size.names(max.parties), th)
@@ -267,7 +267,7 @@ launchPilerDash <- function(logger = NULL) {
         ),
         
         h4("Group basis: ", textOutput(paste0("GroupBasis", countryTabID), inline = T)),
-  
+
         br(),
         
         h4(textOutput(paste0("WarningHeader", countryTabID))),

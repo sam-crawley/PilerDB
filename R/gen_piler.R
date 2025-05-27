@@ -862,8 +862,6 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
       ) %>%
       select(-row)  # Remove the dummy row column
     
-    gs.row <- bind_cols(gs.row, gs)
-    
     party.group.sizes <- summary.data %>% 
       filter(Group %in% main.groups) %>% 
       arrange(Group) %>%
@@ -879,35 +877,44 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
     if (length(main.groups) < summary.group.size) {
       for (extra.group in (length(main.groups)+1):summary.group.size) {
         party.group.sizes[[paste('Group', extra.group)]] <- NA
+        gs[[paste0('Group', extra.group)]] <- NA
+        gs[[paste0('n', extra.group)]] <- NA
       }
+    }
+    
+    party.back.map <- purrr::pluck(country.data$Summary, "party.back.map")
+    
+    if (! is.null(party.back.map)) {
+      party.group.sizes <- party.group.sizes %>%
+        left_join(party.back.map, by = join_by(Party.Grp == std_party_name)) %>%
+        select(-party_id, -party_code) %>%
+        rename(Orig.Party = orig_party_name) %>%
+        select(Party.Grp, Orig.Party, everything())
     }
     
     party.group.sizes <- party.group.sizes %>%
       mutate(across(everything(), as.character)) %>%
-      # Add a row identifier (optional, but helps in debugging)
       tibble::rownames_to_column("row_num") %>%
-      # Pivot longer to stack all values under a single key
       pivot_longer(
         cols = -row_num,
         names_to = "col_name",
         values_to = "value"
       ) %>%
-      # Create new column names in the format "OriginalName_RowNum"
       mutate(new_col = paste0(col_name, "_", row_num)) %>%
-      # Drop the old identifiers
       select(-row_num, -col_name) %>%
-      # Pivot back to wide format (now one row)
       pivot_wider(
         names_from = new_col,
         values_from = value
       )
     
+    # Join parts of the row together
+    gs.row <- bind_cols(gs.row, gs)
     gs.row <- suppressWarnings(bind_cols(gs.row, party.group.sizes, .name_repair = "minimal"))
     
     gs.row
   }
   
-  group.sizes <- furrr::future_map(res, get.grp.size.row) |>
+  group.sizes <- furrr::future_map(res, get.grp.size.row) %>%
     list_rbind()
   
   names(group.sizes) <- gsub("_\\d+$", "", names(group.sizes))

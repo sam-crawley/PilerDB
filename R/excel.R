@@ -166,20 +166,20 @@ write.excel.group.sizes.tab <- function(wb, group.sizes.data, tab.name = "Group 
   openxlsx::writeData(wb, tab.name, "Largest Groups", startRow = 1, startCol = 5)
   
   for (party.num in 1:max.parties) {
-    col <- 4 + (summary.group.size * 2) + ( (party.num-1) * (2 + summary.group.size) ) + 1
+    col <- 4 + (summary.group.size * 2) + ( (party.num-1) * (3 + summary.group.size) ) + 1
     openxlsx::writeData(wb, tab.name, paste("Supporters of Party", party.num), startRow = 1, startCol = col)
   }
   
   group.size.names <- c(
     "Country", "Data Source", "Year", "Group Basis",
     rep(c("Name", "N"), summary.group.size),
-    rep(c("Party", "Total N", paste("Group", 1:summary.group.size)), max.parties)
+    rep(c("Party", "Orig Party", "Total N", paste("Group", 1:summary.group.size)), max.parties)
   )
   
   openxlsx::writeData(wb, tab.name, data.frame(t(group.size.names)), startRow = 2, startCol = 1, colNames = F, rowNames = F)
   openxlsx::writeData(wb, tab.name, group.sizes.data, startRow = 3, startCol = 1, colNames = F, rowNames = F)
   
-  header.cols <- 4 + (summary.group.size * 2) + ( (max.parties) * (2 + summary.group.size) )
+  header.cols <- 4 + (summary.group.size * 2) + ( (max.parties) * (3 + summary.group.size) )
   openxlsx::setColWidths(wb, sheet = tab.name, cols = 1:header.cols, widths = "auto")
   openxlsx::addStyle(wb, sheet = tab.name, hs2, rows = 1, cols = 1:header.cols)
   openxlsx::addStyle(wb, sheet = tab.name, hs2, rows = 2, cols = 1:header.cols)  
