@@ -1,7 +1,7 @@
 # Some functions to manipulate data for display in the shiny app
 
 # Get the main 'summary' table on the Crosstabs tab of the shiny app
-get.summary.table <- function(res, datasrc, group.basis, country, incomplete.data = F, with.id = F, as.dt = T) {
+get.summary.table <- function(res, datasrc, group.basis, country, incomplete.data = F, with.id = F) {
   table.to.use <- res$summary
   if (group.basis != "(Highest PES)")
     table.to.use <- res$summary.by.group[[group.basis]]
@@ -44,23 +44,7 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
     filter(! is.na(`Group Basis`)) %>% 
     select(-`Excluded Reason`)
   
-  if (! as.dt)
-    return (tab)
-
-  tab %>%
-    DT::datatable(
-      options = list(
-        lengthChange = F, 
-        paging = F, 
-        searching = F,
-        order = list(list(5, 'desc')),
-        columnDefs = list(list(className = 'dt-center', targets = 12:14))
-      ),
-      selection = 'single',
-      class = "display compact",
-      rownames = F
-    ) %>%
-    DT::formatRound(c("Total Included (%)", "Party Missing / Other (%)", "Group Missing / Other (%)"), 2)
+  tab
 }
 
 gen.group.size.names <- function(max.parties) {

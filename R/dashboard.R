@@ -142,9 +142,36 @@ launchPilerDash <- function(logger = NULL) {
   )
   
   server <- function(input, output, session) {
+    summary_table <- reactive({
+      get.summary.table(
+        piler, 
+        input$datasrc, 
+        input$group.basis, 
+        input$country, 
+        input$incomplete.data, 
+        with.id = T
+      )
+    })
     
-    output$tableOutput = DT::renderDT(
-      get.summary.table(piler, input$datasrc, input$group.basis, input$country, input$incomplete.data),
+    output$tableOutput = DT::renderDT({
+      table <- req(summary_table()) %>%
+        select(-ID)
+      
+      table %>%
+        DT::datatable(
+          options = list(
+            lengthChange = F, 
+            paging = F, 
+            searching = F,
+            order = list(list(5, 'desc')),
+            columnDefs = list(list(className = 'dt-center', targets = 12:14))
+          ),
+          selection = 'single',
+          class = "display compact",
+          rownames = F
+        ) %>%
+        DT::formatRound(c("Total Included (%)", "Party Missing / Other (%)", "Group Missing / Other (%)"), 2)
+      },
       server = T
     )
     
@@ -217,9 +244,9 @@ launchPilerDash <- function(logger = NULL) {
     
     observeEvent(input$tableOutput_rows_selected, {
       row <- input$tableOutput_rows_selected
+      req(row)  # Ensure a row is selected
       
-      displayed.sum.table <- get.summary.table(piler, input$datasrc, input$group.basis, input$country, input$incomplete.data, with.id = T, as.dt = F)
-      selected.row <- displayed.sum.table[row,]
+      selected.row <- summary_table()[row, ]
       
       country.data <- crosstabs[[selected.row$ID]]
       
