@@ -108,10 +108,7 @@ data.spec <- list(
         )
       ) %>%
       mutate(Party = if_else(Country %in% c("United States"), "Missing", Party)) %>%
-      
-      # Set all Hungary's weights to 1, since some are 0
-      #mutate(Weight = if_else(Country == "Hungary", 1, Weight)) %>%
-      
+      mutate(Weight = Weight / 100000) %>%
       mutate(Year = 1985)
   }
 )
