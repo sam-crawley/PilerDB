@@ -150,7 +150,7 @@ data.spec <- list(
         )
       ) %>%
       mutate(Country = if_else(Country == "Northern Ireland", "United Kingdom", Country)) %>%
-      
+      mutate(Party = if_else(Country %in% c("United States"), "Missing", Party)) %>%
       mutate(Year = 1990)
   }
 )
