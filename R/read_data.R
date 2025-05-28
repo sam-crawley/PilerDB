@@ -101,7 +101,7 @@ get.datasets.dir <- function() {
 }
 
 get.party.map <- function() {
-  read.csv(paste0(system.file("PartyMap", package=packageName()), "/party.name.map.csv"))
+  readr::read_csv(paste0(system.file("PartyMap", package=packageName()), "/party.name.map.csv"))
 }
 
 #' @export
