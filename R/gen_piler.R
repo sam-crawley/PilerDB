@@ -872,7 +872,9 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
       mutate(Total = sum(c_across(-Party))) %>%
       select(Party, Total, everything()) %>%
       arrange(desc(Total))
-    
+
+    names(party.group.sizes) <- c("Party.Grp", "Total", paste("Group", 1:length(main.groups)))
+        
     # Ensure we always have the right number of groups
     if (length(main.groups) < summary.group.size) {
       for (extra.group in (length(main.groups)+1):summary.group.size) {
@@ -882,8 +884,6 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
       }
     }
 
-    names(party.group.sizes) <- c("Party.Grp", "Total", paste("Group", 1:length(main.groups)))
-        
     party.back.map <- purrr::pluck(country.data$Summary, "party.back.map")
     
     if (! is.null(party.back.map)) {
