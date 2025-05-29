@@ -134,7 +134,8 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
       crosstab <- crosstab %>%
         mutate(across(ends_with("percent"), ~paste0(format(.x, nsmall = 1), '%')))
         
-      party.back.map <- purrr::pluck(country.data$Summary, "party.back.map")
+      party.back.map <- purrr::pluck(country.data$Summary, "party.back.map") %>% 
+        distinct(std_party_name, .keep_all = T)
       
       # Make original party name available (and link to Party Facts entry)
       if (! is.null(party.back.map)) {
