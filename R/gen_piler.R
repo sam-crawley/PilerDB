@@ -685,6 +685,7 @@ calc.group.basis <- function(cor) {
 }
 
 # Calculate a DF summarising all countries
+#' @export
 calc.summary.data <- function(res, group.to.use = NULL) {
   furrr::future_map_dfr(res, function(country.data) {
     orig.sum.data <- country.data$Summary
@@ -820,6 +821,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
   })
 }
 
+#' @export
 get.group.size.summary <- function(res, group.to.use = NULL) {
   # Add in group sizes for n largest groups for each country,
   #  as well as breakdowns for each Party/Main Group combo
@@ -871,8 +873,6 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
       select(Party, Total, everything()) %>%
       arrange(desc(Total))
     
-    names(party.group.sizes) <- c("Party.Grp", "Total", paste("Group", 1:length(main.groups)))
-    
     # Ensure we always have the right number of groups
     if (length(main.groups) < summary.group.size) {
       for (extra.group in (length(main.groups)+1):summary.group.size) {
@@ -881,7 +881,9 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
         gs[[paste0('n', extra.group)]] <- NA
       }
     }
-    
+
+    names(party.group.sizes) <- c("Party.Grp", "Total", paste("Group", 1:length(main.groups)))
+        
     party.back.map <- purrr::pluck(country.data$Summary, "party.back.map")
     
     if (! is.null(party.back.map)) {
