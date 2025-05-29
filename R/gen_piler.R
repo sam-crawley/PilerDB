@@ -836,7 +836,7 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
     
     summary.data <- config.summary.data(country.data[[group.basis]], drop.cats = T, weighted = T)
     
-    if (! is.data.frame(summary.data))
+    if (! is.data.frame(summary.data) || nrow(summary.data) == 0)
       return(NULL)
     
     gs.row <- country.data$Summary$general %>%
