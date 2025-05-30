@@ -1,7 +1,6 @@
 data.spec <- list(
   file.name = "Latinobarometro_2009_datos_eng_v2014_06_27.dta",
   file.type = 'dta',
-  file.encoding = "latin1",  
   question.text = c(
     "Party" = "If elections were held this Sunday, which party would you vote for?",
     "Religion" = "What is your religion?",
@@ -34,12 +33,12 @@ cat.defs <- list(
     "Other" = c("Other")
   ),
   Religion = list(
-    "Missing" = c("Not applicable", "No answer/Refused", "Don\u00C2\u00B4t know"),
+    "Missing" = c("Not applicable", "No answer/Refused", "Don´t know"),
     "Other" = c("Others"),
     "No Religion" = c("Believer, not belonging to any church", "Agnostic", "Atheist", "None")
   ),
   Ethnicity = list(
-    "Missing" = c("Not applicable", "No answer/Refused", "Don\u00C2\u00B4t know"),
+    "Missing" = c("Not applicable", "No answer/Refused", "Don´t know"),
     "Other" = c("Other race")
   )
 )
