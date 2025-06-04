@@ -112,12 +112,16 @@ get.country.list <- function(summary.table, data.src, included = T) {
   res
 }
 
-generate.country.tables <- function(countryTabID, country.data, output, show.all.data = T, show.weighted = F) {
+generate.country.tables <- function(countryTabID, country.data, output, show.all.data = T, show.weighted = F, party.map) {
   walk (group.names, function(group) {
     grp.output.header <- paste0(group, "Heading", countryTabID)
     grp.output.table <- paste0(group, "Table", countryTabID)
     
-    crosstab <- gen.crosstab(country.data[[group]], totals = T, drop.cats = ! show.all.data, weighted = show.weighted)
+    country <- country.data$Summary$general$Country
+    country.party.map <- party.map %>% filter(Country == country)
+    
+    crosstab <- gen.crosstab(country.data[[group]], totals = T, drop.cats = ! show.all.data, weighted = show.weighted,
+                             party.map = country.party.map)
     
     if (! is.null(crosstab) & is.data.frame(crosstab)) {
       if (show.all.data) {
@@ -133,22 +137,15 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
       
       crosstab <- crosstab %>%
         mutate(across(ends_with("percent"), ~paste0(format(.x, nsmall = 1), '%')))
-        
-      party.back.map <- purrr::pluck(country.data$Summary, "party.back.map") %>% 
-        distinct(std_party_name, .keep_all = T)
-      
+
       # Make original party name available (and link to Party Facts entry)
-      if (! is.null(party.back.map)) {
-        crosstab <- crosstab %>%
-          left_join(party.back.map, by = join_by(Party == std_party_name)) %>%
-          mutate(Party = if_else(! is.na(orig_party_name), 
-                                 paste0("<a href='https://partyfacts.herokuapp.com/data/partycodes/", party_id, 
-                                        "/' target='_new' title='Original name: ", orig_party_name, "'>", 
-                                        Party, "</a>"),
-                                 Party)) %>%
-          select(-orig_party_name, -party_id, -party_code)
-        
-      }
+      crosstab <- crosstab %>%
+        mutate(Party = if_else(! is.na(Party.Std), 
+                               paste0("<a href='https://partyfacts.herokuapp.com/data/partycodes/", party_id, 
+                                      "/' target='_new' title='Original name: ", Party, "'>", 
+                                      Party.Std, "</a>"),
+                               Party)) %>%
+        select(-Party.Std, -party_id)
 
       col.totals <- crosstab %>% filter(Party == "Total")
       crosstab   <- crosstab %>% filter(Party != "Total")

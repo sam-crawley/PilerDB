@@ -466,7 +466,7 @@ config.summary.data <- function(summary.data, drop.cats = F, weighted = F) {
 }
 
 # Generate a single crosstab from stored summary data
-gen.crosstab <- function(summary.data, drop.cats = F, weighted = F, totals = F) {
+gen.crosstab <- function(summary.data, drop.cats = F, weighted = F, totals = F, party.map = NULL) {
   summary.data <- config.summary.data(summary.data, drop.cats = drop.cats, weighted = weighted)
   
   if (! is.data.frame(summary.data) || nrow(summary.data) == 0)
@@ -501,6 +501,11 @@ gen.crosstab <- function(summary.data, drop.cats = F, weighted = F, totals = F) 
   
   crosstab <- crosstab %>%
     select(Party, all_of(group.cols))
+  
+  if (! is.null(party.map)) {
+    crosstab <- crosstab %>% left_join(party.map, by = join_by(Party == piler_party)) %>%
+      select(Party, "Party.Std" = party_name, party_id, all_of(group.cols))
+  }
   
   if (totals) {
     party.totals <- summary.data %>% 

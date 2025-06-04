@@ -15,6 +15,7 @@ launchPilerDash <- function(logger = NULL) {
   summary.table <- piler$summary
   group.sizes <- piler$group.sizes
   max.parties <- piler$max.parties
+  party.map <- get.party.map()
   
   data.src.list <- sort(unique(summary.table$`Data Source`))
   
@@ -333,13 +334,15 @@ launchPilerDash <- function(logger = NULL) {
       observeEvent(input[[paste0("ShowAllData", countryTabID)]], {
         generate.country.tables(countryTabID, country.data, output, 
                                 show.all.data = input[[paste0("ShowAllData", countryTabID)]],
-                                show.weighted = input[[paste0("ShowWeighted", countryTabID)]])
+                                show.weighted = input[[paste0("ShowWeighted", countryTabID)]],
+                                party.map = party.map)
       }, ignoreInit = T)
       
       observeEvent(input[[paste0("ShowWeighted", countryTabID)]], {
         generate.country.tables(countryTabID, country.data, output, 
                                 show.all.data = input[[paste0("ShowAllData", countryTabID)]],
-                                show.weighted = input[[paste0("ShowWeighted", countryTabID)]])
+                                show.weighted = input[[paste0("ShowWeighted", countryTabID)]],
+                                party.map = party.map)
       }, ignoreInit = T)    
       
       sample.size <- country.data$Summary$general$`Sample Size`
@@ -365,7 +368,7 @@ launchPilerDash <- function(logger = NULL) {
         session$userData$countryTabsOpen[[countryTabID]] <- NULL
       }, ignoreInit = T)
       
-      generate.country.tables(countryTabID, country.data, output)
+      generate.country.tables(countryTabID, country.data, output, party.map = party.map)
       
       appendTab("mainPanel", tab, select = T)
     })
