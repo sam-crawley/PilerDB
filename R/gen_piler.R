@@ -340,8 +340,12 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, par
 calc.all.summaries <- function(res) {
   res$summary <- calc.summary.data(res$crosstabs)
   res$summary.by.group <- map(c(group.names), ~ calc.summary.data(res$crosstabs, group.to.use = .x)) %>% set_names(group.names)
-  res$group.sizes <- get.group.size.summary(res$crosstabs)
-  res$group.sizes.by.group <- map(c(group.names), ~ get.group.size.summary(res$crosstabs, group.to.use = .x)) %>% set_names(group.names)
+  
+  party.map <- get.party.map()
+  
+  res$group.sizes <- get.group.size.summary(res$crosstabs, party.map = party.map)
+  res$group.sizes.by.group <- map(c(group.names), ~ get.group.size.summary(res$crosstabs, group.to.use = .x, party.map = party.map)) %>%
+    set_names(group.names)
   res$max.parties <- get.max.parties(res$group.sizes)
   
   return(res)
@@ -802,7 +806,10 @@ calc.summary.data <- function(res, group.to.use = NULL) {
 }
 
 #' @export
-get.group.size.summary <- function(res, group.to.use = NULL) {
+get.group.size.summary <- function(res, group.to.use = NULL, party.map = NULL) {
+  if (is.null(party.map))
+    party.map <- get.party.map()
+  
   # Add in group sizes for n largest groups for each country,
   #  as well as breakdowns for each Party/Main Group combo
   get.grp.size.row <- function(country.data) {
@@ -864,15 +871,14 @@ get.group.size.summary <- function(res, group.to.use = NULL) {
       }
     }
 
-    party.back.map <- purrr::pluck(country.data$Summary, "party.back.map")
+    # Join standard names from party.map
+    country.party.map <- party.map %>% filter(Country == country.data$Summary$general$Country)
     
-    if (! is.null(party.back.map)) {
-      party.group.sizes <- party.group.sizes %>%
-        left_join(party.back.map, by = join_by(Party.Grp == std_party_name)) %>%
-        select(-party_id, -party_code) %>%
-        rename(Orig.Party = orig_party_name) %>%
-        select(Party.Grp, Orig.Party, everything())
-    }
+    party.group.sizes <- party.group.sizes %>%
+      left_join(country.party.map, by = join_by(Party.Grp == piler_party)) %>%
+      select(-party_id, -party_code) %>%
+      rename(Std.Party = party_name) %>%
+      select(Party.Grp, Std.Party, everything())
     
     party.group.sizes <- party.group.sizes %>%
       mutate(across(everything(), as.character)) %>%
