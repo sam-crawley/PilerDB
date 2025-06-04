@@ -173,7 +173,7 @@ write.excel.group.sizes.tab <- function(wb, group.sizes.data, tab.name = "Group 
   group.size.names <- c(
     "Country", "Data Source", "Year", "Group Basis",
     rep(c("Name", "N"), summary.group.size),
-    rep(c("Party", "Orig Party", "Total N", paste("Group", 1:summary.group.size)), max.parties)
+    rep(c("Party", "Std Party", "Total N", paste("Group", 1:summary.group.size)), max.parties)
   )
   
   openxlsx::writeData(wb, tab.name, data.frame(t(group.size.names)), startRow = 2, startCol = 1, colNames = F, rowNames = F)

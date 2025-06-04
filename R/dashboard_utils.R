@@ -50,7 +50,7 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
 gen.group.size.names <- function(max.parties) {
   c(
     rep(c("Name", "N"), summary.group.size),
-    rep(c("Party", "Orig Party", "Total N", paste("Group", 1:summary.group.size)), max.parties)
+    rep(c("Party", "Std Party", "Total N", paste("Group", 1:summary.group.size)), max.parties)
   )
 }
 
