@@ -647,9 +647,7 @@ drop.rows.from.country.data <- function(d, group1.var, group2.var, weighted = F)
 
 calc.all.indices <- function(country.data, sum.dfs, drop.cats = F, weighted = F) {
   indices <- map_dfr(group.names, function(group) {
-    summary.data <- sum.dfs[[group]]
-    
-    calc.indices(country.data, summary.data, group, drop.cats = drop.cats, weighted = weighted)
+    calc.indices(country.data, sum.dfs[[group]], group, drop.cats = drop.cats, weighted = weighted)
   })
 
   indices %>%
