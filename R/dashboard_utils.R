@@ -204,6 +204,53 @@ get.country.warnings <- function(country.data) {
   
 }
 
+get.country.summary <- function(summary) {
+  summary %>% 
+    group_by(Country) %>% 
+    summarise(
+      total.surveys = n(), 
+      included = sum(is.na(excluded)), 
+      excluded = sum(! is.na(excluded)), 
+      pes.min = min(PES, na.rm = T), 
+      pes.max = max(PES, na.rm = T),
+      year.min = min(Year), 
+      year.max = max(Year),
+      group.basis = {
+         counts <- count(cur_data(), `Group Basis`, sort = TRUE)
+         if (nrow(counts) == 0) NA_character_ else counts$`Group Basis`[1]
+      }
+    )
+}
+
+get.country.parties <- function(piler, country, party.map) {
+  surveys <- piler$summary %>%
+    filter(Country == country & is.na(excluded)) %>%
+    pull(ID)
+  
+  country.party.map <- party.map %>% filter(Country == country)
+  
+  map_dfr(surveys, function(s) {
+    country.data <- piler$crosstabs[[s]]
+    group.basis <- country.data$Summary$general$`Group Basis`
+    
+    if (is.na(group.basis))
+      return (NULL)
+    
+    crosstab <- gen.crosstab(country.data[[group.basis]], weighted = T, totals = T, party.map = country.party.map) %>%
+      filter(! Party %in% c(cats.to.drop, "Total")) %>%
+      mutate(Party = if_else(is.na(Party.Std), Party, Party.Std))
+    
+    tibble(
+      id = s,
+      year = country.data$Summary$general$Year,
+      party = crosstab$Party,
+      percent = crosstab$Total_percent
+    )
+    
+  }) %>% arrange(year) %>% 
+    pivot_wider(names_from = id, id_cols = party, values_from = percent)
+}
+
 get.excel.dir <- function() {
     system.file("excel", package="PilerDB", mustWork = T)
 }

@@ -15,6 +15,7 @@ launchPilerDash <- function(logger = NULL) {
   summary.table <- piler$summary
   group.sizes <- piler$group.sizes
   max.parties <- piler$max.parties
+  countries <- unique(summary.table$Country) %>% sort()
   party.map <- get.party.map()
   
   data.src.list <- sort(unique(summary.table$`Data Source`))
@@ -41,7 +42,7 @@ launchPilerDash <- function(logger = NULL) {
                           )),
               pickerInput("country", 
                           label = "Country", 
-                          sort(unique(summary.table$`Country`)), 
+                          countries, 
                           multiple = T,
                           options = list(
                             `none-selected-text` = "All"
@@ -70,6 +71,26 @@ launchPilerDash <- function(logger = NULL) {
            ),                
           DT::DTOutput("tableGroupSizes")
         )
+      )
+    ),
+    tabPanel("Countries",
+      tabsetPanel(id = "countryPanel", 
+                 tabPanel("Summary",
+                    DT::DTOutput("countrySummary", height = "auto")
+                 ),
+                 tabPanel("Country Details", pageWithSidebar(
+                   headerPanel('Country Details'),
+                   sidebarPanel(
+                     pickerInput("country.picker", 
+                                 label = "Country", 
+                                 countries
+                     ),
+                     width = 2
+                   ),
+                   mainPanel(
+                     DT::DTOutput("tableCountryParties")
+                   )
+                 ))
       )
     ),
     tabPanel("Data Sources", 
@@ -188,6 +209,15 @@ launchPilerDash <- function(logger = NULL) {
       extensions = 'Buttons'
     )
     
+    output$tableCountryParties = DT::renderDT(
+      get.country.parties(piler, input$country.picker, party.map),
+      options = list(
+        paging = F, 
+        searching = F
+      ),
+      rownames = F
+    )
+    
     output$info.cntry.included <- renderText(get.country.list(summary.table, input$info.datasrc, included = T))
     output$info.cntry.excluded <- renderText(get.country.list(summary.table, input$info.datasrc, included = F))
     
@@ -241,6 +271,16 @@ launchPilerDash <- function(logger = NULL) {
       content <- function(file) {
         file.copy(paste0(excel.dir, '/piler_crosstabs.xlsx'), file)
       }
+    )
+    
+    output$countrySummary <- DT::renderDT(
+      get.country.summary(summary.table),
+      options = list(
+        lengthChange = F, 
+        paging = F, 
+        searching = T
+      ),
+      rownames = F
     )
     
     observeEvent(input$tableOutput_rows_selected, {
