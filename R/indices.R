@@ -2,7 +2,7 @@
 
 # This is the main entry function, which calculated all indices for a specific
 #  group/country/configuration
-calc.indices <- function(country.data, summary.data, group, drop.cats = F, weighted = F) {
+calc.indices <- function(country.data, summary.data, group, drop.cats = NULL, weighted = F) {
   summary.data <- config.summary.data(summary.data, drop.cats = drop.cats, weighted = weighted)
   
   if (weighted) {
@@ -12,8 +12,8 @@ calc.indices <- function(country.data, summary.data, group, drop.cats = F, weigh
   
   cc <- calc.cross.cutting(country.data, group, drop.cats = drop.cats, weighted = weighted)
   
-  if (drop.cats & ! is.null(country.data))
-    country.data <- drop.rows.from.country.data(country.data, "Party", group, weighted = weighted)
+  if (! is.null(drop.cats) & ! is.null(country.data))
+    country.data <- drop.rows.from.country.data(country.data, "Party", group, drop.cats, weighted = weighted)
 
   n.eff <- NA
   if (is.data.frame(summary.data))
@@ -171,7 +171,7 @@ calc.tau.and.V <- function(country.data, group, weighted = F) {
   )
 }
 
-calc.cross.cutting <- function(country.data, group, drop.cats = F, weighted = F) {
+calc.cross.cutting <- function(country.data, group, drop.cats = NULL, weighted = F) {
   purrr::map_chr(group.names, function(g) {
     if (g == group)
       return (NA)
@@ -179,8 +179,8 @@ calc.cross.cutting <- function(country.data, group, drop.cats = F, weighted = F)
     # If drop.cats requested, we do our own version of that here
     #  Because we're dropping cats for group vs group, we need to do that separately
     #  from the party vs group drop cats done for the other index calculations
-    if (drop.cats)
-      country.data <- drop.rows.from.country.data(country.data, group, g, weighted = weighted)
+    if (! is.null(drop.cats))
+      country.data <- drop.rows.from.country.data(country.data, group, g, drop.cats, weighted = weighted)
 
     country.data <- country.data %>% mutate(
       "{group}" = fct_drop(.data[[group]]),

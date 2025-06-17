@@ -76,7 +76,7 @@ get.high.group.missing <- function(crosstabs, flagged.only = T) {
     
     summary.data <- crosstabs[[country]][[group]]
     
-    summary.data <- config.summary.data(summary.data, drop.cats = F, weighted = T)
+    summary.data <- config.summary.data(summary.data, drop.cats = NULL, weighted = T)
     
     if (! is.data.frame(summary.data))
       return (NULL)
@@ -84,7 +84,7 @@ get.high.group.missing <- function(crosstabs, flagged.only = T) {
     sample.size <- sum(summary.data$n)
     
     high.missing <- summary.data %>% 
-      filter(! Group %in% cats.to.drop) %>%
+      filter(! Group %in% cats.to.drop$nomiss) %>%
       group_by(Group) %>% 
       mutate(missing.percent = n / sum(n), total.percent = sum(n) / sample.size) %>% 
       filter(Party == "Missing") %>%

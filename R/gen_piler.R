@@ -5,7 +5,10 @@ summary.group.size <- 5
 # These "countries" should *always* be skipped
 global.country.skip <- c("Hong Kong SAR China", "Macao SAR China", "Puerto Rico")
 
-cats.to.drop <- c("Missing", "Other", "No Religion")
+cats.to.drop <- list(
+  nomiss = c("Missing", "Other"),
+  norel = c("Missing", "Other", "No Religion")
+)
 
 version.maj = 1
 version.min = 1
@@ -299,16 +302,19 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, par
   names(tables) <- group.names
   
   # Calculate the counts of available parties/groups
-  avail.counts <- calc.avail.counts(d, with.removals = T)
-  avail.counts.orig <- calc.avail.counts(d, with.removals = F)
+  avail.counts <- calc.avail.counts(d, drop.cats = NULL)
+  avail.counts.nomiss <- calc.avail.counts(d, drop.cats = "nomiss")
+  avail.counts.norel <- calc.avail.counts(d, drop.cats = "norel")
   
   if (is.null(year))
     year <- max(as.integer(d$Year), na.rm = T)
   
   cor = calc.all.indices(d, tables)
   cor.wt = calc.all.indices(d, tables, weighted = T)
-  cor.nomiss = calc.all.indices(d, tables, drop.cats = T)
-  cor.nomiss.wt = calc.all.indices(d, tables, drop.cats = T, weighted = T)
+  cor.nomiss = calc.all.indices(d, tables, drop.cats = "nomiss")
+  cor.nomiss.wt = calc.all.indices(d, tables, drop.cats = "nomiss", weighted = T)
+  cor.norel = calc.all.indices(d, tables, drop.cats = "norel")
+  cor.norel.wt = calc.all.indices(d, tables, drop.cats = "norel", weighted = T)
   
   group.basis <- ifelse(! excluded, calc.group.basis(cor.nomiss.wt), NA_character_)
   
@@ -327,9 +333,12 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, par
     cor.wt = cor.wt,
     cor.nomiss = cor.nomiss,
     cor.nomiss.wt = cor.nomiss.wt,
+    cor.norel = cor.norel,
+    cor.norel.wt = cor.norel.wt,
     country.orig = country.orig,
     avail.counts = avail.counts,
-    avail.counts.orig = avail.counts.orig,
+    avail.counts.nomiss = avail.counts.nomiss,
+    avail.counts.norel = avail.counts.norel,
     manually.excluded = excluded
   )
   
@@ -376,38 +385,6 @@ calc.summarised.group.data <- function(data, group.var) {
     complete(Party, Group, fill = list(n = 0, n.weighted = 0))
 }
 
-# Regenerate the indices data for all countries, without re-generating the crosstabs, etc.
-#  This is quicker than generating everything from scratch
-# XXX: not currently working
-regen.all.indicies <- function(orig.data, calc.summaries = T) {
-  piler.new <- orig.data
-  
-  piler.new$crosstabs <- furrr::future_map(orig.data$crosstabs, function(country.data) {
-    
-    summary.data.list <- country.data[group.names]
-    
-    country.data$Summary$cor = update.summary.indices(country.data$Summary$cor, summary.data.list)
-    country.data$Summary$cor.wt = update.summary.indices(country.data$Summary$cor.wt, summary.data.list, weighted = T)
-    country.data$Summary$cor.nomiss = update.summary.indices(country.data$Summary$cor.nomiss, summary.data.list, drop.cats = T)
-    country.data$Summary$cor.nomiss.wt = update.summary.indices(country.data$Summary$cor.nomiss.wt, summary.data.list, drop.cats = T, weighted = T)
-    
-    group.basis <- calc.group.basis(country.data$Summary$cor.nomiss.wt)
-
-    country.data$Summary$general$`Group Basis` = group.basis
-
-    country.data
-  })
-  
-  if (calc.summaries) {
-    piler.new <- calc.all.summaries(piler.new)
-  }
-  
-  
-  
-  return (piler.new)
-}
-
-
 # Helper function to find the groups / parties smaller than 0.02
 #  to drop based on group summary data
 find.groups.to.drop <- function(summary.data, group.type) {
@@ -441,7 +418,7 @@ find.groups.to.drop <- function(summary.data, group.type) {
 #'   of the crosstabs are used, rather than raw numbers.
 #'
 #' @export
-config.summary.data <- function(summary.data, drop.cats = F, weighted = F) {
+config.summary.data <- function(summary.data, drop.cats = NULL, weighted = F) {
   if (! is.data.frame(summary.data))
     return (NA)
   
@@ -456,13 +433,13 @@ config.summary.data <- function(summary.data, drop.cats = F, weighted = F) {
   }  
   
   # Drop out unwanted categories, and those < 0.02
-  if (drop.cats) {
+  if (! is.null(drop.cats)) {
     parties.to.drop <- find.groups.to.drop(summary.data, "Party")
     groups.to.drop  <- find.groups.to.drop(summary.data, "Group")
     
     summary.data <- summary.data %>%
-      filter(! Party %in% c(cats.to.drop, parties.to.drop)) %>%
-      filter(! Group %in% c(cats.to.drop, groups.to.drop))
+      filter(! Party %in% c(cats.to.drop[[drop.cats]], parties.to.drop)) %>%
+      filter(! Group %in% c(cats.to.drop[[drop.cats]], groups.to.drop))
   }
   
   summary.data
@@ -470,7 +447,7 @@ config.summary.data <- function(summary.data, drop.cats = F, weighted = F) {
 }
 
 # Generate a single crosstab from stored summary data
-gen.crosstab <- function(summary.data, drop.cats = F, weighted = F, totals = F, party.map = NULL) {
+gen.crosstab <- function(summary.data, drop.cats = NULL, weighted = F, totals = F, party.map = NULL) {
   summary.data <- config.summary.data(summary.data, drop.cats = drop.cats, weighted = weighted)
   
   if (! is.data.frame(summary.data) || nrow(summary.data) == 0)
@@ -553,16 +530,16 @@ process.data <- function(data, cat.defs) {
 }
 
 # Calculate the counts of groups/parties available in a country survey
-calc.avail.counts <- function(d, with.removals = F) {
+calc.avail.counts <- function(d, drop.cats = NULL) {
   map(main.vars, function(var.name) {
     avail <- d %>%
       group_by(.data[[var.name]]) %>% 
       summarise(n = n(), .groups = "drop") %>% 
       mutate(p = n / sum(n))
     
-    if (with.removals) {
+    if (! is.null(drop.cats)) {
       avail <- avail %>%
-        filter(p >= 0.02 & ! .data[[var.name]] %in% cats.to.drop)
+        filter(p >= 0.02 & ! .data[[var.name]] %in% cats.to.drop[[drop.cats]])
     }
     else {
       # Treat 'Missing' as a "special case", i.e. we don't count it as
@@ -631,7 +608,7 @@ get.data.src.info <- function(data, data.def) {
 #  at a time, since someone could be a member of a language group that is smaller
 #  than 2%, but be a member of a large religion group. We would want to keep this
 #  person in the analysis for religion, but not for language
-drop.rows.from.country.data <- function(d, group1.var, group2.var, weighted = F) {
+drop.rows.from.country.data <- function(d, group1.var, group2.var, drop.cats, weighted = F) {
   weights <- NULL
   if (weighted)
     weights <- d$Weight
@@ -639,13 +616,13 @@ drop.rows.from.country.data <- function(d, group1.var, group2.var, weighted = F)
   d <- d %>% 
     mutate(across(all_of(c(group1.var, group2.var)), ~fct_lump_prop(fct_drop(.x), 0.02, w = weights))) %>%
     filter(
-      ! .data[[group1.var]] %in% cats.to.drop & ! .data[[group2.var]] %in% cats.to.drop
+      ! .data[[group1.var]] %in% cats.to.drop[[drop.cats]] & ! .data[[group2.var]] %in% cats.to.drop[[drop.cats]]
     )
   
   d
 }
 
-calc.all.indices <- function(country.data, sum.dfs, drop.cats = F, weighted = F) {
+calc.all.indices <- function(country.data, sum.dfs, drop.cats = NULL, weighted = F) {
   indices <- map_dfr(group.names, function(group) {
     calc.indices(country.data, sum.dfs[[group]], group, drop.cats = drop.cats, weighted = weighted)
   })
@@ -747,18 +724,18 @@ calc.summary.data <- function(res, group.to.use = NULL) {
       sum$group.missing.pct <- NA
       
       suppressWarnings({
-        if (orig.sum.data$avail.counts.orig$Party == 0)
+        if (orig.sum.data$avail.counts$Party == 0)
           sum$excluded <- "No party data"
-        else if (orig.sum.data$avail.counts$Party == 0)
+        else if (orig.sum.data$avail.counts.nomiss$Party == 0)
           sum$excluded <- "No parties after removals"
-        else if (all(orig.sum.data$avail.counts.orig[group.names] == 0))
-          sum$excluded <- "No group data"
         else if (all(orig.sum.data$avail.counts[group.names] == 0))
+          sum$excluded <- "No group data"
+        else if (all(orig.sum.data$avail.counts.nomiss[group.names] == 0))
           sum$excluded <- "No groups after removals"
         else if (group.basis.selected) {
           stats <- orig.sum.data$cor.nomiss.wt %>% filter(group == all_of(group.to.use))
           
-          if (orig.sum.data$avail.counts[[group.to.use]] == 0 | ! has_name(stats, 'group'))
+          if (orig.sum.data$avail.counts.nomiss[[group.to.use]] == 0 | ! has_name(stats, 'group'))
             sum$excluded <- paste(group.to.use, "not available")
           else if (stats$n.eff <= 200)
             sum$excluded <- "N <= 200 after removals"
@@ -784,7 +761,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     parties.to.drop <- find.groups.to.drop(main.summary.data, "Party")
     
     sum$party.missing <- main.summary.data %>% 
-      filter(Party %in% c(cats.to.drop, parties.to.drop)) %>%
+      filter(Party %in% c(cats.to.drop$nomiss, parties.to.drop)) %>%
       summarise(n = sum(n.weighted)) %>% 
       pull(n)
     
@@ -793,7 +770,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     groups.to.drop <- find.groups.to.drop(main.summary.data, "Group")
     
     sum$group.missing <- main.summary.data %>% 
-      filter(Group %in% c(cats.to.drop, groups.to.drop)) %>%
+      filter(Group %in% c(cats.to.drop$nomiss, groups.to.drop)) %>%
       summarise(n = sum(n.weighted)) %>% 
       pull(n)
     
@@ -819,7 +796,7 @@ get.group.size.summary <- function(res, group.to.use = NULL, party.map = NULL) {
     if (is.na(group.basis) || is.null(group.basis))
       return(NULL)
     
-    summary.data <- config.summary.data(country.data[[group.basis]], drop.cats = T, weighted = T)
+    summary.data <- config.summary.data(country.data[[group.basis]], drop.cats = "nomiss", weighted = T)
     
     if (! is.data.frame(summary.data) || nrow(summary.data) == 0)
       return(NULL)
