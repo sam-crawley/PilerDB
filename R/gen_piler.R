@@ -682,12 +682,12 @@ calc.summary.data <- function(res, group.to.use = NULL) {
         sum$PVP <- stats$PVP
         
         # Add PES with "no religion" included (if relevant)
-        if (group.basis.selected || group.to.use == "Religion") {
-          stats.norel <- orig.sum.data$cor.incl_no_rel.wt %>%
+        if (! group.basis.selected || group.to.use == "Religion") {
+          stats.incl_no_rel <- orig.sum.data$cor.incl_no_rel.wt %>%
             filter(group == group.to.use)
           
-          sum$PES.norel <- stats.norel$pes
-          sum$PES.norel.nrm <- stats.norel$pes.nrm
+          sum$PES.incl_no_rel <- stats.incl_no_rel$pes
+          sum$PES.incl_no_rel.nrm <- stats.incl_no_rel$pes.nrm
         }
         
         # Calculate a mean cross.cutting values from all available values
