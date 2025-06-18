@@ -677,12 +677,18 @@ calc.summary.data <- function(res, group.to.use = NULL) {
       if (has_name(stats, 'pes')) {
         sum$PES <- stats$pes
         sum$PES.nrm <- stats$pes.nrm
-        sum$PES.abs <- stats$pes.abs
-        sum$PES.abs.nrm <- stats$pes.abs.nrm
-        sum$PES.old <- stats$pes.old
         sum$V <- stats$V
         sum$PVF <- stats$PVF
         sum$PVP <- stats$PVP
+        
+        # Add PES with "no religion" included (if relevant)
+        if (group.basis.selected || group.to.use == "Religion") {
+          stats.norel <- orig.sum.data$cor.incl_no_rel.wt %>%
+            filter(group == group.to.use)
+          
+          sum$PES.norel <- stats.norel$pes
+          sum$PES.norel.nrm <- stats.norel$pes.nrm
+        }
         
         # Calculate a mean cross.cutting values from all available values
         sum$cross.cutting <- orig.sum.data$cor.all_removals.wt %>% 
