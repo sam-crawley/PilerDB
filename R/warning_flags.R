@@ -84,7 +84,7 @@ get.high.group.missing <- function(crosstabs, flagged.only = T) {
     sample.size <- sum(summary.data$n)
     
     high.missing <- summary.data %>% 
-      filter(! Group %in% cats.to.drop$nomiss) %>%
+      filter(! Group %in% cats.to.drop$all_removals) %>%
       group_by(Group) %>% 
       mutate(missing.percent = n / sum(n), total.percent = sum(n) / sample.size) %>% 
       filter(Party == "Missing") %>%
@@ -150,7 +150,7 @@ get.outlier.cases <- function(crosstabs, sd.threshold = 9) {
     if (is.na(d$`Group Basis`))
       return (NULL)
     
-    pes = crosstabs[[id]]$Summary$cor.nomiss.wt %>% 
+    pes = crosstabs[[id]]$Summary$cor.all_removals.wt %>% 
       filter(group == d$`Group Basis`) %>%
       pull(pes)
     

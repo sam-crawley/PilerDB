@@ -6,8 +6,8 @@ summary.group.size <- 5
 global.country.skip <- c("Hong Kong SAR China", "Macao SAR China", "Puerto Rico")
 
 cats.to.drop <- list(
-  nomiss = c("Missing", "Other"),
-  norel = c("Missing", "Other", "No Religion")
+  mis_oth = c("Missing", "Other"),
+  mis_oth_norel = c("Missing", "Other", "No Religion")
 )
 
 version.maj = 1
@@ -303,20 +303,23 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, par
   
   # Calculate the counts of available parties/groups
   avail.counts <- calc.avail.counts(d, drop.cats = NULL)
-  avail.counts.nomiss <- calc.avail.counts(d, drop.cats = "nomiss")
-  avail.counts.norel <- calc.avail.counts(d, drop.cats = "norel")
+  avail.counts.incl_no_rel <- calc.avail.counts(d, drop.cats = "mis_oth")
+  avail.counts.all_removals <- calc.avail.counts(d, drop.cats = "mis_oth_norel")
   
   if (is.null(year))
     year <- max(as.integer(d$Year), na.rm = T)
   
+  # Calculate indices for the different combinations, i.e. with all categories,
+  #  with missing/other dropped (but 'No Religion' retained), and with
+  #  missing/other/no religion dropped. And each of these with and without weights
   cor = calc.all.indices(d, tables)
   cor.wt = calc.all.indices(d, tables, weighted = T)
-  cor.nomiss = calc.all.indices(d, tables, drop.cats = "nomiss")
-  cor.nomiss.wt = calc.all.indices(d, tables, drop.cats = "nomiss", weighted = T)
-  cor.norel = calc.all.indices(d, tables, drop.cats = "norel")
-  cor.norel.wt = calc.all.indices(d, tables, drop.cats = "norel", weighted = T)
+  cor.incl_no_rel = calc.all.indices(d, tables, drop.cats = "mis_oth")
+  cor.incl_no_rel.wt = calc.all.indices(d, tables, drop.cats = "mis_oth", weighted = T)
+  cor.all_removals = calc.all.indices(d, tables, drop.cats = "mis_oth_norel")
+  cor.all_removals.wt = calc.all.indices(d, tables, drop.cats = "mis_oth_norel", weighted = T)
   
-  group.basis <- ifelse(! excluded, calc.group.basis(cor.nomiss.wt), NA_character_)
+  group.basis <- ifelse(! excluded, calc.group.basis(cor.all_removals.wt), NA_character_)
   
   tables$Summary <- list(
     general = tibble(
@@ -331,14 +334,14 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, par
     ),
     cor = cor,
     cor.wt = cor.wt,
-    cor.nomiss = cor.nomiss,
-    cor.nomiss.wt = cor.nomiss.wt,
-    cor.norel = cor.norel,
-    cor.norel.wt = cor.norel.wt,
+    cor.incl_no_rel = cor.incl_no_rel,
+    cor.incl_no_rel.wt = cor.incl_no_rel.wt,
+    cor.all_removals = cor.all_removals,
+    cor.all_removals.wt = cor.all_removals.wt,
     country.orig = country.orig,
     avail.counts = avail.counts,
-    avail.counts.nomiss = avail.counts.nomiss,
-    avail.counts.norel = avail.counts.norel,
+    avail.counts.incl_no_rel = avail.counts.incl_no_rel,
+    avail.counts.all_removals = avail.counts.all_removals,
     manually.excluded = excluded
   )
   
@@ -662,14 +665,14 @@ calc.summary.data <- function(res, group.to.use = NULL) {
       sum$`Group Basis` <- group.to.use
     }
       
-    stats <- orig.sum.data$cor.nomiss.wt %>%
+    stats <- orig.sum.data$cor.all_removals.wt %>%
         filter(group == group.to.use)
     
-    sum$cor.nomiss <- NA
+    sum$cor.all_removals <- NA
     sum$PES <- NA
     
     if (nrow(stats) > 0) {
-      sum$cor.nomiss <- round(stats$tau, 2)
+      sum$cor.all_removals <- round(stats$tau, 2)
         
       if (has_name(stats, 'pes')) {
         sum$PES <- stats$pes
@@ -682,7 +685,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
         sum$PVP <- stats$PVP
         
         # Calculate a mean cross.cutting values from all available values
-        sum$cross.cutting <- orig.sum.data$cor.nomiss.wt %>% 
+        sum$cross.cutting <- orig.sum.data$cor.all_removals.wt %>% 
           select(group, starts_with("cc")) %>% 
           pivot_longer(-group) %>% 
           filter((group == "Language" | group == "Religion" & name == "cc.E")) %>% 
@@ -696,7 +699,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     # Add summary columns indicating whether the group variable is 'available'.
     #  Available is defined as the correlations were able to be calculated
     #  (so includes, eg., cases where there was only one group)
-    available <- country.data$Summary$cor.nomiss.wt %>% 
+    available <- country.data$Summary$cor.all_removals.wt %>% 
       mutate(available = {if ("pes" %in% names(.)) ! is.na(pes) else F}) %>%
       select(group, available) %>% 
       pivot_wider(names_from = group, values_from = available)
@@ -726,21 +729,21 @@ calc.summary.data <- function(res, group.to.use = NULL) {
       suppressWarnings({
         if (orig.sum.data$avail.counts$Party == 0)
           sum$excluded <- "No party data"
-        else if (orig.sum.data$avail.counts.nomiss$Party == 0)
+        else if (orig.sum.data$avail.counts.all_removals$Party == 0)
           sum$excluded <- "No parties after removals"
         else if (all(orig.sum.data$avail.counts[group.names] == 0))
           sum$excluded <- "No group data"
-        else if (all(orig.sum.data$avail.counts.nomiss[group.names] == 0))
+        else if (all(orig.sum.data$avail.counts.all_removals[group.names] == 0))
           sum$excluded <- "No groups after removals"
         else if (group.basis.selected) {
-          stats <- orig.sum.data$cor.nomiss.wt %>% filter(group == all_of(group.to.use))
+          stats <- orig.sum.data$cor.all_removals.wt %>% filter(group == all_of(group.to.use))
           
-          if (orig.sum.data$avail.counts.nomiss[[group.to.use]] == 0 | ! has_name(stats, 'group'))
+          if (orig.sum.data$avail.counts.all_removals[[group.to.use]] == 0 | ! has_name(stats, 'group'))
             sum$excluded <- paste(group.to.use, "not available")
           else if (stats$n.eff <= 200)
             sum$excluded <- "N <= 200 after removals"
         }
-        else if (max(orig.sum.data$cor.nomiss.wt$n.eff, na.rm = T) <= 200)
+        else if (max(orig.sum.data$cor.all_removals.wt$n.eff, na.rm = T) <= 200)
           sum$excluded <- "N <= 200 after removals"
         else if (orig.sum.data$manually.excluded)
           sum$excluded <- "Manually excluded"
@@ -753,7 +756,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     
     total.sample <- sum(main.summary.data$n.weighted)
     
-    sum$total.included <- orig.sum.data$cor.nomiss.wt %>%
+    sum$total.included <- orig.sum.data$cor.all_removals.wt %>%
       filter(group == group.to.use) %>%
       pull(n.eff)
     sum$total.included.pct <- round(sum$total.included / total.sample, 4)
@@ -761,7 +764,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     parties.to.drop <- find.groups.to.drop(main.summary.data, "Party")
     
     sum$party.missing <- main.summary.data %>% 
-      filter(Party %in% c(cats.to.drop$nomiss, parties.to.drop)) %>%
+      filter(Party %in% c(cats.to.drop$all_removals, parties.to.drop)) %>%
       summarise(n = sum(n.weighted)) %>% 
       pull(n)
     
@@ -770,7 +773,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     groups.to.drop <- find.groups.to.drop(main.summary.data, "Group")
     
     sum$group.missing <- main.summary.data %>% 
-      filter(Group %in% c(cats.to.drop$nomiss, groups.to.drop)) %>%
+      filter(Group %in% c(cats.to.drop$all_removals, groups.to.drop)) %>%
       summarise(n = sum(n.weighted)) %>% 
       pull(n)
     
@@ -796,7 +799,7 @@ get.group.size.summary <- function(res, group.to.use = NULL, party.map = NULL) {
     if (is.na(group.basis) || is.null(group.basis))
       return(NULL)
     
-    summary.data <- config.summary.data(country.data[[group.basis]], drop.cats = "nomiss", weighted = T)
+    summary.data <- config.summary.data(country.data[[group.basis]], drop.cats = "mis_oth_norel", weighted = T)
     
     if (! is.data.frame(summary.data) || nrow(summary.data) == 0)
       return(NULL)

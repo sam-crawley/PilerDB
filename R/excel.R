@@ -120,7 +120,7 @@ write.divided.xlsx <- function(res, include.summary = T, include.summary.by.grou
       openxlsx::writeData(wb, country.sht, "Correlations (Party = None/Missing/DK removed)", startCol = 1, startRow = startRow+9)
       openxlsx::addStyle(wb, sheet = country.sht, hs2, rows = startRow+9, cols = 1)
       
-      openxlsx::writeData(wb, country.sht, res$crosstabs[[country]]$Summary$cor.nomiss, startCol = 2, startRow = startRow+11)
+      openxlsx::writeData(wb, country.sht, res$crosstabs[[country]]$Summary$cor.all_removals, startCol = 2, startRow = startRow+11)
     }
   }
   
@@ -132,7 +132,7 @@ write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", incl
     mutate(across(ends_with('.pct'), ~set.class('percentage', .))) %>%
     select(-Religion, -Ethnicity, -Language, -ID) %>%
     arrange(desc(PES)) %>%
-    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, PES.nrm, cor.nomiss, cross.cutting, V, PES.abs, PES.abs.nrm, 
+    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, PES.nrm, cor.all_removals, cross.cutting, V, PES.abs, PES.abs.nrm, 
            PES.old, PVP, PVF, excluded, everything())
   
   hs2 <- openxlsx::createStyle(textDecoration = "bold")

@@ -9,7 +9,7 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
   tab <- table.to.use  %>%
     mutate(across(ends_with('.pct'), ~.x * 100)) %>%
     rename(
-      "Tau" = cor.nomiss,
+      "Tau" = cor.all_removals,
       "Total Included (N)" = total.included,
       "Total Included (%)" = total.included.pct,
       "Party Missing / Other (N)" = party.missing,
@@ -99,10 +99,10 @@ get.cat.sum.table <- function(category.sum, data.src, variable) {
 get.country.list <- function(summary.table, data.src, included = T) {
   if (included)
     res <- summary.table %>% 
-      filter(`Data Source` == data.src & ! is.na(cor.nomiss))
+      filter(`Data Source` == data.src & ! is.na(cor.all_removals))
   else
     res <- summary.table %>% 
-      filter(`Data Source` == data.src & is.na(cor.nomiss))
+      filter(`Data Source` == data.src & is.na(cor.all_removals))
   
   res <- paste(unique(res$Country), collapse = ", ")
   
@@ -128,7 +128,7 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
         sample.size <- country.data$Summary$general$`Sample Size`
       }
       else {
-        sample.size <- country.data$Summary$cor.nomiss %>% filter(group == group) %>% pull(n.eff)
+        sample.size <- country.data$Summary$cor.all_removals %>% filter(group == group) %>% pull(n.eff)
       }
       
       output[[grp.output.header]] <- renderText(group)

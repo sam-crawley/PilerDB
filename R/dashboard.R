@@ -399,8 +399,8 @@ launchPilerDash <- function(logger = NULL) {
       })      
       output[[paste0("CorTable", countryTabID)]] <- renderTable(country.data$Summary$cor)
       output[[paste0("CorWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.wt)
-      output[[paste0("CorNoMissTable", countryTabID)]] <- renderTable(country.data$Summary$cor.nomiss)
-      output[[paste0("CorNoMissWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.nomiss.wt)
+      output[[paste0("CorNoMissTable", countryTabID)]] <- renderTable(country.data$Summary$cor.all_removals)
+      output[[paste0("CorNoMissWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.all_removals.wt)
       output[[paste0("country.orig", countryTabID)]] <- renderText(country.data$Summary$country.orig)
       
       observeEvent(input[[paste0("Close", countryTabID)]], {
