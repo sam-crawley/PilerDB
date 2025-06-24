@@ -9,7 +9,7 @@ data.spec <- list(
   party.question.type = "PartyVote",
   country.format = 'country.name',
   country.custom = c(
-    "República Dominicana" = "Dominican Republic"
+    "Rep\u{00FA}blica Dominicana" = "Dominican Republic"
   ),
   field.def = c(
     "Party" = "p48st",
@@ -31,7 +31,7 @@ cat.defs <- list(
                   "GT: No documentado - 926", "GT: No documentado - 927", "GT: No documentado - 928", "GT: No documentado - 929",
                   "GT: No documentado - 930", "NI: No documentado - 1235", "NI: No documentado - 1236", "NI: No documentado - 1237",
                   "NI: No documentado - 1238"),
-    "Other" = c("Otros (partidos nacionales y provinciales)", "Vota nulo/Blanco", "No vota/Ninguno", "No inscrito/No tenía edad",
+    "Other" = c("Otros (partidos nacionales y provinciales)", "Vota nulo/Blanco", "No vota/Ninguno", "No inscrito/No ten\u{00ED}a edad",
                 "CL: Vota por personas")
   ),
   Language = list(
@@ -39,7 +39,7 @@ cat.defs <- list(
     "Other" = c("Other")
   ),
   Religion = list(
-    "Missing" = c("Not applicable", "No answer/Refused", "Don´t know"),
+    "Missing" = c("Not applicable", "No answer/Refused", "Don\u{00B4}t know"),
     "Other" = c("Others"),
     "No Religion" = c("Believer, not belonging to any church", "Agnostic", "Atheist", "None")
   )
