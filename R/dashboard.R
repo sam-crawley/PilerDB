@@ -307,12 +307,15 @@ launchPilerDash <- function(logger = NULL) {
       tab <- tabPanel(country.data$Summary$general$ID,
         h3(textOutput(paste0("CountryName", countryTabID))),
         
-        prettySwitch(
-          inputId = paste0("ShowAllData", countryTabID),
-          label = "Show all country data",
-          fill = TRUE, 
-          status = "primary",
-          value = T,
+        pickerInput(
+          inputId = paste0("CatsToDrop", countryTabID),
+          label = "Drop Categories:",
+          choices = list(
+            "None" = "none",
+            "Missing/Other" = "mis_oth", 
+            "Missing/Other/No Rel." = "mis_oth_norel"
+          ),
+          selected = "mis_oth_norel",
           inline = T
         ),
         
@@ -321,7 +324,7 @@ launchPilerDash <- function(logger = NULL) {
           label = "Show weighted data",
           fill = TRUE, 
           status = "primary",
-          value = F,
+          value = T,
           inline = T
         ),
         
@@ -358,9 +361,13 @@ launchPilerDash <- function(logger = NULL) {
         h5("Correlations - all categories, weighted"),
         tableOutput(paste0("CorWtTable", countryTabID)),
         h5("Correlations - Missing/Other removed"),
-        tableOutput(paste0("CorNoMissTable", countryTabID)),
+        tableOutput(paste0("CorInclNoRelTable", countryTabID)),
         h5("Correlations - Missing/Other removed, weighted"),
-        tableOutput(paste0("CorNoMissWtTable", countryTabID)),
+        tableOutput(paste0("CorInclNoRelWtTable", countryTabID)),
+        h5("Correlations - Missing/Other/No Rel removed"),
+        tableOutput(paste0("CorAllRemTable", countryTabID)),
+        h5("Correlations - Missing/Other/No Rel removed, weighted"),
+        tableOutput(paste0("CorAllRemWtTable", countryTabID)),
         h5("Original country name (from data file)"),
         textOutput(paste0("country.orig", countryTabID))
       )
@@ -371,16 +378,16 @@ launchPilerDash <- function(logger = NULL) {
         output[[paste0("WarningMsg", countryTabID)]] <- renderUI(HTML(paste(country.warnings$message, collapse = "<br/><br/>")))
       }
       
-      observeEvent(input[[paste0("ShowAllData", countryTabID)]], {
+      observeEvent(input[[paste0("CatsToDrop", countryTabID)]], {
         generate.country.tables(countryTabID, country.data, output, 
-                                show.all.data = input[[paste0("ShowAllData", countryTabID)]],
+                                cats.to.drop = input[[paste0("CatsToDrop", countryTabID)]],
                                 show.weighted = input[[paste0("ShowWeighted", countryTabID)]],
                                 party.map = party.map)
       }, ignoreInit = T)
       
       observeEvent(input[[paste0("ShowWeighted", countryTabID)]], {
         generate.country.tables(countryTabID, country.data, output, 
-                                show.all.data = input[[paste0("ShowAllData", countryTabID)]],
+                                cats.to.drop = input[[paste0("CatsToDrop", countryTabID)]],
                                 show.weighted = input[[paste0("ShowWeighted", countryTabID)]],
                                 party.map = party.map)
       }, ignoreInit = T)    
@@ -399,8 +406,10 @@ launchPilerDash <- function(logger = NULL) {
       })      
       output[[paste0("CorTable", countryTabID)]] <- renderTable(country.data$Summary$cor)
       output[[paste0("CorWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.wt)
-      output[[paste0("CorNoMissTable", countryTabID)]] <- renderTable(country.data$Summary$cor.all_removals)
-      output[[paste0("CorNoMissWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.all_removals.wt)
+      output[[paste0("CorInclNoRelTable", countryTabID)]] <- renderTable(country.data$Summary$cor.incl_no_rel)
+      output[[paste0("CorInclNoRelWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.incl_no_rel.wt)
+      output[[paste0("CorAllRemTable", countryTabID)]] <- renderTable(country.data$Summary$cor.all_removals)
+      output[[paste0("CorAllRemWtTable", countryTabID)]] <- renderTable(country.data$Summary$cor.all_removals.wt)
       output[[paste0("country.orig", countryTabID)]] <- renderText(country.data$Summary$country.orig)
       
       observeEvent(input[[paste0("Close", countryTabID)]], {

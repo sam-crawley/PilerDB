@@ -9,6 +9,9 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
   tab <- table.to.use  %>%
     mutate(across(ends_with('.pct'), ~.x * 100)) %>%
     rename(
+      "PES (nrm)" = PES.nrm,
+      "PES (w/ no rel.)" = PES.incl_no_rel,
+      "PES (w/ no rel. nrm)" = PES.incl_no_rel.nrm,
       "Tau" = cor.all_removals,
       "Total Included (N)" = total.included,
       "Total Included (%)" = total.included.pct,
@@ -25,7 +28,7 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
     ) %>%
     mutate(across(c(Lng, Rel, Eth), ~if_else(.x, "\u{2713}", "\u{2716}"))) %>%
     mutate(Flagged = if_else(is.na(Flagged), "", "\u{D83D}\u{DEA9}")) %>%
-    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, PES.nrm, PES.incl_no_rel, PES.incl_no_rel.nrm, Tau, V, PVF, PVP, CC, Lng, Rel, Eth, Flagged, everything())
+    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, `PES (nrm)`, `PES (w/ no rel.)`, `PES (w/ no rel. nrm)`, Tau, V, PVF, PVP, CC, Lng, Rel, Eth, Flagged, everything())
   
   if (! with.id)
     tab <- tab %>% select(-ID)
@@ -111,7 +114,7 @@ get.country.list <- function(summary.table, data.src, included = T) {
   res
 }
 
-generate.country.tables <- function(countryTabID, country.data, output, show.all.data = T, show.weighted = F, party.map) {
+generate.country.tables <- function(countryTabID, country.data, output, cats.to.drop = "mis_oth_norel", show.weighted = T, party.map) {
   walk (group.names, function(group) {
     grp.output.header <- paste0(group, "Heading", countryTabID)
     grp.output.table <- paste0(group, "Table", countryTabID)
@@ -119,12 +122,18 @@ generate.country.tables <- function(countryTabID, country.data, output, show.all
     country <- country.data$Summary$general$Country
     country.party.map <- party.map %>% filter(Country == country)
     
-    crosstab <- gen.crosstab(country.data[[group]], totals = T, drop.cats = ! show.all.data, weighted = show.weighted,
+    if (cats.to.drop == 'none')
+      cats.to.drop <- NULL
+
+    crosstab <- gen.crosstab(country.data[[group]], totals = T, drop.cats = cats.to.drop, weighted = show.weighted,
                              party.map = country.party.map)
     
     if (! is.null(crosstab) & is.data.frame(crosstab)) {
-      if (show.all.data) {
+      if (is.null(cats.to.drop)) {
         sample.size <- country.data$Summary$general$`Sample Size`
+      }
+      else if (cats.to.drop == 'mis_oth') {
+        sample.size <- country.data$Summary$cor.incl_no_rel %>% filter(group == group) %>% pull(n.eff)
       }
       else {
         sample.size <- country.data$Summary$cor.all_removals %>% filter(group == group) %>% pull(n.eff)

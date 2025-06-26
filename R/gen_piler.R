@@ -437,6 +437,9 @@ config.summary.data <- function(summary.data, drop.cats = NULL, weighted = F) {
   
   # Drop out unwanted categories, and those < 0.02
   if (! is.null(drop.cats)) {
+    if (! drop.cats %in% names(cats.to.drop))
+      stop("Invalid cats.to.drop key: ", drop.cats)
+    
     parties.to.drop <- find.groups.to.drop(summary.data, "Party")
     groups.to.drop  <- find.groups.to.drop(summary.data, "Group")
     
