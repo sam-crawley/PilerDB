@@ -10,8 +10,6 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
     mutate(across(ends_with('.pct'), ~.x * 100)) %>%
     rename(
       "PES (nrm)" = PES.nrm,
-      "PES (w/ no rel.)" = PES.incl_no_rel,
-      "PES (w/ no rel. nrm)" = PES.incl_no_rel.nrm,
       "Tau" = cor.all_removals,
       "Total Included (N)" = total.included,
       "Total Included (%)" = total.included.pct,
@@ -27,8 +25,19 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
       "CC" = cross.cutting
     ) %>%
     mutate(across(c(Lng, Rel, Eth), ~if_else(.x, "\u{2713}", "\u{2716}"))) %>%
-    mutate(Flagged = if_else(is.na(Flagged), "", "\u{D83D}\u{DEA9}")) %>%
-    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, `PES (nrm)`, `PES (w/ no rel.)`, `PES (w/ no rel. nrm)`, Tau, V, PVF, PVP, CC, Lng, Rel, Eth, Flagged, everything())
+    mutate(Flagged = if_else(is.na(Flagged), "", "\u{D83D}\u{DEA9}")) 
+  
+  if (group.basis %in% c("Religion", "(Highest PES)")) {
+    tab <- tab %>%
+      rename(
+        "PES (w/ no rel.)" = PES.incl_no_rel,
+        "PES (w/ no rel. nrm)" = PES.incl_no_rel.nrm
+      )
+  }
+
+  tab <- tab %>%
+    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, `PES (nrm)`, any_of(c("PES (w/ no rel.)", "PES (w/ no rel. nrm)")), 
+            Tau, V, PVF, PVP, CC, Lng, Rel, Eth, Flagged, everything())
   
   if (! with.id)
     tab <- tab %>% select(-ID)

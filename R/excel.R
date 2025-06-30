@@ -130,10 +130,15 @@ write.divided.xlsx <- function(res, include.summary = T, include.summary.by.grou
 write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", included.excluded.col = T) {
   summary.sheet <- summary.data %>%
     mutate(across(ends_with('.pct'), ~set.class('percentage', .))) %>%
-    select(-Religion, -Ethnicity, -Language, -ID) %>%
+    select(-Religion, -Ethnicity, -Language, -ID, -warning.flags) %>%
     arrange(desc(PES)) %>%
-    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, PES.nrm, cor.all_removals, cross.cutting, V, PES.abs, PES.abs.nrm, 
-           PES.old, PVP, PVF, excluded, everything())
+    mutate(
+      # Create incl_no_rel cols if they don't exist
+      PES.incl_no_rel     = if ("PES.incl_no_rel" %in% names(.))     PES.incl_no_rel else NA,
+      PES.incl_no_rel.nrm = if ("PES.incl_no_rel.nrm" %in% names(.)) PES.incl_no_rel.nrm else NA,
+    ) %>%
+    select(Country, `Data Source`, Year, `Sample Size`, `Group Basis`, PES, PES.nrm, PES.incl_no_rel, PES.incl_no_rel.nrm, 
+           cor.all_removals, cross.cutting, V, PVP, PVF, excluded, everything())
   
   hs2 <- openxlsx::createStyle(textDecoration = "bold")
   
@@ -146,13 +151,18 @@ write.excel.summary.tab <- function(wb, summary.data, tab.name = "Summary", incl
   openxlsx::mergeCells(wb, tab.name, cols = 20:21, rows = 1)
   openxlsx::mergeCells(wb, tab.name, cols = 22:23, rows = 1)
   
-  summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "PES", "PES.nrm", "Tau", "CC",
-                       "V", "PES.abs", "PES.abs.nrm", "PES.old", "PVP", "PVF", "Exclusion Reason", "Party Question Type",
-                       "(N)", "(%)", "(N)", "(%)", "(N)", "(%)")
+  summary.headers <- c("Country", "Data Source", "Survey Year", "Sample Size", "Group Basis", "PES", "PES.nrm",
+                       "PES (w/ no rel)", "PES (w/ no rel).nrm", "Tau", "CC", "V", "PVP", "PVF", "Exclusion Reason", 
+                       "Party Question Type", "(N)", "(%)", "(N)", "(%)", "(N)", "(%)")
   
   openxlsx::writeData(wb, tab.name, data.frame(t(summary.headers)), startRow = 2, startCol = 1, colNames = F, rowNames = F)
   openxlsx::setColWidths(wb, sheet = tab.name, cols = 1:length(summary.headers), widths = "auto")
   openxlsx::addStyle(wb, sheet = tab.name, hs2, rows = 2, cols = 1:length(summary.headers))
+  
+  # Hide the incl_no_rel cols if they are empty
+  if (! has_name(summary.data, 'PES.incl_no_rel')) {
+    openxlsx::setColWidths(wb, tab.name, cols = 8:9, hidden = c(T, T))
+  }
   
   openxlsx::writeData(wb, tab.name, summary.sheet, startRow = 3, colNames = F, rowNames = F)
 }
