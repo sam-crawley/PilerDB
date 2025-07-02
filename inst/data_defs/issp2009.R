@@ -30,6 +30,7 @@ data.spec <- list(
     "GB-GBN" = "United Kingdom",
     "BE-FLA" = "Belgium"
   ),
+  manual.exclusions = c('China'),
   field.def = c(
     "Party" = "prty",
     "Religion" = "RELIG",
