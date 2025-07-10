@@ -52,8 +52,8 @@ get.summary.table <- function(res, datasrc, group.basis, country, incomplete.dat
   
   if (! incomplete.data)
     tab <- tab %>%
-    filter(! is.na(`Group Basis`)) %>% 
-    select(-`Excluded Reason`)
+      filter(is.na(`Excluded Reason`)) %>% 
+      select(-`Excluded Reason`)
   
   tab
 }
