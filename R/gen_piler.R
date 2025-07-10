@@ -736,7 +736,9 @@ calc.summary.data <- function(res, group.to.use = NULL) {
       sum$group.missing.pct <- NA
       
       suppressWarnings({
-        if (orig.sum.data$avail.counts$Party == 0)
+        if (orig.sum.data$manually.excluded)
+          sum$excluded <- "Manually excluded"
+        else if (orig.sum.data$avail.counts$Party == 0)
           sum$excluded <- "No party data"
         else if (orig.sum.data$avail.counts.all_removals$Party == 0)
           sum$excluded <- "No parties after removals"
@@ -754,8 +756,6 @@ calc.summary.data <- function(res, group.to.use = NULL) {
         }
         else if (max(orig.sum.data$cor.all_removals.wt$n.eff, na.rm = T) <= 200)
           sum$excluded <- "N <= 200 after removals"
-        else if (orig.sum.data$manually.excluded)
-          sum$excluded <- "Manually excluded"
       })
       
       return(sum)
