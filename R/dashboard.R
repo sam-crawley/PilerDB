@@ -274,7 +274,7 @@ launchPilerDash <- function(logger = NULL) {
     )
     
     output$countrySummary <- DT::renderDT(
-      get.country.summary(summary.table),
+      get.country.summary(piler$country.summaries),
       options = list(
         lengthChange = F, 
         paging = F, 

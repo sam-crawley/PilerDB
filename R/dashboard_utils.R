@@ -221,21 +221,10 @@ get.country.warnings <- function(country.data) {
   
 }
 
-get.country.summary <- function(summary) {
-  summary %>% 
-    group_by(Country) %>% 
-    summarise(
-      total.surveys = n(), 
-      included = sum(is.na(excluded)), 
-      excluded = sum(! is.na(excluded)), 
-      pes.min = min(PES, na.rm = T), 
-      pes.max = max(PES, na.rm = T),
-      year.min = min(Year), 
-      year.max = max(Year),
-      group.basis = {
-         counts <- count(cur_data(), `Group Basis`, sort = TRUE)
-         if (nrow(counts) == 0) NA_character_ else counts$`Group Basis`[1]
-      }
+get.country.summary <- function(country.summaries) {
+  country.summaries %>% 
+    select(
+      Country, mean.group.basis, pes.min, pes.max, total.surveys, included, excluded, year.min, year.max
     )
 }
 

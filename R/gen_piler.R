@@ -360,6 +360,8 @@ calc.all.summaries <- function(res) {
     set_names(group.names)
   res$max.parties <- get.max.parties(res$group.sizes)
   
+  res$country.summaries <- gen.country.summaries(res)
+  
   return(res)
 }
 
@@ -605,6 +607,47 @@ get.data.src.info <- function(data, data.def) {
     questions = questions,
     modules = modules
   )
+}
+
+# Generate some country-level summary data
+gen.country.summaries <- function(res) {
+  country.summaries <- res$summary %>% 
+    group_by(Country) %>% 
+    summarise(
+      total.surveys = n(), 
+      included = sum(is.na(excluded)), 
+      excluded = sum(! is.na(excluded)), 
+      pes.min = min(PES.nrm, na.rm = T), 
+      pes.max = max(PES.nrm, na.rm = T),
+      year.min = min(Year, na.rm = T), 
+      year.max = max(Year, na.rm = T),
+      gb_l = sum(`Group Basis` == "Language", na.rm = T),
+      gb_r = sum(`Group Basis` == "Religion", na.rm = T),
+      gb_e = sum(`Group Basis` == "Ethnicity", na.rm = T)
+    )
+  
+  # Combine group summaries into a single data frame
+  combined.summary <- purrr::map_dfr(group.names, function(group) {
+    res$summary.by.group[[group]] %>%
+      dplyr::filter(is.na(excluded))
+  })
+  
+  pes.means <- combined.summary %>%
+    dplyr::group_by(Country, `Group Basis`) %>%
+    dplyr::summarise(
+      PES.mean = round(mean(PES.nrm), 2),
+      group.survey.count = n()
+    ) %>%
+    tidyr::pivot_wider(id_cols = Country, names_from = `Group Basis`, values_from = c(PES.mean, group.survey.count))
+  
+  country.summaries %>%
+    dplyr::inner_join(pes.means, by = "Country") %>%
+    dplyr::mutate(mean.group.basis = pmap_chr(
+      list(PES.mean_Language, PES.mean_Religion, PES.mean_Ethnicity),
+      ~{
+        c("Language", "Religion", "Ethnicity")[which.max(c(...))]
+      }
+    ))
 }
 
 # This function removes rows from a country data frame that will not be used in
