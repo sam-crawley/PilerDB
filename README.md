@@ -13,7 +13,7 @@ database by adding new surveys.
 
 For more details, see:
 
-Fraenkel J & Crawley S (forthcoming), Does ethnic fractionalization lead to polarization? Introducing a new dataset on communal party affiliations. Ethnopolitics.
+Fraenkel, J., & Crawley, S. (2025). Does Ethnic Fractionalization Lead to Polarization? Introducing a new Dataset on Communal Party Affiliations. Ethnopolitics, 1–23. https://doi.org/10.1080/17449057.2025.2516905
 
 ## Accessing the data
 There are two methods that can be used to access the PILER data: (1) via Excel
