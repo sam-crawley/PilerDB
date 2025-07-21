@@ -15,10 +15,10 @@ launchPilerDash <- function(logger = NULL) {
   summary.table <- piler$summary
   group.sizes <- piler$group.sizes
   max.parties <- piler$max.parties
-  countries <- unique(summary.table$Country) %>% sort()
+  countries <- unique(piler$survey.summary$Country) %>% sort()
   party.map <- get.party.map()
   
-  data.src.list <- sort(unique(summary.table$`Data Source`))
+  data.src.list <- sort(names(piler$data.src.info))
   
   excel.dir <- get.excel.dir()
   
@@ -218,8 +218,8 @@ launchPilerDash <- function(logger = NULL) {
       rownames = F
     )
     
-    output$info.cntry.included <- renderText(get.country.list(summary.table, input$info.datasrc, included = T))
-    output$info.cntry.excluded <- renderText(get.country.list(summary.table, input$info.datasrc, included = F))
+    output$info.cntry.included <- renderText(get.country.list(input$info.datasrc, included = T))
+    output$info.cntry.excluded <- renderText(get.country.list(input$info.datasrc, included = F))
     
     output$info.var.party <- renderText(get.data.src.question(data.src.info, input$info.datasrc, "Party"))
     output$info.var.religion <- renderText(get.data.src.question(data.src.info, input$info.datasrc, "Religion"))

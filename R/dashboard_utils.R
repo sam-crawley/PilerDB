@@ -2,9 +2,8 @@
 
 # Get the main 'summary' table on the Crosstabs tab of the shiny app
 get.summary.table <- function(res, datasrc, group.basis, country, incomplete.data = F, with.id = F) {
-  table.to.use <- res$summary
-  if (group.basis != "(Highest PES)")
-    table.to.use <- res$summary.by.group[[group.basis]]
+  index.by <- str_remove_all(group.basis, "\\(|\\)")
+  table.to.use <- get.survey.summary(index.by)
   
   tab <- table.to.use  %>%
     mutate(across(ends_with('.pct'), ~.x * 100)) %>%
@@ -107,13 +106,12 @@ get.cat.sum.table <- function(category.sum, data.src, variable) {
   res
 }
 
-get.country.list <- function(summary.table, data.src, included = T) {
-  if (included)
-    res <- summary.table %>% 
-      filter(`Data Source` == data.src & ! is.na(cor.all_removals))
-  else
-    res <- summary.table %>% 
-      filter(`Data Source` == data.src & is.na(cor.all_removals))
+get.country.list <- function(data.src, included = T) {
+  res <- get.survey.summary('Highest PES') %>% 
+    filter(
+      `Data Source` == data.src,
+      is.na(excluded) == included
+    )
   
   res <- paste(unique(res$Country), collapse = ", ")
   
@@ -229,9 +227,10 @@ get.country.summary <- function(country.summaries) {
 }
 
 get.country.parties <- function(piler, country, party.map) {
-  surveys <- piler$summary %>%
+  surveys <- piler$survey.summary %>%
     filter(Country == country & is.na(excluded)) %>%
-    pull(ID)
+    pull(ID) %>%
+    unique()
   
   country.party.map <- party.map %>% filter(Country == country)
   

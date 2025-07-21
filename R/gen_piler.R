@@ -350,9 +350,8 @@ gen.single.country.data <- function(d, cntry, data.source, data.source.orig, par
 
 # (Re-)calculate the all summary data from the country crosstabs
 calc.all.summaries <- function(res) {
-  res$summary <- calc.summary.data(res$crosstabs)
-  res$summary.by.group <- map(c(group.names), ~ calc.summary.data(res$crosstabs, group.to.use = .x)) %>% set_names(group.names)
-  
+  res$survey.summary <- purrr::map_dfr(group.names, ~calc.summary.data(res$crosstabs, group.to.use = .x))
+
   party.map <- get.party.map()
   
   res$group.sizes <- get.group.size.summary(res$crosstabs, party.map = party.map)
@@ -611,7 +610,7 @@ get.data.src.info <- function(data, data.def) {
 
 # Generate some country-level summary data
 gen.country.summaries <- function(res) {
-  country.summaries <- res$summary %>% 
+  country.summaries <- get.survey.summary("Highest PES") %>% 
     group_by(Country) %>% 
     summarise(
       total.surveys = n(), 
@@ -626,13 +625,9 @@ gen.country.summaries <- function(res) {
       gb_e = sum(`Group Basis` == "Ethnicity", na.rm = T)
     )
   
-  # Combine group summaries into a single data frame
-  combined.summary <- purrr::map_dfr(group.names, function(group) {
-    res$summary.by.group[[group]] %>%
-      dplyr::filter(is.na(excluded))
-  })
-  
-  pes.means <- combined.summary %>%
+
+  pes.means <- piler$survey.summary %>%
+    dplyr::filter(is.na(excluded)) %>%
     dplyr::group_by(Country, `Group Basis`) %>%
     dplyr::summarise(
       PES.mean = round(mean(PES.nrm), 2),
@@ -692,25 +687,64 @@ calc.group.basis <- function(cor) {
 
 }
 
+#' Get a summary of surveys in PILER.
+#' 
+#' The dataframe piler$survey.summaries provides a list of *all* country-survey/group
+#'  combinations. However, analyses will often want to rely on one particular group type.
+#'  This can be selected using the 'index.by' parameter to this function.
+#'  
+#' @param index.by Either a group type (Language, Ethnicity, Religion), or "Highest PES". The latter
+#'  will select the group type that has the highest PES for that survey-country as the "Group Basis"
+#' @export
+get.survey.summary <- function(index.by) {
+  get_overall_exclusion <- function(excluded_vals) {
+    vals <- excluded_vals[!str_detect(excluded_vals, regex("not available", ignore_case = TRUE))]
+    vals[[1]]
+  }
+  
+  if (index.by %in% group.names)
+    return (piler$survey.summary %>% filter(`Group Basis` == index.by))
+  
+  else if (index.by == "Highest PES") {
+    summaries <- piler$survey.summary %>%
+      group_by(ID) %>%
+      filter(is.na(excluded)) %>%
+      slice_max(PES, n = 1, with_ties = FALSE)
+    
+    # Add back in surveys where all groups were excluded
+    excluded <- piler$survey.summary %>%
+      group_by(ID) %>%
+      mutate(
+        all_excluded = all(!is.na(excluded))
+      ) %>%
+      filter(all_excluded) %>%
+      mutate(
+        excluded = get_overall_exclusion(excluded),
+        `Group Basis` = NA_character_
+      ) %>%
+      select(-all_excluded) %>% 
+      slice(1)
+    
+    return(bind_rows(summaries, excluded) %>%
+             ungroup() %>%
+             arrange(Year, ID))
+  }
+  
+  else
+    stop("Unknown index.by value")
+}
+
 # Calculate a DF summarising all countries
 #' @export
-calc.summary.data <- function(res, group.to.use = NULL) {
+calc.summary.data <- function(res, group.to.use) {
   furrr::future_map_dfr(res, function(country.data) {
     orig.sum.data <- country.data$Summary
 
-    group.basis.selected <- F
-    
     sum <- orig.sum.data$general %>%
       select(-`Data Source Orig`, -warning.flags.details)
     
-    if (is.null(group.to.use)) {
-      group.to.use <- sum$`Group Basis`
-    }
-    else {
-      group.basis.selected <- T
-      sum$`Group Basis` <- group.to.use
-    }
-      
+    sum$`Group Basis` <- group.to.use
+    
     stats <- orig.sum.data$cor.all_removals.wt %>%
         filter(group == group.to.use)
     
@@ -726,9 +760,11 @@ calc.summary.data <- function(res, group.to.use = NULL) {
         sum$V <- stats$V
         sum$PVF <- stats$PVF
         sum$PVP <- stats$PVP
+        sum$PES.incl_no_rel <- stats$pes
+        sum$PES.incl_no_rel.nrm <- stats$pes.nrm
         
         # Add PES with "no religion" included (if relevant)
-        if (! group.basis.selected || group.to.use == "Religion") {
+        if (group.to.use == "Religion") {
           stats.incl_no_rel <- orig.sum.data$cor.incl_no_rel.wt %>%
             filter(group == group.to.use)
           
@@ -765,10 +801,8 @@ calc.summary.data <- function(res, group.to.use = NULL) {
     is.excluded = F
     if (orig.sum.data$manually.excluded)
       is.excluded <- T
-    else if (group.basis.selected)
-      is.excluded <- is.na(sum$PES)
     else
-      is.excluded <- is.na(sum$`Group Basis`)
+      is.excluded <- is.na(sum$PES)
 
     if (is.excluded) {
       sum$total.included <- NA
@@ -779,6 +813,7 @@ calc.summary.data <- function(res, group.to.use = NULL) {
       sum$group.missing.pct <- NA
       
       suppressWarnings({
+        # We handle exclusion reasons for the whole survey first (i.e. all groups)
         if (orig.sum.data$manually.excluded)
           sum$excluded <- "Manually excluded"
         else if (orig.sum.data$avail.counts$Party == 0)
@@ -789,7 +824,10 @@ calc.summary.data <- function(res, group.to.use = NULL) {
           sum$excluded <- "No group data"
         else if (all(orig.sum.data$avail.counts.all_removals[group.names] == 0))
           sum$excluded <- "No groups after removals"
-        else if (group.basis.selected) {
+        else if (max(orig.sum.data$cor.all_removals.wt$n.eff, na.rm = T) <= 200)
+          sum$excluded <- "N <= 200 after removals"
+        else {
+          # Now handle group-specific exclusions
           stats <- orig.sum.data$cor.all_removals.wt %>% filter(group == all_of(group.to.use))
           
           if (orig.sum.data$avail.counts.all_removals[[group.to.use]] == 0 | ! has_name(stats, 'group'))
@@ -797,8 +835,6 @@ calc.summary.data <- function(res, group.to.use = NULL) {
           else if (stats$n.eff <= 200)
             sum$excluded <- "N <= 200 after removals"
         }
-        else if (max(orig.sum.data$cor.all_removals.wt$n.eff, na.rm = T) <= 200)
-          sum$excluded <- "N <= 200 after removals"
       })
       
       return(sum)

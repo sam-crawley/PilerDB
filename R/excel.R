@@ -10,14 +10,6 @@ gen.spreadsheets <- function(piler.data = NULL) {
 
 set.class <- function(class.name, i) { class(i) <- class.name; i} 
 
-get.excel.summary.sheet <- function(res) {
-  summary.sheet <- res$summary %>%
-    mutate(across(ends_with('.pct'), ~set.class('percentage', .))) %>%
-    select(-Religion, -Ethnicity, -Language)
-  
-  return(summary.sheet)
-}
-
 
 write.divided.xlsx <- function(res, include.summary = T, include.summary.by.group = T, include.group.sizes = T, include.crosstabs = T, include.group.sizes.by.group = T,
                                file = "inst/excel/piler_crosstabs.xlsx") {
@@ -42,12 +34,12 @@ write.divided.xlsx <- function(res, include.summary = T, include.summary.by.grou
   
   # Add summary sheet
   if (include.summary) {
-    write.excel.summary.tab(wb, res$summary)
+    write.excel.summary.tab(wb, get.survey.summary("Highest PES"))
   }
   
   if (include.summary.by.group) {
     for (group in group.names) {
-      write.excel.summary.tab(wb, res$summary.by.group[[group]], tab.name = paste("Summary -", group))
+      write.excel.summary.tab(wb, get.survey.summary(group), tab.name = paste("Summary -", group))
     }
   }
   
