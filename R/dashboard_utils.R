@@ -222,8 +222,9 @@ get.country.warnings <- function(country.data) {
 get.country.summary <- function(country.summaries) {
   country.summaries %>% 
     select(
-      Country, mean.group.basis, pes.min, pes.max, total.surveys, included, excluded, year.min, year.max
-    )
+      Country, mean.group.basis, pes.min, pes.max, pes.mean, total.surveys, included, excluded, year.min, year.max
+    ) %>%
+    mutate(pes.mean = round(pes.mean, 2))
 }
 
 get.country.parties <- function(piler, country, party.map) {

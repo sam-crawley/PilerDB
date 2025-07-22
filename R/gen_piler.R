@@ -618,11 +618,12 @@ gen.country.summaries <- function(res) {
       excluded = sum(! is.na(excluded)), 
       pes.min = min(PES.nrm, na.rm = T), 
       pes.max = max(PES.nrm, na.rm = T),
+      pes.mean = mean(PES.nrm, na.rm = T),
       year.min = min(Year, na.rm = T), 
       year.max = max(Year, na.rm = T),
-      gb_l = sum(`Group Basis` == "Language", na.rm = T),
-      gb_r = sum(`Group Basis` == "Religion", na.rm = T),
-      gb_e = sum(`Group Basis` == "Ethnicity", na.rm = T)
+      gb_Language = sum(`Group Basis` == "Language", na.rm = T),
+      gb_Religion = sum(`Group Basis` == "Religion", na.rm = T),
+      gb_Ethnicity = sum(`Group Basis` == "Ethnicity", na.rm = T)
     )
   
 
