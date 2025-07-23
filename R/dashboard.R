@@ -49,7 +49,7 @@ launchPilerDash <- function(logger = NULL) {
                           )),
               pickerInput("group.basis", 
                           label = "Group Basis", 
-                          sort(c('(Highest PES)', group.names)), 
+                          c('(Highest PES)', group.names, '(All)'),
                           multiple = F
                           ),            
               checkboxInput("incomplete.data",

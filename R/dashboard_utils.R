@@ -2,8 +2,12 @@
 
 # Get the main 'summary' table on the Crosstabs tab of the shiny app
 get.summary.table <- function(res, datasrc, group.basis, country, incomplete.data = F, with.id = F) {
-  index.by <- str_remove_all(group.basis, "\\(|\\)")
-  table.to.use <- get.survey.summary(index.by)
+  if (group.basis == "(All)")
+      table.to.use <- res$survey.summary
+  else {
+    index.by <- str_remove_all(group.basis, "\\(|\\)")
+    table.to.use <- get.survey.summary(index.by)
+  }
   
   tab <- table.to.use  %>%
     mutate(across(ends_with('.pct'), ~.x * 100)) %>%
