@@ -101,7 +101,8 @@ get.datasets.dir <- function() {
 }
 
 get.party.map <- function() {
-  readr::read_csv(paste0(system.file("PartyMap", package=packageName()), "/party_name_map.csv"))
+  readr::read_csv(paste0(system.file("PartyMap", package=packageName()), "/party_name_map.csv")) %>%
+    distinct()
 }
 
 #' @export
