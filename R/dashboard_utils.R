@@ -228,7 +228,18 @@ get.country.summary <- function(country.summaries) {
     select(
       Country, mean.group.basis, pes.min, pes.max, pes.mean, total.surveys, included, excluded, year.min, year.max
     ) %>%
-    mutate(pes.mean = round(pes.mean, 2))
+    mutate(pes.mean = round(pes.mean, 2)) %>%
+    rename(
+      "Group Basis (highest mean)" = mean.group.basis,
+      "Min. PES" = pes.min,
+      "Max. PES" = pes.max,
+      "Mean PES" = pes.mean,
+      "Total Surveys" = total.surveys,
+      "Surveys Incl." = included,
+      "Surveys Excl." = excluded,
+      "Min. Year" = year.min,
+      "Max. Year" = year.max
+    )
 }
 
 get.country.parties <- function(piler, country, party.map) {

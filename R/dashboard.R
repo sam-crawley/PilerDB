@@ -278,7 +278,8 @@ launchPilerDash <- function(logger = NULL) {
       options = list(
         lengthChange = F, 
         paging = F, 
-        searching = T
+        searching = T,
+        order = list(list(4, 'desc'))
       ),
       rownames = F
     )
