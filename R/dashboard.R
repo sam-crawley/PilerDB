@@ -77,20 +77,7 @@ launchPilerDash <- function(logger = NULL) {
       tabsetPanel(id = "countryPanel", 
                  tabPanel("Summary",
                     DT::DTOutput("countrySummary", height = "auto")
-                 ),
-                 tabPanel("Country Details", pageWithSidebar(
-                   headerPanel('Country Details'),
-                   sidebarPanel(
-                     pickerInput("country.picker", 
-                                 label = "Country", 
-                                 countries
-                     ),
-                     width = 2
-                   ),
-                   mainPanel(
-                     DT::DTOutput("tableCountryParties")
-                   )
-                 ))
+                 )
       )
     ),
     tabPanel("Data Sources", 
@@ -281,6 +268,7 @@ launchPilerDash <- function(logger = NULL) {
         searching = T,
         order = list(list(4, 'desc'))
       ),
+      selection = 'single',
       rownames = F
     )
     
@@ -421,6 +409,24 @@ launchPilerDash <- function(logger = NULL) {
       generate.country.tables(countryTabID, country.data, output, party.map = party.map)
       
       appendTab("mainPanel", tab, select = T)
+    })
+    
+    observeEvent(input$countrySummary_rows_selected, {
+    
+      row <- input$countrySummary_rows_selected
+      req(row)  # Ensure a row is selected
+      
+      selected.row <- get.country.summary(piler$country.summaries)[row, ]
+      
+      tab <- tabPanel(selected.row$Country, 
+               bslib::navset_card_pill(
+                 bslib::nav_panel("Overview", h4(selected.row$Country)),
+                 bslib::nav_panel("Parties", DT::DTOutput("tableCountryParties"))
+               )
+      )
+      
+      appendTab("countryPanel", tab, select = T)
+    
     })
   }
   
