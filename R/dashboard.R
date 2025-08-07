@@ -416,14 +416,51 @@ launchPilerDash <- function(logger = NULL) {
       row <- input$countrySummary_rows_selected
       req(row)  # Ensure a row is selected
       
-      selected.row <- get.country.summary(piler$country.summaries)[row, ]
+      country.name <- get.country.summary(piler$country.summaries)[row, ]$Country
+      country.code <- countrycode::countrycode(country.name, "country.name", "iso3c")
+      country.tab.id <- paste0("country.tab.", country.code)
       
-      tab <- tabPanel(selected.row$Country, 
-               bslib::navset_card_pill(
-                 bslib::nav_panel("Overview", h4(selected.row$Country)),
-                 bslib::nav_panel("Parties", DT::DTOutput("tableCountryParties"))
-               )
+      country.data <- piler$country.summaries %>%
+        filter(Country == country.name)
+      
+      tab <- tabPanel(country.name, 
+         value = country.tab.id,
+         h4(country.name),
+         bslib::navset_card_pill(
+           bslib::nav_panel("Overview",
+             bslib::card(
+               htmltools::withTags(
+                table(
+                  style = "width: 30%",
+                  tr(
+                    td("Total surveys:"),
+                    td(textOutput(paste0("CntOverviewTotSurveys", country.tab.id)))
+                  ),
+                  tr(
+                    td("Year Coverage:"),
+                    td(textOutput(paste0("CntOverviewYrCoverage", country.tab.id)))
+                  ),
+                  tr(
+                    td("PES range:"),
+                    td(textOutput(paste0("CntOverviewPesRange", country.tab.id)))
+                  ),
+                  tr(
+                    td("PES mean (via Highest PES):"),
+                    td(textOutput(paste0("CntOverviewPesMean", country.tab.id)))
+                  )
+                )
+              )
+            )
+          ),
+          bslib::nav_panel("Parties", DT::DTOutput("tableCountryParties"))
+         )
       )
+      
+      output[[paste0("CntOverviewTotSurveys", country.tab.id)]] <- 
+        renderText(paste(country.data$total.surveys, "(", country.data$included, "included;", country.data$excluded, "excluded)"))
+      output[[paste0("CntOverviewYrCoverage", country.tab.id)]] <- renderText(paste(country.data$year.min, "-", country.data$year.max))
+      output[[paste0("CntOverviewPesRange", country.tab.id)]] <- renderText(paste(country.data$pes.min, "-", country.data$pes.max))
+      output[[paste0("CntOverviewPesMean", country.tab.id)]] <- renderText(round(country.data$pes.mean, 2))
       
       appendTab("countryPanel", tab, select = T)
     
