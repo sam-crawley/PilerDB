@@ -272,6 +272,73 @@ get.country.parties <- function(piler, country, party.map) {
     pivot_wider(names_from = id, id_cols = party, values_from = percent)
 }
 
+get.group.basis.country.table <- function(country.stats) {
+  country.stats %>% 
+    select(c(starts_with("PES.mean_"), starts_with("group.survey.count"), starts_with("gb_"))) %>% 
+    pivot_longer(everything()) %>% 
+    tidyr::separate(name, sep = "_", into = c("var", "group.type")) %>%
+    mutate(group.type = case_when(
+      group.type == "l" ~ "Language",
+      group.type == "r" ~ "Religion",
+      group.type == "e" ~ "Ethnicity",
+      .default = group.type
+    )) %>%
+    mutate(var = case_when(
+      var == "PES.mean" ~ "PES Mean",
+      var == "group.survey.count" ~ "Survey Count",
+      var == "gb" ~ "Group Basis"
+    )) %>%
+    rename("Group Type" = group.type) %>%
+    pivot_wider(id_cols = `Group Type`, names_from = var, values_from = value) 
+}
+
+get.country.groups <- function(piler, country) {
+  country.surveys <- get.survey.summary("Highest PES") %>% filter(Country == country)
+  
+  size.data <- map_dfr(country.surveys$ID, function(survey.id) {
+    survey.info <- piler$crosstabs[[survey.id]]
+    
+    res <- map_dfr(c("Language", "Religion", "Ethnicity"), function(group.type) {
+      tab <- survey.info[[group.type]]
+      
+      if (! is_tibble(tab) | is.na(survey.info$Summary$general$`Group Basis`))
+        return (NULL)
+      
+      pes <- survey.info$Summary$cor.all_removals.wt %>% 
+        filter(group == group.type) %>%
+        pull(pes.nrm)
+      
+      config.summary.data(tab, drop.cats = "mis_oth_norel", weighted = T)  %>% 
+        group_by(Group) %>% 
+        summarise(n = sum(n), .groups = "drop") %>% 
+        mutate(Size = round(n / sum(n), 3)) %>%
+        mutate(Group.Type = group.type) %>%
+        mutate(PES = pes) %>%
+        select(-n)
+    }) 
+    
+    res %>%
+      mutate(
+        Year = survey.info$Summary$general$Year,
+        Survey = survey.info$Summary$general$`Data Source`
+      )
+  })
+  
+  # Cap at max of 6 groups per survey
+  size.data <- size.data %>% 
+    group_by(Group.Type, Survey) %>% 
+    arrange(desc(Size)) %>% 
+    slice_head(n = 6)
+  
+  size.data %>% 
+    group_by(Year, Survey, Group.Type) %>% 
+    arrange(desc(Size)) %>% 
+    mutate(col = row_number()) %>% 
+    pivot_wider(id_cols = c(Year, Survey, Group.Type, PES), names_from = col, values_from = c(Group, Size), names_vary = "slowest") %>%
+    ungroup() %>%
+    arrange(Year, Survey, Group.Type)
+}
+
 get.excel.dir <- function() {
     system.file("excel", package="PilerDB", mustWork = T)
 }

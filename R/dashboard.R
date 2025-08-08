@@ -74,6 +74,7 @@ launchPilerDash <- function(logger = NULL) {
       )
     ),
     tabPanel("Countries",
+      shinybusy::add_busy_spinner(spin = "cube-grid"),
       tabsetPanel(id = "countryPanel", 
                  tabPanel("Summary",
                     DT::DTOutput("countrySummary", height = "auto")
@@ -196,14 +197,7 @@ launchPilerDash <- function(logger = NULL) {
       extensions = 'Buttons'
     )
     
-    output$tableCountryParties = DT::renderDT(
-      get.country.parties(piler, input$country.picker, party.map),
-      options = list(
-        paging = F, 
-        searching = F
-      ),
-      rownames = F
-    )
+
     
     output$info.cntry.included <- renderText(get.country.list(input$info.datasrc, included = T))
     output$info.cntry.excluded <- renderText(get.country.list(input$info.datasrc, included = F))
@@ -283,10 +277,10 @@ launchPilerDash <- function(logger = NULL) {
       if (is.null(session$userData$countryTabsOpen))
         session$userData$countryTabsOpen <- list()
       
-      countryTabsOpen <- session$userData$countryTabsOpen
+      country.summary.tabs.open <- session$userData$countryTabsOpen
       countryTabID <- str_remove_all(selected.row$ID, " ")
       
-      if (has_name(countryTabsOpen, countryTabID)) {
+      if (has_name(country.summary.tabs.open, countryTabID)) {
         updateTabsetPanel(session, "mainPanel", selected = selected.row$ID)
         return()
       }
@@ -420,47 +414,113 @@ launchPilerDash <- function(logger = NULL) {
       country.code <- countrycode::countrycode(country.name, "country.name", "iso3c")
       country.tab.id <- paste0("country.tab.", country.code)
       
+      if (is.null(session$userData$country.summary.tabs.open))
+        session$userData$country.summary.tabs.open <- list()
+      
+      country.summary.tabs.open <- session$userData$country.summary.tabs.open
+      
+      if (has_name(country.summary.tabs.open, country.tab.id)) {
+        updateTabsetPanel(session, "countryPanel", selected = country.tab.id)
+        return()
+      }
+      
+      session$userData$country.summary.tabs.open[[country.tab.id]] <- 1
+      
       country.data <- piler$country.summaries %>%
         filter(Country == country.name)
       
-      tab <- tabPanel(country.name, 
+      tab <- tabPanel(country.name,
          value = country.tab.id,
          h4(country.name),
-         bslib::navset_card_pill(
-           bslib::nav_panel("Overview",
-             bslib::card(
-               htmltools::withTags(
-                table(
-                  style = "width: 30%",
-                  tr(
-                    td("Total surveys:"),
-                    td(textOutput(paste0("CntOverviewTotSurveys", country.tab.id)))
-                  ),
-                  tr(
-                    td("Year Coverage:"),
-                    td(textOutput(paste0("CntOverviewYrCoverage", country.tab.id)))
-                  ),
-                  tr(
-                    td("PES range:"),
-                    td(textOutput(paste0("CntOverviewPesRange", country.tab.id)))
-                  ),
-                  tr(
-                    td("PES mean (via Highest PES):"),
-                    td(textOutput(paste0("CntOverviewPesMean", country.tab.id)))
-                  )
+         actionBttn(
+           inputId = paste0("CloseSum", country.tab.id),
+           label = "Close",
+           icon = icon("window-close"),
+           size = "sm",
+           block = FALSE,
+           no_outline = TRUE
+         ),
+         tabsetPanel(id = "countryPanel", 
+          tabPanel("Survey Stats",
+            htmltools::withTags(
+              table(
+                style = "width: 30%",
+                tr(
+                  td("Total surveys:"),
+                  td(textOutput(paste0("CntOverviewTotSurveys", country.tab.id)))
+                ),
+                tr(
+                  td("Year Coverage:"),
+                  td(textOutput(paste0("CntOverviewYrCoverage", country.tab.id)))
+                ),
+                tr(
+                  td("PES range:"),
+                  td(textOutput(paste0("CntOverviewPesRange", country.tab.id)))
+                ),
+                tr(
+                  td("PES mean (via Highest PES):"),
+                  td(textOutput(paste0("CntOverviewPesMean", country.tab.id)))
                 )
               )
             )
           ),
-          bslib::nav_panel("Parties", DT::DTOutput("tableCountryParties"))
-         )
+          tabPanel("Group Basis",
+             htmltools::withTags(
+               table(
+                 style = "width: 15%",
+                 tr(
+                   td("Most divided group:"),
+                   td(textOutput(paste0("CntOverviewMostDivGroup", country.tab.id)))
+                 ),
+                 tr(
+                   td("Most common group basis:"),
+                   td(textOutput(paste0("CntOverviewComGroupBas", country.tab.id)))
+                 )
+               )
+             ),
+             h4('Group Stats'),
+             tableOutput(paste0("CntOverviewGroupStats", country.tab.id)),
+          ),
+          tabPanel("Parties", DT::DTOutput(paste0("tableCountryParties", country.tab.id))),
+          tabPanel("Groups", DT::DTOutput(paste0("tableCountryGroups", country.tab.id))),
+        )
       )
-      
+       
       output[[paste0("CntOverviewTotSurveys", country.tab.id)]] <- 
         renderText(paste(country.data$total.surveys, "(", country.data$included, "included;", country.data$excluded, "excluded)"))
       output[[paste0("CntOverviewYrCoverage", country.tab.id)]] <- renderText(paste(country.data$year.min, "-", country.data$year.max))
       output[[paste0("CntOverviewPesRange", country.tab.id)]] <- renderText(paste(country.data$pes.min, "-", country.data$pes.max))
       output[[paste0("CntOverviewPesMean", country.tab.id)]] <- renderText(round(country.data$pes.mean, 2))
+      
+      output[[paste0("CntOverviewMostDivGroup", country.tab.id)]] <- renderText(country.data$mean.group.basis)
+      gb.tbl <- get.group.basis.country.table(country.data)
+      common.group.basis <- gb.tbl %>% slice_max(`Group Basis`) %>% pull(`Group Type`)
+      
+      output[[paste0("CntOverviewComGroupBas", country.tab.id)]] <- renderText(common.group.basis)
+      output[[paste0("CntOverviewGroupStats", country.tab.id)]] <- renderTable(gb.tbl)
+      
+      output[[paste0("tableCountryParties", country.tab.id)]] = DT::renderDT(
+        get.country.parties(piler, country.name, party.map),
+        options = list(
+          paging = F, 
+          searching = F
+        ),
+        rownames = F
+      )
+      
+      output[[paste0("tableCountryGroups", country.tab.id)]] = DT::renderDT(
+        get.country.groups(piler, country.name),
+        options = list(
+          paging = F, 
+          searching = F
+        ),
+        rownames = F
+      )
+      
+      observeEvent(input[[paste0("CloseSum", country.tab.id)]], {
+        removeTab("countryPanel", country.tab.id)
+        session$userData$country.summary.tabs.open[[country.tab.id]] <- NULL
+      }, ignoreInit = T)
       
       appendTab("countryPanel", tab, select = T)
     
