@@ -441,7 +441,8 @@ launchPilerDash <- function(logger = NULL) {
            no_outline = TRUE
          ),
          tabsetPanel(id = "countryPanel", 
-          tabPanel("Survey Stats",
+          tabPanel("Surveys",
+            h4('Summary'),
             htmltools::withTags(
               table(
                 style = "width: 30%",
@@ -462,7 +463,10 @@ launchPilerDash <- function(logger = NULL) {
                   td(textOutput(paste0("CntOverviewPesMean", country.tab.id)))
                 )
               )
-            )
+            ),
+            h4('Surveys'),
+            DT::DTOutput(paste0("tableCountrySurveys", country.tab.id)),
+            
           ),
           tabPanel("Group Basis",
              htmltools::withTags(
@@ -498,6 +502,15 @@ launchPilerDash <- function(logger = NULL) {
       
       output[[paste0("CntOverviewComGroupBas", country.tab.id)]] <- renderText(common.group.basis)
       output[[paste0("CntOverviewGroupStats", country.tab.id)]] <- renderTable(gb.tbl)
+      
+      output[[paste0("tableCountrySurveys", country.tab.id)]] = DT::renderDT(
+        get.summary.table(piler, group.basis = "(All)", country = country.name),
+        options = list(
+          paging = F,
+          order = list(list(2, 'asc'))
+        ),
+        rownames = F
+       )
       
       output[[paste0("tableCountryParties", country.tab.id)]] = DT::renderDT(
         get.country.parties(piler, country.name, party.map),

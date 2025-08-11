@@ -1,7 +1,7 @@
 # Some functions to manipulate data for display in the shiny app
 
 # Get the main 'summary' table on the Crosstabs tab of the shiny app
-get.summary.table <- function(res, datasrc, group.basis, country, incomplete.data = F, with.id = F) {
+get.summary.table <- function(res, datasrc = NULL, group.basis, country, incomplete.data = F, with.id = F) {
   if (group.basis == "(All)")
       table.to.use <- res$survey.summary
   else {
