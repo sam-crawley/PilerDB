@@ -39,6 +39,11 @@ data.spec <- list(
       mutate(across(c(prty, relig, ethn), ~str_replace(.x, "^\\d+\\.\\s+", "")))
     
     data
+  },
+  fixups = function(data) {
+    # Remove the ", 2017" suffix from the Iceland party coding (see note from survey info)
+    data <- data %>%
+      mutate(Party = str_remove(Party, ", 2017$"))
   }
 )
 

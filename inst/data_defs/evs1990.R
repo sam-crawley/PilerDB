@@ -32,13 +32,23 @@ data.spec <- list(
       mutate(Religion = fct_expand(Religion, "No Religion")) %>% 
       mutate(Religion = replace(Religion, q332a == "No", "No Religion"))
     
+    # Recode parties from Germany (to account for different codes used)
+    data <- data %>% mutate(Party =
+      case_when(
+        Party == "SPD" ~ "Social Democrats",
+        Party == "FDP" ~ "Free Democratic Party",
+        Party == "Greens" ~ "Die Grünen",
+        .default = Party
+      )
+    )
+    
     data
   }
 )
 
 cat.defs <- list(
   Party = list(
-    "Missing" = c("Missing", "I would not vote", "I would cast a blank ballot", "No right to vote", "None", "undocumented", "I would not go to election",
+    "Missing" = c("Missing", "I would not vote", "I would cast a blank ballot", "None", "undocumented", "I would not go to election",
                   "unknown", "no vote"),
     "Other" = c("Other", "other party", "other", "other party/movement", "Other party", "Other/independent", "Other parties", "Well governing, just, wise party",
                 "Depends on candidates, on programs, will vote for people", "Non-party people", "None, will not vote for any party, not for any other",
