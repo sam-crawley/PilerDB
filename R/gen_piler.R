@@ -610,7 +610,7 @@ get.data.src.info <- function(data, data.def) {
 
 # Generate some country-level summary data
 gen.country.summaries <- function(res) {
-  country.summaries <- get.survey.summary("Highest PES") %>% 
+  country.summaries <- get.survey.summary("Highest PES", piler.data = res) %>% 
     group_by(Country) %>% 
     summarise(
       total.surveys = n(), 
@@ -626,8 +626,7 @@ gen.country.summaries <- function(res) {
       gb_Ethnicity = sum(`Group Basis` == "Ethnicity", na.rm = T)
     )
   
-
-  pes.means <- piler$survey.summary %>%
+  pes.means <- res$survey.summary %>%
     dplyr::filter(is.na(excluded)) %>%
     dplyr::group_by(Country, `Group Basis`) %>%
     dplyr::summarise(
@@ -635,6 +634,16 @@ gen.country.summaries <- function(res) {
       group.survey.count = n()
     ) %>%
     tidyr::pivot_wider(id_cols = Country, names_from = `Group Basis`, values_from = c(PES.mean, group.survey.count))
+  
+  # Handle case where not all Group Types were present (so cols aren't created in pes.means)
+  expected_cols <- paste0("PES.mean_", group.names)
+  missing_cols <- setdiff(expected_cols, names(pes.means))
+  
+  # Add missing columns
+  if (length(missing_cols) > 0) {
+    pes.means <- pes.means %>%
+      tibble::add_column(!!!setNames(rep(list(0), length(missing_cols)), missing_cols))
+  }
   
   country.summaries %>%
     dplyr::inner_join(pes.means, by = "Country") %>%
@@ -697,34 +706,40 @@ calc.group.basis <- function(cor) {
 #' @param index.by Either a group type (Language, Ethnicity, Religion), or "Highest PES". The latter
 #'  will select the group type that has the highest PES for that survey-country as the "Group Basis"
 #' @export
-get.survey.summary <- function(index.by) {
+get.survey.summary <- function(index.by, piler.data = NULL) {
   get_overall_exclusion <- function(excluded_vals) {
     vals <- excluded_vals[!str_detect(excluded_vals, regex("not available", ignore_case = TRUE))]
     vals[[1]]
   }
   
+  if (is.null(piler.data))
+    piler.data <- piler
+  
   if (index.by %in% group.names)
-    return (piler$survey.summary %>% filter(`Group Basis` == index.by))
+    return (piler.data$survey.summary %>% filter(`Group Basis` == index.by))
   
   else if (index.by == "Highest PES") {
-    summaries <- piler$survey.summary %>%
+    summaries <- piler.data$survey.summary %>%
       group_by(ID) %>%
       filter(is.na(excluded)) %>%
       slice_max(PES, n = 1, with_ties = FALSE)
     
     # Add back in surveys where all groups were excluded
-    excluded <- piler$survey.summary %>%
+    excluded <- piler.data$survey.summary %>%
       group_by(ID) %>%
       mutate(
         all_excluded = all(!is.na(excluded))
       ) %>%
       filter(all_excluded) %>%
-      mutate(
-        excluded = get_overall_exclusion(excluded),
-        `Group Basis` = NA_character_
-      ) %>%
-      select(-all_excluded) %>% 
-      slice(1)
+      select(-all_excluded)
+    
+    if (nrow(excluded) > 0)
+      excluded <- excluded %>%
+        mutate(
+          excluded = get_overall_exclusion(excluded),
+          `Group Basis` = NA_character_
+        ) %>% 
+        slice(1)
     
     return(bind_rows(summaries, excluded) %>%
              ungroup() %>%
