@@ -54,20 +54,13 @@ calc.summary.indices <- function(summary.data, include.extra = F) {
 
   pes <- calc.pes(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes)
   pes.nrm <- normalise.pes(pes)
-  pes.abs <- calc.pes(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes, use.abs = T)
-  pes.abs.nrm <- normalise.pes(pes.abs, abs = T)
   
   huber <- calc.huber.indices(summary.data, 
                               index.summaries$group.sizes, index.summaries$party.sizes, index.summaries$group.size.by.party, index.summaries$party.support.by.group)
   
-  pes.old <- calc.pes.old(index.summaries$party.support.by.group, index.summaries$group.sizes, index.summaries$party.sizes)
-  
   res <- tibble(
     pes     = pes,
-    pes.nrm = pes.nrm,
-    pes.abs = pes.abs,
-    pes.abs.nrm = pes.abs.nrm,
-    pes.old = pes.old
+    pes.nrm = pes.nrm
   )
   
   if (include.extra) {
@@ -78,16 +71,12 @@ calc.summary.indices <- function(summary.data, include.extra = F) {
 }
 
 # Rescale PES to range between 0 and 1.
-normalise.pes <- function(val, abs = F) {
+normalise.pes <- function(val) {
   # We use a hare-coded max val, which is the highest value in the DB as at Aug '23
   #  Since the PES calculation has no theoretical maximum, it is possible future
   #  values could exceed 1
   max <- 51.21
-  
-  if (abs)
-    # Max value for the 'abs' version of PES
-    max <- 66.314
-  
+
   scales::rescale(val, from = c(0,max))
 }
 
@@ -220,24 +209,16 @@ calc.cc.selway <- function(var1, var2, weight = NULL) {
 
 # TODO: document
 #' @export
-calc.pes <- function(party.sizes.by.grp, grp.sizes, party.sizes, use.abs = F, by.party = F) {
+calc.pes <- function(party.sizes.by.grp, grp.sizes, party.sizes, by.party = F) {
   # Calculate unweighted values for each party
   res <- party.sizes.by.grp %>% 
     inner_join(grp.sizes, by = "Group") %>%
     mutate(value = percent.x - percent.y)
   
-  if (use.abs) {
-    res <- res %>% 
-      mutate(value = abs(value)) %>% 
-      group_by(Party) %>% 
-      summarise(total = sum(value)/2)
-  }
-  else {
-    res <- res %>% 
-      mutate(value = value*value) %>% 
-      group_by(Party) %>% 
-      summarise(total = sqrt(sum(value)/2))
-  }
+  res <- res %>% 
+    mutate(value = value*value) %>% 
+    group_by(Party) %>% 
+    summarise(total = sqrt(sum(value)/2))
   
   # Apply weights
   res.wt <- party.sizes %>%
@@ -278,25 +259,6 @@ calc.gatev <- function(party.support.by.group, group.sizes, party.sizes, wt.by.p
     ungroup() %>% 
     summarise(gatev = sqrt(sum(nom) / sum(denom))) %>%
     pull(gatev)
-}
-
-calc.pes.old <- function(party.support.by.group, group.sizes, party.sizes) {
-  if (nrow(group.sizes) == 0 | nrow(party.sizes) == 0)
-    return (NA)
-  
-  joined_data <- party.support.by.group %>% 
-    rename(party.spt = percent) %>%
-    left_join(group.sizes, by = c("Group")) %>%
-    rename(group.size = percent) %>%
-    mutate(Pd = (party.spt - group.size)^2) %>%
-    group_by(Party) %>%
-    summarise(Pd = sum(Pd)) %>%
-    left_join(party.sizes, by = c("Party")) %>%
-    rename(party.size = percent) %>%
-    mutate(Pn = party.size) %>%
-    mutate(pes.old = Pn * Pd)
-
-  sqrt(sum(joined_data$pes.old) / 2) * 100
 }
 
 #' @export
