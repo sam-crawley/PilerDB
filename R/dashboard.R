@@ -5,6 +5,18 @@
 launchPilerDash <- function() {
   message("PILER Dashboard initialising")
 
+  if (!exists("piler", inherits = TRUE) || is.null(piler$survey.summary)) {
+    utils::data("piler", package = "PilerDB", envir = environment())
+  }
+  if (!exists("piler", inherits = TRUE) || is.null(piler$survey.summary)) {
+    stop(
+      "The 'piler' dataset is missing or out of date (no 'survey.summary' ",
+      "element). Reinstall PilerDB, or in a dev session run data(piler) after ",
+      "load_all(), or regenerate it with gen.piler.db().",
+      call. = FALSE
+    )
+  }
+
   crosstabs <- piler$crosstabs
   category.sum <- piler$cat.sum
   data.src.info <- piler$data.src.info
