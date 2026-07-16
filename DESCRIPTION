@@ -16,7 +16,6 @@ RoxygenNote: 7.3.2
 Imports:
     countrycode,
     openxlsx,
-    log4r,
     scales,
     shinybusy,
     rlist,
